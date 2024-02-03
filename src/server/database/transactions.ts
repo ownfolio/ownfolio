@@ -1,6 +1,12 @@
 import postgres from 'postgres'
 
-import { Transaction, transactionSchema, TransactionSearch } from '../../shared/models/Transaction'
+import {
+  Transaction,
+  transactionSchema,
+  TransactionSearch,
+  TransactionSearchResult,
+  transactionSearchResultSchema,
+} from '../../shared/models/Transaction'
 import { DatabaseEntity } from './DatabaseEntity'
 import { randomId } from './id'
 
@@ -14,25 +20,32 @@ export class DatabaseTransactions extends DatabaseEntity<Transaction, 'createdAt
     order: 'asc' | 'desc' = 'desc',
     skip: number = 0,
     top: number = 2147483647
-  ): Promise<Transaction[]> {
-    const typeFilterQ = search?.type ? this.sql`"data" -> 'type' = ${search.type}` : this.sql`true`
-    const fromDateFilterQ = search?.fromDate ? this.sql`"date" >= ${search.fromDate}` : this.sql`true`
-    const toDateFilterQ = search?.toDate ? this.sql`"date" <= ${search.toDate}` : this.sql`true`
+  ): Promise<TransactionSearchResult[]> {
+    const typeFilterQ = search?.type ? this.sql`t."data" -> 'type' = ${search.type}` : this.sql`true`
+    const fromDateFilterQ = search?.fromDate ? this.sql`t."date" >= ${search.fromDate}` : this.sql`true`
+    const toDateFilterQ = search?.toDate ? this.sql`t."date" <= ${search.toDate}` : this.sql`true`
     const portfolioQ = search?.portfolioId
       ? this
-          .sql`"data"::text LIKE ANY(SELECT CONCAT('%', "id", '%') FROM "account" WHERE "portfolioId" = ${search.portfolioId})`
+          .sql`t."data"::text LIKE ANY(SELECT CONCAT('%', "id", '%') FROM "account" WHERE "portfolioId" = ${search.portfolioId})`
       : this.sql`true`
-    const accountQ = search?.accountId ? this.sql`"data"::text LIKE ${'%' + search.accountId + '%'}` : this.sql`true`
-    const assetQ = search?.assetId ? this.sql`"data"::text LIKE ${'%' + search.assetId + '%'}` : this.sql`true`
-    const referenceFilterQ = search?.reference ? this.sql`"reference" = ${search.reference}` : this.sql`true`
+    const accountQ = search?.accountId ? this.sql`t."data"::text LIKE ${'%' + search.accountId + '%'}` : this.sql`true`
+    const assetQ = search?.assetId ? this.sql`t."data"::text LIKE ${'%' + search.assetId + '%'}` : this.sql`true`
+    const attachmentQ = search?.attachmentId
+      ? this
+          .sql`(SELECT count(1) FROM "attachment_transaction_link" atl WHERE atl."transactionId" = t."id" AND atl."attachmentId" = ${search.attachmentId}) > 0`
+      : this.sql`true`
+    const referenceFilterQ = search?.reference ? this.sql`t."reference" = ${search.reference}` : this.sql`true`
     const orderQ = order === 'desc' ? this.sql`DESC` : this.sql`ASC`
     const rows = await this.sql`
-      SELECT * FROM "transaction"
-      WHERE "userId" = ${userId} AND ${typeFilterQ} AND ${fromDateFilterQ} AND ${portfolioQ} AND ${accountQ} AND ${assetQ} AND ${toDateFilterQ} AND ${referenceFilterQ}
-      ORDER BY "date" ${orderQ}, "time" ${orderQ}, "id" ${orderQ}
+      SELECT
+          t.*,
+          (SELECT count(1)::int FROM "attachment_transaction_link" atl WHERE atl."transactionId" = t."id") "attachmentCount"
+      FROM "transaction" t
+      WHERE "userId" = ${userId} AND ${typeFilterQ} AND ${fromDateFilterQ} AND ${portfolioQ} AND ${accountQ} AND ${assetQ} AND ${attachmentQ} AND ${toDateFilterQ} AND ${referenceFilterQ}
+      ORDER BY t."date" ${orderQ}, t."time" ${orderQ}, t."id" ${orderQ}
       OFFSET ${skip} LIMIT ${top}
     `
-    return rows.map(row => this.schema.parse(row))
+    return rows.map(row => transactionSearchResultSchema.parse(row))
   }
 
   public async countForPortfolioId(portfolioId: string): Promise<number> {

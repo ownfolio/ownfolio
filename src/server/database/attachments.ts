@@ -1,26 +1,18 @@
 import postgres from 'postgres'
-import { z } from 'zod'
 
 import {
   Attachment,
   AttachmentContent,
   attachmentContentSchema,
   attachmentSchema,
+  AttachmentSearch,
+  AttachmentSearchResult,
+  attachmentSearchResultSchema,
 } from '../../shared/models/Attachment'
 import { extractAttachmentContent } from './attachmentContentParsers'
 import { DatabaseEntity } from './DatabaseEntity'
 import { DatabaseError } from './DatabaseError'
 import { randomId } from './id'
-
-export const attachmentSearchSchema = z.object({
-  transactionId: z.string().optional(),
-})
-
-export type AttachmentSearch = z.infer<typeof attachmentSearchSchema>
-
-export const attachmentSearchResultSchema = attachmentSchema.extend({ transactionCount: z.number() })
-
-export type AttachmentSearchResult = z.infer<typeof attachmentSearchResultSchema>
 
 export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'> {
   protected override table = 'attachment'

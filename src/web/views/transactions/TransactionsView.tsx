@@ -39,6 +39,7 @@ export const TransactionsView: React.FC = () => {
       { id: 'data', title: 'Data', minWidth: 400, className: stylesDataColumn },
       { id: 'reference', title: 'Reference', width: 200, priority: 2, className: stylesReferenceColumn },
       { id: 'comment', title: 'Comment', width: 200, priority: 2, className: stylesCommentColumn },
+      { id: 'links', title: 'Links', width: 80, align: 'right', priority: 3 },
     ],
     []
   )
@@ -102,6 +103,7 @@ export const TransactionsView: React.FC = () => {
           data: <TransactionData data={tx.data} />,
           reference: tx.reference,
           comment: tx.comment,
+          links: tx.attachmentCount.toString(),
         },
         menuItems: menuItems(tx),
       }
@@ -340,7 +342,7 @@ const TransactionData: React.FC<{ data: TransactionData }> = ({ data }): React.R
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
-          Received{' '}
+          Receive{' '}
           <Amount
             amount={data.cashAmount}
             symbol={currency?.symbol || '???'}
@@ -357,7 +359,7 @@ const TransactionData: React.FC<{ data: TransactionData }> = ({ data }): React.R
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
-          Received{' '}
+          Receive{' '}
           <Amount
             amount={data.cashAmount}
             symbol={currency?.symbol || '???'}
@@ -374,7 +376,7 @@ const TransactionData: React.FC<{ data: TransactionData }> = ({ data }): React.R
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
-          Payed{' '}
+          Pay{' '}
           <Amount
             amount={data.taxCashAmount}
             symbol={currency?.symbol || '???'}
@@ -390,7 +392,7 @@ const TransactionData: React.FC<{ data: TransactionData }> = ({ data }): React.R
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
-          Payed{' '}
+          Pay{' '}
           <Amount
             amount={data.feeCashAmount}
             symbol={currency?.symbol || '???'}
