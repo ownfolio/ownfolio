@@ -3,10 +3,41 @@ require('ts-node').register()
 const fs = require('fs/promises')
 const path = require('path')
 const markdownIt = require('markdown-it')
+const conventionalChangeLog = require('conventional-changelog')
 
 const build = benchmark('build', async () => {
   await clear()
+  await buildChangelog()
   await buildPages()
+})
+
+const buildChangelog = benchmark('buildChangelog', async () => {
+  const markdown = await new Promise((resolve, reject) => {
+    const stream = conventionalChangeLog(
+      {
+        warn: console.warn,
+        preset: 'angular',
+        releaseCount: 0,
+        outputUnreleased: false,
+        skipUnstable: true,
+      },
+      undefined,
+      {
+        path: path.resolve(__dirname, '..'),
+      }
+    )
+    let buffer = Buffer.from([])
+    stream.on('data', chunk => {
+      buffer = Buffer.concat([buffer, chunk])
+    })
+    stream.on('end', () => {
+      resolve(buffer.toString('utf-8'))
+    })
+    stream.on('error', err => {
+      reject(err)
+    })
+  })
+  await fs.writeFile(path.resolve(__dirname, '../temp/changelog.md'), markdown, 'utf-8')
 })
 
 const buildPages = benchmark('buildHtml', async () => {
@@ -20,6 +51,7 @@ const buildPages = benchmark('buildHtml', async () => {
   await fs.cp(path.resolve(__dirname, '../temp/screenshots'), path.resolve(__dirname, 'dist/screenshots'), {
     recursive: true,
   })
+  await markdownToHtml(path.resolve(__dirname, '../temp/changelog.md'), path.resolve(__dirname, 'dist/changelog.html'))
 })
 
 const markdownToHtml = benchmark('markdownToHtml', async (input, output) => {
