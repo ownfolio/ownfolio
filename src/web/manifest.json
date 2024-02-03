@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json.schemastore.org/web-manifest-combined.json",
+  "name": "myfolio",
+  "short_name": "myfolio",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f5f5f6",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "1024x1024",
+      "type": "image/webp"
+    }
+  ]
+}

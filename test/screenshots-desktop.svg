@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- 1440x932 -->
+<svg width="100%" height="100%" viewBox="0 0 2888 2072" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <defs>
+        <clipPath id="windowClip">
+            <rect x="4" y="204" width="2880" height="1864" style="fill:rgb(245,245,245);" rx="32" ry="32"/>
+        </clipPath>
+    </defs>
+    <rect id="background" x="0" y="0" width="2888" height="2072" style="fill:rgb(211,211,211);"  rx="32" ry="32"/>
+    <rect id="input" x="404" y="64" width="2412" height="80" style="fill:rgb(255,255,255);" rx="16" ry="16"/>
+    <circle id="close" cx="104" cy="104" r="28" style="fill:rgb(216,120,83);"/>
+    <circle id="maximize" cx="304" cy="104" r="28" style="fill:rgb(152,192,60);"/>
+    <circle id="minimize" cx="204" cy="104" r="28" style="fill:rgb(222,172,46);"/>
+    <rect id="content-placeholder" x="4" y="204" width="2880" height="1864" style="fill:rgb(245,245,245); opacity: CONTENT_PLACEHOLDER_OPACITY;" clip-path="url(#windowClip)"/>
+    <image id="content" x="4" y="204" width="2880" height="1864" xlink:href="data:image/png;base64,CONTENT_DATA" clip-path="url(#windowClip)"/>
+</svg>

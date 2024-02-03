@@ -1,0 +1,42 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Test
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-test-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-test-
+            ${{ runner.os }}-
+      - name: Install dependencies
+        run: npm ci
+      - name: Run commit message linting
+        run: npm run lint:commit -- --from HEAD~1 --to HEAD
+        if: github.event_name == 'push'
+      - name: Run pull request commit messages linting
+        run: npm run lint:commit -- --from ${{ github.event.pull_request.head.sha }}~${{ github.event.pull_request.commits }} --to ${{ github.event.pull_request.head.sha }}
+        if: github.event_name == 'pull_request'
+      - name: Run code linting
+        run: npm run lint
+      - name: Run tests
+        run: npm run test -- --run
+      - name: Run build
+        run: npm run build

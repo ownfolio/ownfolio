@@ -1,0 +1,53 @@
+Wertpapierabrechnung Verkauf
+Ordernummer 134681565.001
+ISIN (WKN) IE00B4L5Y983 (A0RPWH)
+Wertpapierbezeichnung iShsIII-Core MSCI World U.ETF
+Registered Shs USD (Acc) o.N.
+Nominale Stück 110,00
+Kurs EUR 45,88
+Handelsplatz Direkthandel
+Ausführungstag / -zeit 23.10.2018 um 16:38:04 Uhr
+Kurswert EUR 5.046,80
+Kapitalertragsteuer 25,00 % EUR 39,20
+Solidaritätszuschlag 5,50 % EUR 2,15
+Provision EUR 17,52
+Endbetrag zu Ihren Gunsten EUR 4.987,93
+Abrechnungs-IBAN DE12 3456 7890 1234 5678 90
+Valuta 25.10.2018
+Wertpapiere zulasten Wertpapierrechnung Großbritannien.
+Diese Order wurde mit folgendem Limit / -typ erteilt: 45,50 EUR
+Jahressteuerbescheinigung folgt.
+Weiter geht es auf Seite 2.
+Depotinhaber: John Doe
+Direkt-Depot Nr.: 1234567890
+Datum: 23.10.2018
+Seite: 1 von 2
+Herrn
+John Doe
+Somestreet 9c
+22119 Hamburg
+34WAAD1234567890_T
+ING-DiBa AG · 60628 Frankfurt am Main
+ING-DiBa AG · Theodor-Heuss-Allee 2 · 60486 Frankfurt am Main · Vorsitzender des Aufsichtsrates: Dr. Claus Dieter Hoffmann · Vorstand: Nick Jue (Vorsitzender),
+Bernd Geilen (stellv. Vorsitzender), Zeljko Kaurin, Remco Nieland, Dr. Joachim von Schorlemer · Sitz: Frankfurt am Main · AG Frankfurt am Main HRB 7727,
+Steuernummer: 047 220 2800 4 · USt-IdNr.: DE 114 103 475 · Internet: www.ing-diba.de · E-Mail: info@ing-diba.de · BIC: INGDDEFFXXX · Mitglied im Einlagensicherungsfonds
+Ordernummer 134681565.001
+ISIN (WKN) IE00B4L5Y983 (A0RPWH)
+Veräußerungsgewinn nach Differenzmethode 64,66 EUR
+Abzgl. Teilfreistellung 30,00 % 19,40 EUR
+Veräußerungsergebnis nach Teilfreistellung 45,26 EUR
+zzgl. fiktives Veräußerungsergebnis zum 31.12.2017
+Fiktives, bereinigtes Kursergebnis
+zum 31.12.2017 -26,03 EUR
+Akkum. thesaurierte Erträge, Schätzwert und
+Mehrbetrag fikt. Veräußerung 31.12.2017 137,57 EUR
+KapSt-pflichtiger Kapitalertrag 156,80 EUR
+Bemessungsgrundlage für KapSt 156,80 EUR
+Es wurde keine Kirchensteuer einbehalten.
+Depotinhaber: John Doe
+Direkt-Depot Nr.: 1234567890
+Datum: 23.10.2018
+Seite: 2 von 2
+Bei Fragen besuchen Sie uns einfach unter www.ing-diba.de/wertpapierwissen - da gibt es viele schnelle
+Antworten. Oder senden Sie uns eine E-Mail an info@ing-diba.de .
+

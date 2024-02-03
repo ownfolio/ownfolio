@@ -1,0 +1,93 @@
+10919 Berlin
+
+Herrn
+John Doe
+Somestreet 15
+12345 City
+
+Depotnummer
+
+123456789
+
+Kundennummer
+
+1234567890
+
+John Doe
+
+Auftragsnummer
+
+642248/76.00
+Datum
+
+20.12.2023
+Rechnungsnummer
+
+W00883-0006630189/23
+Umsatzsteuer-ID
+
+DE137178746
+
+0883.12202046.0089780OR07
+
+Dieses Dokument wurde maschinell erstellt und wird nicht unterschrieben.
+
+Wertpapier Abrechnung Kauf
+
+Nominale
+
+Wertpapierbezeichnung
+
+ISIN
+
+(WKN)
+
+Stück 1,0215
+
+ISHSV-MSCI ACWI UCITS ETF
+REGISTERED SHARES USD (ACC) ON
+IE00B6R52259
+
+(A1JMDF)
+Handels-/Ausführungsplatz
+
+Außerbörslich
+Schlusstag/-Zeit
+
+20.12.2023 12:05:52
+Ausführungskurs 68,53 EUR
+Auftraggeber
+
+Jane Doe
+Auftragserteilung/ -ort
+
+sonstige
+Wertpapierrechnung Lagerland Irland
+
+Kurswert
+
+70,00-
+
+EUR
+
+Provision
+
+1,50-
+
+EUR
+
+Ausmachender Betrag
+
+71,50-
+
+EUR
+
+Den Gegenwert buchen wir mit Valuta 22.12.2023 zu Lasten des Kontos 1073376665
+(IBAN DE03 1203 0000 1073 3766 65), BLZ 12030000 (BIC BYLADEM1001).
+Die Wertpapiere schreiben wir Ihrem Depotkonto gut.
+Sofern keine Umsatzsteuer ausgewiesen ist, handelt es sich um eine umsatzsteuerbefreite Finanzdienstleistung.
+Gegenpartei bei diesem Geschäft war Börse Tradegate
+ABR. OHNE AUSGABEAUFSCHLAG
+Ihr ETF-Sparplan Nr.
+
+1

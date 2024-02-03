@@ -1,0 +1,34 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    name: Publish
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: git-describe-semver
+        uses: choffmeister/git-describe-semver@main
+        with:
+          fallback: v0.0.0
+          drop-prefix: true
+          prerelease-timestamped: true
+      - name: Build and publish docker image
+        run: docker buildx build --platform=linux/amd64 -t $DOCKER_IMAGE:$DOCKER_TAG --pull --push .
+        env:
+          DOCKER_IMAGE: ghcr.io/choffmeister/myfolio
+          DOCKER_TAG: ${{ steps.git-describe-semver.outputs.version }}
