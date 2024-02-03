@@ -74,7 +74,11 @@ export const TransactionDialog: React.FC<Props> & DialogOpts = ({
     },
     'application/pdf'
   )
-  const [previewedAttachment, setPreviewedAttachment] = React.useState<Attachment | undefined>(undefined)
+  const [previewedAttachment, setPreviewedAttachment] = React.useState<Attachment | undefined>(
+    mode.type === 'create' && mode.pendingAttachments && mode.pendingAttachments.length > 0
+      ? mode.pendingAttachments[0]
+      : undefined
+  )
   React.useEffect(() => {
     const run = async () => {
       try {
