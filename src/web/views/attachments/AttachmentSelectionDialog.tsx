@@ -39,6 +39,6 @@ const stylesRoot = css`
 `
 
 const stylesPreview = css`
-  width: 50vw;
+  min-width: 50vw;
   height: 50vh;
 `
