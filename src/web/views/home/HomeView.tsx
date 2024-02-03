@@ -5,6 +5,7 @@ import React from 'react'
 import { CgProfile } from 'react-icons/cg'
 import { FaCheck } from 'react-icons/fa6'
 import { FiPlus } from 'react-icons/fi'
+import { GiHamburgerMenu } from 'react-icons/gi'
 import { LuRefreshCw } from 'react-icons/lu'
 import { Route, Routes, useNavigate } from 'react-router-dom'
 
@@ -55,7 +56,7 @@ export const HomeView: React.FC = () => {
             >
               myfolio
             </a>
-            <Menu
+            <ResponsiveMenu
               items={[
                 {
                   label: 'Portfolios',
@@ -80,9 +81,9 @@ export const HomeView: React.FC = () => {
               ]}
             >
               <a href="#" className={clsx(stylesNavigationLink)}>
-                Data
+                <GiHamburgerMenu />
               </a>
-            </Menu>
+            </ResponsiveMenu>
           </div>
           <div />
           <div className={stylesNavigationElementGroup}>
@@ -198,6 +199,31 @@ export const HomeView: React.FC = () => {
   )
 }
 
+export const ResponsiveMenu: React.FC<React.ComponentProps<typeof Menu>> = ({ items, className, ...other }) => {
+  return (
+    <>
+      <Menu items={items} className={clsx(stylesResponsiveMenuCollapsed, className)} {...other} />
+      {items
+        .flatMap(item => (item ? [item] : []))
+        .map((item, idx) => (
+          <a
+            key={idx}
+            href="#"
+            className={clsx(stylesNavigationLink, stylesResponsiveMenuExpandedItem)}
+            onClick={event => {
+              event.preventDefault()
+              if (item.onClick) {
+                item.onClick()
+              }
+            }}
+          >
+            {item.label}
+          </a>
+        ))}
+    </>
+  )
+}
+
 const stylesRoot = css`
   display: grid;
   grid-template-rows: auto 1fr;
@@ -261,6 +287,18 @@ const stylesNavigationIconRotating = css`
     to {
       transform: rotate(360deg);
     }
+  }
+`
+
+const stylesResponsiveMenuCollapsed = css`
+  @media (min-width: 1201px) {
+    display: none;
+  }
+`
+
+const stylesResponsiveMenuExpandedItem = css`
+  @media (max-width: 1200px) {
+    display: none;
   }
 `
 

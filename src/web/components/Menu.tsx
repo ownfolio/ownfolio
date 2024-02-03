@@ -11,13 +11,20 @@ interface Props {
   } | null)[]
   alignment?: 'left' | 'right'
   verticalAlignment?: 'bottom' | 'top'
+  className?: string
   children: React.ReactElement
 }
 
-export const Menu: React.FC<Props> = ({ items, alignment = 'left', verticalAlignment = 'bottom', children }) => {
+export const Menu: React.FC<Props> = ({
+  items,
+  alignment = 'left',
+  verticalAlignment = 'bottom',
+  className,
+  children,
+}) => {
   const hasIcons = items.find(i => !!i?.icon)
   return (
-    <HeadlessUI.Menu as="div" className={stylesRoot}>
+    <HeadlessUI.Menu as="div" className={clsx(stylesRoot, className)}>
       {({ open }) => (
         <>
           <HeadlessUI.Menu.Button as={React.Fragment}>{children}</HeadlessUI.Menu.Button>
