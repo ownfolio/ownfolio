@@ -4,7 +4,7 @@ import * as puppeteer from 'puppeteer'
 import sharp from 'sharp'
 
 import { Database } from '../src/server/database'
-import { usingTestContainerDatabaseInstance } from '../src/server/database/databaseTest'
+import { databaseTest } from '../src/server/database/databaseTest'
 import { yahooFinanceAxios } from '../src/server/quotes/yahooFinance'
 import { createServer, runServer } from '../src/server/server'
 import { Portfolio } from '../src/shared/models/Portfolio'
@@ -100,7 +100,7 @@ async function prepare(
 ): Promise<void> {
   const port = 3001
   const baseUrl = `http://localhost:${port}`
-  await usingTestContainerDatabaseInstance(async database => {
+  await databaseTest(async database => {
     const yahooFinanceAxiosMock = await applyAxiosMock(yahooFinanceAxios, __filename.replace(/\.ts$/, '.mock.json'))
     await database.init()
     const user = await database.users.create({ email: 'john@doe.com' }, 'testtest')
