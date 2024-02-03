@@ -1,10 +1,9 @@
 import { createRpcCall, RpcError } from '@choffmeister/rpc-core'
 import { z } from 'zod'
 
-import { attachmentContentSchema, attachmentSchema } from '../../shared/models/Attachment'
+import { attachmentContentSchema, attachmentSchema, attachmentSearchSchema } from '../../shared/models/Attachment'
 import { fileSchema, parseDataUrl, renderDataUrl } from '../../shared/utils/file'
 import { Database } from '../database'
-import { attachmentSearchSchema } from '../database/attachments'
 import { pdfToPng } from '../pdf/pdfToPng'
 import { RpcCtx } from './context'
 import { byIdSchema, pagingParamsSchema } from './utils'

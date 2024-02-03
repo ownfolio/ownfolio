@@ -40,6 +40,16 @@ export const attachmentSchema = z.object({
 
 export type Attachment = z.infer<typeof attachmentSchema>
 
+export const attachmentSearchSchema = z.object({
+  transactionId: z.string().optional(),
+})
+
+export type AttachmentSearch = z.infer<typeof attachmentSearchSchema>
+
+export const attachmentSearchResultSchema = attachmentSchema.extend({ transactionCount: z.number() })
+
+export type AttachmentSearchResult = z.infer<typeof attachmentSearchResultSchema>
+
 export function createEmptyAttachment(): Attachment {
   return {
     id: '',

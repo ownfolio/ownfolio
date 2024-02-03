@@ -1,7 +1,11 @@
 import { createRpcCall, RpcError } from '@choffmeister/rpc-core'
 import { z } from 'zod'
 
-import { transactionSchema, transactionSearchSchema } from '../../shared/models/Transaction'
+import {
+  transactionSchema,
+  transactionSearchResultSchema,
+  transactionSearchSchema,
+} from '../../shared/models/Transaction'
 import { Database } from '../database'
 import { RpcCtx } from './context'
 import { byIdSchema, pagingParamsSchema } from './utils'
@@ -13,7 +17,7 @@ export function createRpcV1Transaction(database: Database) {
   return {
     listTransactions: createRpcCall(
       transactionSearchSchema.extend(pagingParamsSchema.shape),
-      z.array(transactionSchema),
+      z.array(transactionSearchResultSchema),
       async (ctx: RpcCtx, input) => {
         if (!ctx.user) throw RpcError.unauthorized()
         const transactions = await database.transactions.listByUserId(ctx.user.id, input, 'desc', input.skip, input.top)
