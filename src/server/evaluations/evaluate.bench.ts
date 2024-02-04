@@ -12,7 +12,11 @@ import {
 } from './evaluate'
 
 const years = [1, 2, 3, 5, 10]
-const fn: EvaluationStepFunction<number, { factor: number }> = (acc, _transaction, opts): EvaluationResult<number> => ({
+const fn: EvaluationStepFunction<number, never, { factor: number }> = (
+  acc,
+  _transaction,
+  opts
+): EvaluationResult<number, never> => ({
   value: acc.value + opts.params.factor,
   errors: acc.errors,
 })

@@ -34,7 +34,7 @@ export const AttachmentsView: React.FC = () => {
           columns: {
             name: attachment.fileName,
             size: formatSize(attachment.size),
-            links: attachment.transactionCount.toString(),
+            links: attachment.transactionIds.length.toString(),
           },
           menuItems: filterNotFalse([
             {

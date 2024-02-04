@@ -14,7 +14,22 @@ export function responseSchema<T extends z.ZodTypeAny>(dataSchema: T) {
 }
 
 export function listResponseSchema<T extends z.ZodTypeAny>(elementSchema: T) {
+  return responseSchema(z.array(elementSchema))
+}
+
+export function responseSchemaWithIncluded<T extends z.ZodTypeAny, I extends z.ZodTypeAny>(
+  dataSchema: T,
+  includedSchema: I
+) {
   return z.object({
-    data: z.array(elementSchema),
+    data: dataSchema,
+    included: includedSchema,
   })
+}
+
+export function listResponseSchemaWithIncluded<T extends z.ZodTypeAny, I extends z.ZodTypeAny>(
+  elementSchema: T,
+  includedSchema: I
+) {
+  return responseSchemaWithIncluded(z.array(elementSchema), includedSchema)
 }

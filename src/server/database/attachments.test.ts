@@ -48,35 +48,35 @@ it(
     await expect(db.attachments.read(a2.id)).resolves.toEqual(a2b)
     await expect(db.attachments.read('attm_???')).rejects.toThrowError()
     await expect(db.attachments.listByUserId(u.id)).resolves.toEqual([
-      { ...a2, transactionCount: 0 },
-      { ...a1, transactionCount: 0 },
+      { ...a2, transactionIds: [] },
+      { ...a1, transactionIds: [] },
     ])
     await expect(db.attachments.listByUserId('user_???')).resolves.toEqual([])
     await db.attachments.linkToTransaction(a1.id, t1.id)
     await expect(db.attachments.listByUserId(u.id, { transactionId: t1.id })).resolves.toEqual([
-      { ...a1, transactionCount: 1 },
+      { ...a1, transactionIds: [t1.id] },
     ])
     await expect(db.attachments.listByUserId(u.id, { transactionId: t2.id })).resolves.toEqual([])
     await db.attachments.linkToTransaction(a1.id, t2.id)
     await expect(db.attachments.listByUserId(u.id, { transactionId: t1.id })).resolves.toEqual([
-      { ...a1, transactionCount: 2 },
+      { ...a1, transactionIds: [t1.id, t2.id] },
     ])
     await expect(db.attachments.listByUserId(u.id, { transactionId: t2.id })).resolves.toEqual([
-      { ...a1, transactionCount: 2 },
+      { ...a1, transactionIds: [t1.id, t2.id] },
     ])
     await db.attachments.linkToTransaction(a2.id, t1.id)
     await expect(db.attachments.listByUserId(u.id, { transactionId: t1.id })).resolves.toEqual([
-      { ...a2, transactionCount: 1 },
-      { ...a1, transactionCount: 2 },
+      { ...a2, transactionIds: [t1.id] },
+      { ...a1, transactionIds: [t1.id, t2.id] },
     ])
     await expect(db.attachments.listByUserId(u.id, { transactionId: t2.id })).resolves.toEqual([
-      { ...a1, transactionCount: 2 },
+      { ...a1, transactionIds: [t1.id, t2.id] },
     ])
     await expect(db.attachments.listByUserId(u.id, { transactionId: 'tx_???' })).resolves.toEqual([])
     await db.attachments.linkToTransaction(a1.id, t1.id)
     await db.attachments.unlinkFromTransaction(a1.id, t1.id)
     await expect(db.attachments.listByUserId(u.id, { transactionId: t1.id })).resolves.toEqual([
-      { ...a2, transactionCount: 1 },
+      { ...a2, transactionIds: [t1.id] },
     ])
     await db.attachments.unlinkFromTransaction(a2.id, t1.id)
     await expect(db.attachments.listByUserId(u.id, { transactionId: t1.id })).resolves.toEqual([])

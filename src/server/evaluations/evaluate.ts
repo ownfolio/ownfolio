@@ -1,56 +1,49 @@
 import BigNumber from 'bignumber.js'
 
 import { Transaction } from '../../shared/models/Transaction'
-import { findIndexLeft, findIndexLeftUntil } from '../../shared/utils/array'
+import { findIndexLeft, findIndexLeftUntil, uniqueBy } from '../../shared/utils/array'
 import { dateParse } from '../../shared/utils/date'
 
 export type EvaluationCurrentQuotes = { [assetId: string]: BigNumber | undefined }
 
 export type EvaluationAllQuotes = { [assetId: string]: { date: string; close: BigNumber }[] | undefined }
 
-export type EvaluationStepFunction<T, P> = (
-  state: EvaluationResult<T>,
+export type EvaluationStepFunction<T, E, P> = (
+  state: EvaluationResult<T, E>,
   transaction: Transaction,
   opts: EvaluateOpts<P>
-) => EvaluationResult<T>
+) => EvaluationResult<T, E>
 
-export interface EvaluationResult<T> {
+export interface EvaluationResult<T, E> {
   value: T
-  errors: EvaluationError[]
+  errors: E[]
 }
 
-export interface EvaluationResultDated<T> extends EvaluationResult<T> {
+export interface EvaluationResultDated<T, E> extends EvaluationResult<T, E> {
   date: string
-}
-
-export interface EvaluationError {
-  message: string
-  transactionId?: string
-  accountId?: string
-  assetId?: string
 }
 
 export interface EvaluateOpts<P> {
   params: P
 }
 
-export function evaluateNow<T, P>(
-  initial: EvaluationResult<T>,
+export function evaluateNow<T, E, P>(
+  initial: EvaluationResult<T, E>,
   transactions: Transaction[],
-  fn: EvaluationStepFunction<T, P>,
+  fn: EvaluationStepFunction<T, E, P>,
   opts: EvaluateOpts<P>
-): EvaluationResult<T> {
-  return transactions.reduce<EvaluationResult<T>>((acc, tx) => fn(acc, tx, opts), initial)
+): EvaluationResult<T, E> {
+  return transactions.reduce<EvaluationResult<T, E>>((acc, tx) => fn(acc, tx, opts), initial)
 }
 
-export function evaluateHistorical<T, P>(
-  initial: EvaluationResult<T>,
+export function evaluateHistorical<T, E, P>(
+  initial: EvaluationResult<T, E>,
   dates: string[],
   transactions: Transaction[],
-  fn: EvaluationStepFunction<T, P>,
+  fn: EvaluationStepFunction<T, E, P>,
   opts: EvaluateOpts<P>
-): EvaluationResultDated<T>[] {
-  const result: EvaluationResultDated<T>[] = []
+): EvaluationResultDated<T, E>[] {
+  const result: EvaluationResultDated<T, E>[] = []
   let nextTransactionIndex = 0
   let state = initial
   dates.forEach(date => {
@@ -68,7 +61,8 @@ export function evaluateHistorical<T, P>(
       const result = fn(acc, tx, { ...opts })
       return {
         value: result.value,
-        errors: evaluationErrorsDistinct(result.errors),
+        // TODO use deep equals function instead of comparing JSON.stringify
+        errors: uniqueBy(result.errors, e => JSON.stringify(e)),
       }
     }, state)
     result.push({
@@ -80,16 +74,16 @@ export function evaluateHistorical<T, P>(
   return result
 }
 
-export type EvaluationHistoryWithQuotesFunction<T, T2> = (
-  history: EvaluationResultDated<T>,
+export type EvaluationHistoryWithQuotesFunction<T, E, T2> = (
+  history: EvaluationResultDated<T, unknown>,
   quotes: EvaluationCurrentQuotes
-) => EvaluationResultDated<T2>
+) => EvaluationResultDated<T2, E>
 
-export function evaluateHistoricalWithQuotes<T, T2>(
-  history: EvaluationResultDated<T>[],
+export function evaluateHistoricalWithQuotes<T, E, T2>(
+  history: EvaluationResultDated<T, unknown>[],
   quotes: EvaluationAllQuotes,
-  fn: EvaluationHistoryWithQuotesFunction<T, T2>
-): EvaluationResultDated<T2>[] {
+  fn: EvaluationHistoryWithQuotesFunction<T, E, T2>
+): EvaluationResultDated<T2, E>[] {
   const quotesState = Object.keys(quotes).reduce<{
     [assetId: string]: {
       nextIndex: number
@@ -120,20 +114,6 @@ export function evaluateHistoricalWithQuotes<T, T2>(
     }, {})
     return fn(result, quotes)
   })
-}
-
-export function evaluationErrorsDistinct(errors: EvaluationError[]): EvaluationError[] {
-  return errors.reduce<EvaluationError[]>((acc, err) => {
-    return !acc.find(
-      e =>
-        e.message === err.message &&
-        e.accountId === err.accountId &&
-        e.assetId === err.assetId &&
-        e.transactionId === err.transactionId
-    )
-      ? [...acc, err]
-      : acc
-  }, [])
 }
 
 export function evaluationSumOverAccounts(

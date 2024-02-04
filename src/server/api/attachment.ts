@@ -12,7 +12,7 @@ export function createRpcV1Attachment(database: Database) {
   return {
     listAttachments: createRpcCall(
       attachmentSearchSchema.extend(pagingParamsSchema.shape),
-      listResponseSchema(attachmentSchema.extend({ transactionCount: z.number() })),
+      listResponseSchema(attachmentSchema.extend({ transactionIds: z.array(z.string()) })),
       async (ctx: RpcCtx, input) => {
         if (!ctx.user) throw RpcError.unauthorized()
         const attachments = await database.attachments.listByUserId(ctx.user.id, input, input.skip, input.top)
