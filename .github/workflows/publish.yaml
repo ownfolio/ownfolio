@@ -28,7 +28,7 @@ jobs:
           drop-prefix: true
           prerelease-timestamped: true
       - name: Build and publish docker image
-        run: docker buildx build --platform=linux/amd64 -t $DOCKER_IMAGE:$DOCKER_TAG --pull --push .
+        run: docker buildx build --platform=linux/amd64 -t $DOCKER_IMAGE:$DOCKER_TAG -t $DOCKER_IMAGE:latest --pull --push .
         env:
           DOCKER_IMAGE: ghcr.io/choffmeister/myfolio
           DOCKER_TAG: ${{ steps.git-describe-semver.outputs.version }}
