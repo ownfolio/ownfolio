@@ -15,7 +15,7 @@ import { AttachmentDialog } from './AttachmentDialog'
 export const AttachmentsView: React.FC = () => {
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
-  const attachments = useQuery(['attachments'], () => rpcClient.listAttachments({})).data!
+  const attachments = useQuery(['attachments'], () => rpcClient.listAttachments({}).then(r => r.data)).data!
 
   const columns = React.useMemo<TableDefinitionColumn[]>(
     () => [
@@ -46,7 +46,7 @@ export const AttachmentsView: React.FC = () => {
             {
               label: 'Download',
               onClick: async () => {
-                const download = await rpcClient.downloadAttachment({ id: attachment.id })
+                const download = await rpcClient.downloadAttachment({ id: attachment.id }).then(r => r.data)
                 await fileDownload(download)
               },
             },

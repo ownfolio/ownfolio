@@ -8,6 +8,7 @@ import { Database } from '../database'
 import { evaluationSumOverAccounts, evaluationSumOverAccountsAndAssets } from '../evaluations/evaluate'
 import { evaluateAll, evaluateHistoricalAllWithQuotes } from '../evaluations/evaluateAll'
 import { RpcCtx } from './context'
+import { responseSchema } from './utils'
 
 export function createRpcV1Evaluations(database: Database) {
   return {
@@ -42,10 +43,12 @@ export function createRpcV1Evaluations(database: Database) {
           )
           .min(1),
       }),
-      z.object({
-        value: z.record(z.string(), z.array(z.array(z.string()))),
-        errors: z.array(z.never()),
-      }),
+      responseSchema(
+        z.object({
+          value: z.record(z.string(), z.array(z.array(z.string()))),
+          errors: z.array(z.never()),
+        })
+      ),
       async (ctx: RpcCtx, input) => {
         if (!ctx.user) throw RpcError.unauthorized()
         const accounts = await database.accounts.listByUserId(ctx.user.id)
@@ -74,7 +77,7 @@ export function createRpcV1Evaluations(database: Database) {
           }
         })()
         const result = evaluateHistoricalAllWithQuotes(transactions, allQuotes, dates)
-        return {
+        const data = {
           value: input.buckets.reduce((acc, bucket) => {
             const [key, accountFilter] = (() => {
               switch (bucket.type) {
@@ -89,7 +92,6 @@ export function createRpcV1Evaluations(database: Database) {
                   return [bucket.accountId, (aid: string) => aid === bucket.accountId] as const
               }
             })()
-
             return {
               ...acc,
               [key]: result.map(r => {
@@ -142,6 +144,7 @@ export function createRpcV1Evaluations(database: Database) {
           }, {}),
           errors: [],
         }
+        return { data }
       }
     ),
     evaluatePositions: createRpcCall(
@@ -151,60 +154,62 @@ export function createRpcV1Evaluations(database: Database) {
           z.object({ type: z.literal('date'), date: z.string().regex(/^(\d{4}-\d{2}-\d{2})$/) }),
         ]),
       }),
-      z.object({
-        value: z.object({
-          openAssetPositions: z.array(
-            z.object({
-              type: z.literal('open'),
-              accountId: z.string(),
-              assetId: z.string(),
-              amount: z.string(),
-              openDate: z.string(),
-              openTime: z.string(),
-              openPrice: z.string(),
-              currentPrice: z.string(),
-              positions: z.array(
-                z.object({
-                  amount: z.string(),
-                  openTransactionId: z.string(),
-                  openDate: z.string(),
-                  openTime: z.string(),
-                  openPrice: z.string(),
-                  currentPrice: z.string(),
-                })
-              ),
-            })
-          ),
-          closedAssetPositions: z.array(
-            z.object({
-              type: z.literal('closed'),
-              accountId: z.string(),
-              assetId: z.string(),
-              amount: z.string(),
-              openDate: z.string(),
-              openTime: z.string(),
-              openPrice: z.string(),
-              closeDate: z.string(),
-              closeTime: z.string(),
-              closePrice: z.string(),
-              positions: z.array(
-                z.object({
-                  amount: z.string(),
-                  openTransactionId: z.string(),
-                  openDate: z.string(),
-                  openTime: z.string(),
-                  openPrice: z.string(),
-                  closeTransactionId: z.string(),
-                  closeDate: z.string(),
-                  closeTime: z.string(),
-                  closePrice: z.string(),
-                })
-              ),
-            })
-          ),
-        }),
-        errors: z.array(z.never()),
-      }),
+      responseSchema(
+        z.object({
+          value: z.object({
+            openAssetPositions: z.array(
+              z.object({
+                type: z.literal('open'),
+                accountId: z.string(),
+                assetId: z.string(),
+                amount: z.string(),
+                openDate: z.string(),
+                openTime: z.string(),
+                openPrice: z.string(),
+                currentPrice: z.string(),
+                positions: z.array(
+                  z.object({
+                    amount: z.string(),
+                    openTransactionId: z.string(),
+                    openDate: z.string(),
+                    openTime: z.string(),
+                    openPrice: z.string(),
+                    currentPrice: z.string(),
+                  })
+                ),
+              })
+            ),
+            closedAssetPositions: z.array(
+              z.object({
+                type: z.literal('closed'),
+                accountId: z.string(),
+                assetId: z.string(),
+                amount: z.string(),
+                openDate: z.string(),
+                openTime: z.string(),
+                openPrice: z.string(),
+                closeDate: z.string(),
+                closeTime: z.string(),
+                closePrice: z.string(),
+                positions: z.array(
+                  z.object({
+                    amount: z.string(),
+                    openTransactionId: z.string(),
+                    openDate: z.string(),
+                    openTime: z.string(),
+                    openPrice: z.string(),
+                    closeTransactionId: z.string(),
+                    closeDate: z.string(),
+                    closeTime: z.string(),
+                    closePrice: z.string(),
+                  })
+                ),
+              })
+            ),
+          }),
+          errors: z.array(z.never()),
+        })
+      ),
       async (ctx: RpcCtx, input) => {
         if (!ctx.user) throw RpcError.unauthorized()
         const transactions = await database.transactions.listByUserId(
@@ -290,14 +295,14 @@ export function createRpcV1Evaluations(database: Database) {
             }
           }
         )
-
-        return {
+        const data = {
           value: {
             openAssetPositions,
             closedAssetPositions,
           },
           errors: [],
         }
+        return { data }
       }
     ),
   }

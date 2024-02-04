@@ -34,10 +34,12 @@ export function parseDataUrl(url: string): [string, string] {
 }
 
 export async function fileUpload(file: File): Promise<Attachment> {
-  const attachment = await rpcClient.uploadAttachment({
-    fileName: file.name,
-    dataUrl: await fileAsDataUrl(file),
-  })
+  const attachment = await rpcClient
+    .uploadAttachment({
+      fileName: file.name,
+      dataUrl: await fileAsDataUrl(file),
+    })
+    .then(r => r.data)
   return attachment
 }
 

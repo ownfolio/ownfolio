@@ -8,7 +8,7 @@ import {
 } from '../../shared/models/Transaction'
 import { Database } from '../database'
 import { RpcCtx } from './context'
-import { byIdSchema, pagingParamsSchema } from './utils'
+import { byIdSchema, listResponseSchema, pagingParamsSchema, responseSchema } from './utils'
 
 const createTransactionSchema = transactionSchema.omit({ id: true, userId: true, createdAt: true })
 const updateTransactionSchema = transactionSchema
@@ -17,39 +17,48 @@ export function createRpcV1Transaction(database: Database) {
   return {
     listTransactions: createRpcCall(
       transactionSearchSchema.extend(pagingParamsSchema.shape),
-      z.array(transactionSearchResultSchema),
+      listResponseSchema(transactionSearchResultSchema),
       async (ctx: RpcCtx, input) => {
         if (!ctx.user) throw RpcError.unauthorized()
         const transactions = await database.transactions.listByUserId(ctx.user.id, input, 'desc', input.skip, input.top)
-        return transactions
+        return { data: transactions }
       }
     ),
-    retrieveTransaction: createRpcCall(byIdSchema, transactionSchema, async (ctx: RpcCtx, input) => {
+    retrieveTransaction: createRpcCall(byIdSchema, responseSchema(transactionSchema), async (ctx: RpcCtx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const transaction = await database.transactions.find(input.id)
       if (!transaction || transaction.userId !== ctx.user.id)
         throw RpcError.badRequest(`Unknown transaction ${input.id}`)
-      return transaction
+      return { data: transaction }
     }),
-    createTransaction: createRpcCall(createTransactionSchema, transactionSchema, async (ctx: RpcCtx, input) => {
-      if (!ctx.user) throw RpcError.unauthorized()
-      const transaction = await database.transactions.create({ ...input, userId: ctx.user.id })
-      return transaction
-    }),
-    updateTransaction: createRpcCall(updateTransactionSchema, transactionSchema, async (ctx: RpcCtx, input) => {
-      if (!ctx.user) throw RpcError.unauthorized()
-      const transaction = await database.transactions.find(input.id)
-      if (!transaction || transaction.userId !== ctx.user.id)
-        throw RpcError.badRequest(`Unknown transaction ${input.id}`)
-      const transaction2 = await database.transactions.update(input)
-      return transaction2
-    }),
-    deleteTransaction: createRpcCall(byIdSchema, z.void(), async (ctx: RpcCtx, input) => {
+    createTransaction: createRpcCall(
+      createTransactionSchema,
+      responseSchema(transactionSchema),
+      async (ctx: RpcCtx, input) => {
+        if (!ctx.user) throw RpcError.unauthorized()
+        const transaction = await database.transactions.create({ ...input, userId: ctx.user.id })
+        return { data: transaction }
+      }
+    ),
+    updateTransaction: createRpcCall(
+      updateTransactionSchema,
+      responseSchema(transactionSchema),
+      async (ctx: RpcCtx, input) => {
+        if (!ctx.user) throw RpcError.unauthorized()
+        const transaction = await database.transactions.find(input.id)
+        if (!transaction || transaction.userId !== ctx.user.id)
+          throw RpcError.badRequest(`Unknown transaction ${input.id}`)
+        const transaction2 = await database.transactions.update(input)
+        return { data: transaction2 }
+      }
+    ),
+    deleteTransaction: createRpcCall(byIdSchema, responseSchema(z.void()), async (ctx: RpcCtx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const transaction = await database.transactions.find(input.id)
       if (!transaction || transaction.userId !== ctx.user.id)
         throw RpcError.badRequest(`Unknown transaction ${input.id}`)
       await database.transactions.delete(input.id)
+      return {}
     }),
   }
 }

@@ -4,37 +4,49 @@ import { z } from 'zod'
 import { portfolioSchema } from '../../shared/models/Portfolio'
 import { Database } from '../database'
 import { RpcCtx } from './context'
-import { byIdSchema, pagingParamsSchema } from './utils'
+import { byIdSchema, listResponseSchema, pagingParamsSchema, responseSchema } from './utils'
 
 const createPortfolioSchema = portfolioSchema.omit({ id: true, userId: true, createdAt: true })
 const updatePortfolioSchema = portfolioSchema
 
 export function createRpcV1Portfolio(database: Database) {
   return {
-    listPortfolios: createRpcCall(pagingParamsSchema, z.array(portfolioSchema), async (ctx: RpcCtx, input) => {
-      if (!ctx.user) throw RpcError.unauthorized()
-      const portfolios = await database.portfolios.listByUserId(ctx.user.id, input.skip, input.top)
-      return portfolios
-    }),
-    retrievePortfolio: createRpcCall(byIdSchema, portfolioSchema, async (ctx: RpcCtx, input) => {
-      if (!ctx.user) throw RpcError.unauthorized()
-      const portfolio = await database.portfolios.find(input.id)
-      if (!portfolio || portfolio.userId !== ctx.user.id) throw RpcError.badRequest(`Unknown portfolio ${input.id}`)
-      return portfolio
-    }),
-    createPortfolio: createRpcCall(createPortfolioSchema, portfolioSchema, async (ctx: RpcCtx, input) => {
-      if (!ctx.user) throw RpcError.unauthorized()
-      const portfolio = await database.portfolios.create({ ...input, userId: ctx.user.id })
-      return portfolio
-    }),
-    updatePortfolio: createRpcCall(updatePortfolioSchema, portfolioSchema, async (ctx: RpcCtx, input) => {
+    listPortfolios: createRpcCall(
+      pagingParamsSchema,
+      listResponseSchema(portfolioSchema),
+      async (ctx: RpcCtx, input) => {
+        if (!ctx.user) throw RpcError.unauthorized()
+        const portfolios = await database.portfolios.listByUserId(ctx.user.id, input.skip, input.top)
+        return { data: portfolios }
+      }
+    ),
+    retrievePortfolio: createRpcCall(byIdSchema, responseSchema(portfolioSchema), async (ctx: RpcCtx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const portfolio = await database.portfolios.find(input.id)
       if (!portfolio || portfolio.userId !== ctx.user.id) throw RpcError.badRequest(`Unknown portfolio ${input.id}`)
-      const portfolio2 = await database.portfolios.update(input)
-      return portfolio2
+      return { data: portfolio }
     }),
-    deletePortfolio: createRpcCall(byIdSchema, z.void(), async (ctx: RpcCtx, input) => {
+    createPortfolio: createRpcCall(
+      createPortfolioSchema,
+      responseSchema(portfolioSchema),
+      async (ctx: RpcCtx, input) => {
+        if (!ctx.user) throw RpcError.unauthorized()
+        const portfolio = await database.portfolios.create({ ...input, userId: ctx.user.id })
+        return { data: portfolio }
+      }
+    ),
+    updatePortfolio: createRpcCall(
+      updatePortfolioSchema,
+      responseSchema(portfolioSchema),
+      async (ctx: RpcCtx, input) => {
+        if (!ctx.user) throw RpcError.unauthorized()
+        const portfolio = await database.portfolios.find(input.id)
+        if (!portfolio || portfolio.userId !== ctx.user.id) throw RpcError.badRequest(`Unknown portfolio ${input.id}`)
+        const portfolio2 = await database.portfolios.update(input)
+        return { data: portfolio2 }
+      }
+    ),
+    deletePortfolio: createRpcCall(byIdSchema, responseSchema(z.void()), async (ctx: RpcCtx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const portfolio = await database.portfolios.find(input.id)
       if (!portfolio || portfolio.userId !== ctx.user.id) throw RpcError.badRequest(`Unknown portfolio ${input.id}`)
@@ -43,6 +55,7 @@ export function createRpcV1Portfolio(database: Database) {
         throw RpcError.badRequest('Portfolios with at least one transaction cannot be deleted')
       }
       await database.portfolios.delete(input.id)
+      return {}
     }),
   }
 }

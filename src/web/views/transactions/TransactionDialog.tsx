@@ -57,7 +57,7 @@ export const TransactionDialog: React.FC<Props> & DialogOpts = ({
   const queryClient = useQueryClient()
   const [transaction, setTransaction] = React.useState<Transaction | undefined>(undefined)
   const attachments = useQuery(['transactions', transaction?.id, 'attachments'], () => {
-    return transaction?.id ? rpcClient.listAttachments({ transactionId: transaction?.id }) : []
+    return transaction?.id ? rpcClient.listAttachments({ transactionId: transaction?.id }).then(r => r.data) : []
   }).data!
   const [next, setNext] = React.useState(initialNext)
   const [state, setState] = React.useState<'busy' | 'done' | undefined>(undefined)
@@ -89,7 +89,7 @@ export const TransactionDialog: React.FC<Props> & DialogOpts = ({
             ...mode.transactionTemplate,
           })
         } else {
-          const transaction = await rpcClient.retrieveTransaction({ id: mode.transactionId })
+          const transaction = await rpcClient.retrieveTransaction({ id: mode.transactionId }).then(r => r.data)
           setTransaction(transaction)
         }
       } catch (err) {
@@ -112,8 +112,8 @@ export const TransactionDialog: React.FC<Props> & DialogOpts = ({
           setState('busy')
           const tx =
             mode.type === 'create'
-              ? await rpcClient.createTransaction(transaction)
-              : await rpcClient.updateTransaction(transaction)
+              ? await rpcClient.createTransaction(transaction).then(r => r.data)
+              : await rpcClient.updateTransaction(transaction).then(r => r.data)
           await Promise.all(
             pendingAttachments
               .filter(a => !unlinkedAttachments.includes(a.id))

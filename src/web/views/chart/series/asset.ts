@@ -14,8 +14,8 @@ export const assetSeries: ChartViewSeries<AssetSeriesConfig> = async (
   resolution: DateUnit,
   config: AssetSeriesConfig
 ): Promise<StockChartSeries[]> => {
-  const asset = await rpcClient.retrieveAsset({ id: config.assetId })
-  const quotes = await rpcClient.listQuotesForAsset({ id: config.assetId })
+  const asset = await rpcClient.retrieveAsset({ id: config.assetId }).then(r => r.data)
+  const quotes = await rpcClient.listQuotesForAsset({ id: config.assetId }).then(r => r.data)
   return [
     {
       type: 'candle',

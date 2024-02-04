@@ -18,11 +18,13 @@ import { TransactionDialog } from '../transactions/TransactionDialog'
 export const AssetOpenPositionsTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => {
   const navigate = useNavigate()
   const { openDialog } = useDialogs()
-  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({})).data!
-  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({})).data!
-  const assets = useQuery(['assets'], () => rpcClient.listAssets({})).data!
+  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({}).then(r => r.data)).data!
+  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
+  const assets = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data!
   const evaluations = useQuery(['evaluatePositions', timetravel], () =>
-    rpcClient.evaluatePositions({ when: !timetravel ? { type: 'now' } : { type: 'date', date: timetravel } })
+    rpcClient
+      .evaluatePositions({ when: !timetravel ? { type: 'now' } : { type: 'date', date: timetravel } })
+      .then(r => r.data)
   ).data!
 
   const columns = React.useMemo<TableDefinitionColumn[]>(

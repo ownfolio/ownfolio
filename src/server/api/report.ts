@@ -10,12 +10,13 @@ import { evaluationSumOverAccounts, evaluationSumOverAccountsAndAssets } from '.
 import { evaluateHistoricalAllWithQuotes } from '../evaluations/evaluateAll'
 import { generatePdf } from '../pdf/generatePdf'
 import { RpcCtx } from './context'
+import { responseSchema } from './utils'
 
 export type { RpcCtx } from './context'
 
 export function createRpcV1Report(database: Database) {
   return {
-    generateYearlyPdfReport: createRpcCall(z.void(), fileSchema, async (ctx: RpcCtx) => {
+    generateYearlyPdfReport: createRpcCall(z.void(), responseSchema(fileSchema), async (ctx: RpcCtx) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const transactions = await database.transactions.listByUserId(ctx.user.id).then(txs => txs.reverse())
       const allQuotes = await database.quotes.listAllClosesByUserId(ctx.user.id)
@@ -71,10 +72,11 @@ export function createRpcV1Report(database: Database) {
         ],
         styles,
       })
-      return {
+      const file = {
         fileName: `myfolio-yearly-report-${dateFormat(new Date(), 'yyyyMMdd-HHMMSS')}.pdf`,
         dataUrl: renderDataUrl('application/pdf', pdf.toString('base64')),
       }
+      return { data: file }
     }),
   }
 }

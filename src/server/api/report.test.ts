@@ -21,7 +21,7 @@ it(
     const ctx = { user: u, sessionId: u.id, setSessionId: async () => {}, unsetSessionId: async () => {} }
     const outputPath = path.resolve(__dirname, '../../../temp')
     await fs.mkdir(outputPath, { recursive: true })
-    const report = await api.generateYearlyPdfReport.handler(ctx)
+    const report = await api.generateYearlyPdfReport.handler(ctx).then(r => r.data)
     await fs.writeFile(
       path.join(outputPath, 'generateYearlyPdfReport.pdf'),
       Buffer.from(parseDataUrl(report.dataUrl)[1], 'base64')

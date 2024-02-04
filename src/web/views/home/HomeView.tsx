@@ -36,7 +36,7 @@ import { useQuoteUpdate } from './useQuoteUpdate'
 export const HomeView: React.FC = () => {
   const navigate = useNavigate()
   const { openDialog } = useDialogs()
-  const me = useQuery(['me'], () => rpcClient.me()).data
+  const me = useQuery(['me'], () => rpcClient.me().then(r => r.data)).data
   const [updatingQuotes, updateQuotes] = useQuoteUpdate(5 * 60 * 1000)
   const { privacy, setPrivacy } = usePrivacy()
 

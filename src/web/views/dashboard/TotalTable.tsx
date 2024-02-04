@@ -16,22 +16,24 @@ import { PortfolioDialog } from '../portfolios/PortfolioDialog'
 export const TotalTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => {
   const navigate = useNavigate()
   const { openDialog } = useDialogs()
-  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({})).data!
+  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({}).then(r => r.data)).data!
   const evaluations = useQuery(['totalTable', timetravel, portfolios.map(p => p.id).join(',')], async () => {
     const now = !timetravel ? new Date() : dateParse(timetravel)
-    const raw = await rpcClient.evaluateSummary({
-      when: {
-        type: 'dates',
-        dates: [
-          dateMinus(dateStartOf(now, 'day'), 'day', 30),
-          dateMinus(dateStartOf(now, 'day'), 'day', 7),
-          dateMinus(dateStartOf(now, 'day'), 'day', 1),
-          dateMinus(dateStartOf(now, 'day'), 'day', 0),
-        ].map(str => dateFormat(str, 'yyyy-MM-dd')),
-      },
-      buckets: [{ type: 'all' }, ...portfolios.map(p => ({ type: 'portfolio' as const, portfolioId: p.id }))],
-      values: ['cash', 'assetsOpenPrice', 'assetsCurrentPrice', 'realizedProfits', 'total', 'deposit'],
-    })
+    const raw = await rpcClient
+      .evaluateSummary({
+        when: {
+          type: 'dates',
+          dates: [
+            dateMinus(dateStartOf(now, 'day'), 'day', 30),
+            dateMinus(dateStartOf(now, 'day'), 'day', 7),
+            dateMinus(dateStartOf(now, 'day'), 'day', 1),
+            dateMinus(dateStartOf(now, 'day'), 'day', 0),
+          ].map(str => dateFormat(str, 'yyyy-MM-dd')),
+        },
+        buckets: [{ type: 'all' }, ...portfolios.map(p => ({ type: 'portfolio' as const, portfolioId: p.id }))],
+        values: ['cash', 'assetsOpenPrice', 'assetsCurrentPrice', 'realizedProfits', 'total', 'deposit'],
+      })
+      .then(r => r.data)
     return {
       ...raw,
       value: recordMap(raw.value, items => {

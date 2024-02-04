@@ -11,7 +11,7 @@ type Props = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElemen
 
 export const SelectAttachment = React.forwardRef<HTMLSelectElement, Props>(
   ({ value, onChange, emptyLabel = '-', clearable = false, className, ...other }, ref: any) => {
-    const options = useQuery(['attachments'], () => rpcClient.listAttachments({})).data || []
+    const options = useQuery(['attachments'], () => rpcClient.listAttachments({}).then(r => r.data)).data!
     const selectProps = React.useMemo(() => {
       return {
         optionGroups: [

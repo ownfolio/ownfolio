@@ -193,7 +193,9 @@ const AssetBuyTransactionDataFields: React.FC<{
             tabIndex={-1}
             onClick={async event => {
               event.preventDefault()
-              const quote = await rpcClient.retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
+              const quote = await rpcClient
+                .retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
+                .then(r => r.data)
               if (quote) {
                 const midDayPrice = BigNumber(quote.close)
                   .plus(quote.open || quote.close)
@@ -278,7 +280,9 @@ const AssetSellTransactionDataFields: React.FC<{
             tabIndex={-1}
             onClick={async event => {
               event.preventDefault()
-              const quote = await rpcClient.retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
+              const quote = await rpcClient
+                .retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
+                .then(r => r.data)
               if (quote) {
                 const midDayPrice = BigNumber(quote.close)
                   .plus(quote.open || quote.close)
@@ -365,7 +369,9 @@ const AssetDepositTransactionDataFields: React.FC<{
             tabIndex={-1}
             onClick={async event => {
               event.preventDefault()
-              const quote = await rpcClient.retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
+              const quote = await rpcClient
+                .retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
+                .then(r => r.data)
               if (quote) {
                 const midDayPrice = BigNumber(quote.close)
                   .plus(quote.open || quote.close)
@@ -434,7 +440,9 @@ const AssetWithdrawalTransactionDataFields: React.FC<{
             tabIndex={-1}
             onClick={async event => {
               event.preventDefault()
-              const quote = await rpcClient.retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
+              const quote = await rpcClient
+                .retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
+                .then(r => r.data)
               if (quote) {
                 const midDayPrice = BigNumber(quote.close)
                   .plus(quote.open || quote.close)
@@ -601,12 +609,14 @@ const DividendTransactionDataFields: React.FC<{
             tabIndex={-1}
             onClick={async event => {
               event.preventDefault()
-              const positions = await rpcClient.evaluatePositions({
-                when: {
-                  type: 'date',
-                  date: dateFormat(dateMinus(dateParse(transaction.date), 'day', 1), 'yyyy-MM-dd'),
-                },
-              })
+              const positions = await rpcClient
+                .evaluatePositions({
+                  when: {
+                    type: 'date',
+                    date: dateFormat(dateMinus(dateParse(transaction.date), 'day', 1), 'yyyy-MM-dd'),
+                  },
+                })
+                .then(r => r.data)
               const openAccountAssetPosition = positions.value.openAssetPositions.find(
                 p => p.type === 'open' && p.accountId === data.assetAccountId && p.assetId === data.assetId
               )

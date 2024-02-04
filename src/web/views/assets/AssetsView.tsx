@@ -21,20 +21,28 @@ export const AssetsView: React.FC = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
-  const assets = useQuery(['assets'], () => rpcClient.listAssets({})).data!
+  const assets = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data!
   const lastYearQuotes = useQuery(['lastYearQuotes'], () =>
-    rpcClient.listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'year', 1), 'yyyy-MM-dd') })
+    rpcClient
+      .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'year', 1), 'yyyy-MM-dd') })
+      .then(r => r.data)
   ).data!
   const lastMonthQuotes = useQuery(['lastMonthQuotes'], () =>
-    rpcClient.listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'month', 1), 'yyyy-MM-dd') })
+    rpcClient
+      .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'month', 1), 'yyyy-MM-dd') })
+      .then(r => r.data)
   ).data!
   const lastWeekQuotes = useQuery(['lastWeekQuotes'], () =>
-    rpcClient.listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'week', 1), 'yyyy-MM-dd') })
+    rpcClient
+      .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'week', 1), 'yyyy-MM-dd') })
+      .then(r => r.data)
   ).data!
   const yesterdayQuotes = useQuery(['yesterdayQuotes'], () =>
-    rpcClient.listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'day', 1), 'yyyy-MM-dd') })
+    rpcClient
+      .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'day', 1), 'yyyy-MM-dd') })
+      .then(r => r.data)
   ).data!
-  const latestQuotes = useQuery(['latestQuotes'], () => rpcClient.listLatestQuotes({})).data!
+  const latestQuotes = useQuery(['latestQuotes'], () => rpcClient.listLatestQuotes({}).then(r => r.data)).data!
   const [showHidden, setShowHidden] = React.useState(false)
 
   const columns = React.useMemo<TableDefinitionColumn[]>(

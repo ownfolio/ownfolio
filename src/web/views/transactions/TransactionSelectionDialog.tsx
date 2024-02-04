@@ -18,7 +18,7 @@ export const TransactionSelectionDialog: React.FC<Props> & DialogOpts = ({ close
         variant="primary"
         onClick={async () => {
           if (transactionId) {
-            const transaction = await rpcClient.retrieveTransaction({ id: transactionId })
+            const transaction = await rpcClient.retrieveTransaction({ id: transactionId }).then(r => r.data)
             closeDialog(transaction)
           }
         }}
