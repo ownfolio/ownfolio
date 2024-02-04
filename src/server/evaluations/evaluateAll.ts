@@ -10,8 +10,6 @@ import {
   evaluateNow,
   EvaluateOpts,
   EvaluationAllQuotes,
-  EvaluationError,
-  evaluationErrorsDistinct,
   EvaluationResult,
   EvaluationResultDated,
   EvaluationStepFunction,
@@ -51,7 +49,15 @@ export interface EvaluateAllValue {
   closedAssetPositions: ClosedAssetPosition[]
 }
 
-export type EvaluateAllResult = EvaluationResult<EvaluateAllValue>
+export type EvaluateAllError = {
+  type: 'consumeExcessiveAssetAmount'
+  transactionId: string
+  assetAccountId: string
+  assetId: string
+  excessiveAssetAmount: BigNumber
+}
+
+export type EvaluateAllResult = EvaluationResult<EvaluateAllValue, EvaluateAllError>
 
 function emptyEvaluateAllResult(): EvaluateAllResult {
   return {
@@ -79,7 +85,12 @@ export interface EvaluateHistoricalAllWithQuotesValue extends EvaluateAllValue {
   accountAssetCurrentPrices: Record<string, Record<string, BigNumber>>
 }
 
-export type EvaluateHistoricalAllWithQuotesResult = EvaluationResultDated<EvaluateHistoricalAllWithQuotesValue>
+export type EvaluateHistoricalAllWithQuotesError = { type: 'noQuotesForAsset'; assetId: string }
+
+export type EvaluateHistoricalAllWithQuotesResult = EvaluationResultDated<
+  EvaluateHistoricalAllWithQuotesValue,
+  EvaluateHistoricalAllWithQuotesError
+>
 
 export function evaluateHistoricalAllWithQuotes(
   transactions: Transaction[],
@@ -126,12 +137,11 @@ export function evaluateHistoricalAllWithQuotes(
         }, {}),
       },
       errors: [
-        ...r.errors,
         ...Object.keys(r.value.accountAssetHoldings)
           .flatMap(aid => Object.keys(r.value.accountAssetHoldings[aid]))
           .filter(aid => !quotes[aid])
-          .map<EvaluationError>(aid => ({
-            message: 'Found no quotes for asset',
+          .map<EvaluateHistoricalAllWithQuotesError>(aid => ({
+            type: 'noQuotesForAsset',
             assetId: aid,
           })),
       ],
@@ -139,7 +149,7 @@ export function evaluateHistoricalAllWithQuotes(
   })
 }
 
-const evaluateAllStep: EvaluationStepFunction<EvaluateAllValue, {}> = (result, transaction) => {
+const evaluateAllStep: EvaluationStepFunction<EvaluateAllValue, EvaluateAllError, {}> = (result, transaction) => {
   const { data } = transaction
   switch (data.type) {
     case 'assetBuy':
@@ -297,10 +307,11 @@ function evaluateAllStepAssetSell(
         return [
           BigNumber(0),
           appendError(acc, {
-            message: 'Insufficient asset amount',
+            type: 'consumeExcessiveAssetAmount',
             transactionId: transaction.id,
-            accountId: data.assetAccountId,
+            assetAccountId: data.assetAccountId,
             assetId: data.assetId,
+            excessiveAssetAmount: remainingAmount,
           }),
         ]
       }
@@ -413,10 +424,11 @@ function evaluateAllStepAssetWithdrawal(
         return [
           BigNumber(0),
           appendError(acc, {
-            message: 'Insufficient asset amount',
+            type: 'consumeExcessiveAssetAmount',
             transactionId: transaction.id,
-            accountId: data.assetAccountId,
+            assetAccountId: data.assetAccountId,
             assetId: data.assetId,
+            excessiveAssetAmount: remainingAmount,
           }),
         ]
       }
@@ -475,10 +487,11 @@ function evaluateAllStepAssetTransfer(
         return [
           BigNumber(0),
           appendError(acc, {
-            message: 'Insufficient asset amount',
+            type: 'consumeExcessiveAssetAmount',
             transactionId: transaction.id,
-            accountId: data.fromAssetAccountId,
+            assetAccountId: data.fromAssetAccountId,
             assetId: data.assetId,
+            excessiveAssetAmount: remainingAmount,
           }),
         ]
       }
@@ -534,10 +547,11 @@ function evaluateAllStepAssetTransfer(
               return [
                 BigNumber(0),
                 appendError(acc, {
-                  message: 'Insufficient asset amount',
+                  type: 'consumeExcessiveAssetAmount',
                   transactionId: transaction.id,
-                  accountId: data.fromAssetAccountId,
+                  assetAccountId: data.fromAssetAccountId,
                   assetId: data.assetId,
+                  excessiveAssetAmount: remainingAmount,
                 }),
               ]
             }
@@ -696,10 +710,10 @@ function updateValue(result: EvaluateAllResult, values: Partial<EvaluateAllValue
   }
 }
 
-function appendError(result: EvaluateAllResult, error: EvaluationError): EvaluateAllResult {
+function appendError(result: EvaluateAllResult, error: EvaluateAllError): EvaluateAllResult {
   return {
     ...result,
-    errors: evaluationErrorsDistinct([...result.errors, error]),
+    errors: [...result.errors, error],
   }
 }
 

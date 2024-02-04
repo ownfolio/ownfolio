@@ -68,49 +68,49 @@ it(
     await expect(db.transactions.list(1, 100)).resolves.toEqual([t2])
     await expect(db.transactions.list(0, 0)).resolves.toEqual([])
     await expect(db.transactions.listByUserId(u.id)).resolves.toEqual([
-      { ...t2, attachmentCount: 0 },
-      { ...t1, attachmentCount: 1 },
+      { ...t2, attachmentIds: [] },
+      { ...t1, attachmentIds: [attm.id] },
     ])
     await expect(db.transactions.listByUserId('user_???')).resolves.toEqual([])
     await expect(db.transactions.listByUserId(u.id, { type: 'cashDeposit' })).resolves.toEqual([
-      { ...t1, attachmentCount: 1 },
+      { ...t1, attachmentIds: [attm.id] },
     ])
     await expect(db.transactions.listByUserId(u.id, { type: 'assetBuy' })).resolves.toEqual([
-      { ...t2, attachmentCount: 0 },
+      { ...t2, attachmentIds: [] },
     ])
     await expect(db.transactions.listByUserId(u.id, { fromDate: '2020-01-02' })).resolves.toEqual([
-      { ...t2, attachmentCount: 0 },
+      { ...t2, attachmentIds: [] },
     ])
     await expect(db.transactions.listByUserId(u.id, { toDate: '2020-01-01' })).resolves.toEqual([
-      { ...t1, attachmentCount: 1 },
+      { ...t1, attachmentIds: [attm.id] },
     ])
     await expect(db.transactions.listByUserId(u.id, { portfolioId: p1.id })).resolves.toEqual([
-      { ...t2, attachmentCount: 0 },
-      { ...t1, attachmentCount: 1 },
+      { ...t2, attachmentIds: [] },
+      { ...t1, attachmentIds: [attm.id] },
     ])
     await expect(db.transactions.listByUserId(u.id, { portfolioId: p2.id })).resolves.toEqual([])
     await expect(db.transactions.listByUserId(u.id, { portfolioId: 'port_???' })).resolves.toEqual([])
     await expect(db.transactions.listByUserId(u.id, { accountId: a1.id })).resolves.toEqual([
-      { ...t2, attachmentCount: 0 },
-      { ...t1, attachmentCount: 1 },
+      { ...t2, attachmentIds: [] },
+      { ...t1, attachmentIds: [attm.id] },
     ])
     await expect(db.transactions.listByUserId(u.id, { accountId: a2.id })).resolves.toEqual([
-      { ...t2, attachmentCount: 0 },
+      { ...t2, attachmentIds: [] },
     ])
     await expect(db.transactions.listByUserId(u.id, { accountId: 'act_???' })).resolves.toEqual([])
     await expect(db.transactions.listByUserId(u.id, { assetId: s1.id })).resolves.toEqual([
-      { ...t2, attachmentCount: 0 },
+      { ...t2, attachmentIds: [] },
     ])
     await expect(db.transactions.listByUserId(u.id, { assetId: 'ast_???' })).resolves.toEqual([])
     await expect(db.transactions.listByUserId(u.id, { attachmentId: 'attm_???' })).resolves.toEqual([])
     await expect(db.transactions.listByUserId(u.id, { attachmentId: attm.id })).resolves.toEqual([
-      { ...t1, attachmentCount: 1 },
+      { ...t1, attachmentIds: [attm.id] },
     ])
     await expect(db.transactions.listByUserId(u.id, { reference: 'ref1' })).resolves.toEqual([
-      { ...t1, attachmentCount: 1 },
+      { ...t1, attachmentIds: [attm.id] },
     ])
     await expect(db.transactions.listByUserId(u.id, { reference: 'ref2' })).resolves.toEqual([
-      { ...t2, attachmentCount: 0 },
+      { ...t2, attachmentIds: [] },
     ])
     await expect(db.transactions.countForPortfolioId(p1.id)).resolves.toBe(2)
     await expect(db.transactions.countForPortfolioId(p2.id)).resolves.toBe(0)

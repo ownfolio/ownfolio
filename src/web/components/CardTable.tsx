@@ -257,7 +257,6 @@ const stylesRoot = css`
   & th,
   & td {
     padding: var(--spacing-small);
-    box-sizing: border-box;
   }
 
   & > thead > tr {

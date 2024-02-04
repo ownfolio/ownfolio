@@ -92,7 +92,7 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
     const rows = await this.sql`
       SELECT
           a.*,
-          (SELECT count(1)::int FROM "attachment_transaction_link" atl WHERE atl."attachmentId" = a."id") "transactionCount"
+          (SELECT array_agg(atl."transactionId") FROM "attachment_transaction_link" atl WHERE atl."attachmentId" = a."id") "transactionIds"
       FROM "attachment" a
       LEFT JOIN "attachment_transaction_link" atl ON atl."attachmentId" = a."id" 
       LEFT JOIN "transaction" t ON t."id" = atl."transactionId"
@@ -101,7 +101,16 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
       ORDER BY a."fileName", a."id"
       OFFSET ${skip} LIMIT ${top}
     `
-    return rows.map(row => attachmentSearchResultSchema.parse(row))
+    return rows.map(row => attachmentSearchResultSchema.parse({ ...row, transactionIds: row.transactionIds || [] }))
+  }
+
+  public async listContentsByUserId(userId: string): Promise<AttachmentContent[]> {
+    const rows = await this.sql`
+      SELECT ac.* FROM ${this.sql('attachment_content')} ac
+      JOIN ${this.sql('attachment')} a ON a."id" = ac."attachmentId"
+      WHERE a."userId" = ${userId}
+    `
+    return rows.map(row => attachmentContentSchema.parse(row))
   }
 
   public async linkToTransaction(id: string, transactionId: string): Promise<void> {
@@ -133,6 +142,13 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
       return attachment
     })
     return attachment
+  }
+
+  public async overwriteContent(id: string, content: Omit<AttachmentContent, 'attachmentId'> | null): Promise<void> {
+    await this.sql`
+      INSERT INTO ${this.sql('attachment_content')} ${this.sql({ attachmentId: id, ...content })}
+      ON CONFLICT ON CONSTRAINT "attachment_content_pkey" DO UPDATE SET "text" = EXCLUDED."text", "parsed" = EXCLUDED."parsed"
+    `
   }
 
   public async read(id: string): Promise<Buffer> {

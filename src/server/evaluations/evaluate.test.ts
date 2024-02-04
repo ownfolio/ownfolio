@@ -11,7 +11,11 @@ import {
 } from './evaluate'
 
 const txs = [tx('tx1', '2000-01-01', {} as any), tx('tx2', '2000-01-02', {} as any), tx('tx3', '2000-01-03', {} as any)]
-const fn: EvaluationStepFunction<number, { factor: number }> = (acc, _transaction, opts): EvaluationResult<number> => {
+const fn: EvaluationStepFunction<number, never, { factor: number }> = (
+  acc,
+  _transaction,
+  opts
+): EvaluationResult<number, never> => {
   return {
     value: acc.value + opts.params.factor,
     errors: acc.errors,

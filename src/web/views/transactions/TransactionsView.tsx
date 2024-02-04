@@ -103,7 +103,7 @@ export const TransactionsView: React.FC = () => {
           data: <TransactionData data={tx.data} />,
           reference: tx.reference,
           comment: tx.comment,
-          links: tx.attachmentCount.toString(),
+          links: tx.attachmentIds.length.toString(),
         },
         menuItems: menuItems(tx),
       }

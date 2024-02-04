@@ -8,47 +8,142 @@ import { Database } from '../database'
 import { evaluationSumOverAccounts, evaluationSumOverAccountsAndAssets } from '../evaluations/evaluate'
 import { evaluateAll, evaluateHistoricalAllWithQuotes } from '../evaluations/evaluateAll'
 import { RpcCtx } from './context'
-import { responseSchema } from './utils'
+import { listResponseSchema, responseSchema } from './utils'
+
+export const evaluateSummaryRequestSchema = z.object({
+  when: z.discriminatedUnion('type', [
+    z.object({ type: z.literal('now') }),
+    z.object({ type: z.literal('dates'), dates: z.array(z.string().regex(/^(\d{4}-\d{2}-\d{2})$/)).min(1) }),
+    z.object({ type: z.literal('historical'), resolution: dateUnitSchema.optional() }),
+  ]),
+  buckets: z.array(
+    z.discriminatedUnion('type', [
+      z.object({ type: z.literal('all') }),
+      z.object({ type: z.literal('portfolio'), portfolioId: z.string() }),
+      z.object({ type: z.literal('account'), accountId: z.string() }),
+    ])
+  ),
+  values: z
+    .array(
+      z.enum([
+        'total',
+        'deposit',
+        'cash',
+        'cashInterest',
+        'cashDividend',
+        'cashFee',
+        'cashTax',
+        'assetsOpenPrice',
+        'assetsCurrentPrice',
+        'realizedProfits',
+      ])
+    )
+    .min(1),
+})
+export const evaluateSummaryResponseSchema = responseSchema(
+  z.object({
+    value: z.record(z.string(), z.array(z.array(z.string()))),
+    errors: z.array(z.never()),
+  })
+)
+
+export const evaluatePositionsRequestSchema = z.object({
+  when: z.discriminatedUnion('type', [
+    z.object({ type: z.literal('now') }),
+    z.object({ type: z.literal('date'), date: z.string().regex(/^(\d{4}-\d{2}-\d{2})$/) }),
+  ]),
+})
+export const evaluatePositionsResponseSchema = responseSchema(
+  z.object({
+    value: z.object({
+      openAssetPositions: z.array(
+        z.object({
+          type: z.literal('open'),
+          accountId: z.string(),
+          assetId: z.string(),
+          amount: z.string(),
+          openDate: z.string(),
+          openTime: z.string(),
+          openPrice: z.string(),
+          currentPrice: z.string(),
+          positions: z.array(
+            z.object({
+              amount: z.string(),
+              openTransactionId: z.string(),
+              openDate: z.string(),
+              openTime: z.string(),
+              openPrice: z.string(),
+              currentPrice: z.string(),
+            })
+          ),
+        })
+      ),
+      closedAssetPositions: z.array(
+        z.object({
+          type: z.literal('closed'),
+          accountId: z.string(),
+          assetId: z.string(),
+          amount: z.string(),
+          openDate: z.string(),
+          openTime: z.string(),
+          openPrice: z.string(),
+          closeDate: z.string(),
+          closeTime: z.string(),
+          closePrice: z.string(),
+          positions: z.array(
+            z.object({
+              amount: z.string(),
+              openTransactionId: z.string(),
+              openDate: z.string(),
+              openTime: z.string(),
+              openPrice: z.string(),
+              closeTransactionId: z.string(),
+              closeDate: z.string(),
+              closeTime: z.string(),
+              closePrice: z.string(),
+            })
+          ),
+        })
+      ),
+    }),
+    errors: z.array(z.never()),
+  })
+)
+
+export const plausibilityFindingLevel = z.enum(['info', 'warning', 'error'])
+export const evaluatePlausibilityRequestSchema = z.void()
+export const evaluatePlausibilityResponseSchema = listResponseSchema(
+  z.discriminatedUnion('type', [
+    z.object({
+      type: z.literal('transactionHasNoAttachment'),
+      date: z.string(),
+      level: plausibilityFindingLevel,
+      transactionId: z.string(),
+    }),
+    z.object({
+      type: z.literal('transactionDataConflictsWithAttachmentContent'),
+      date: z.string(),
+      level: plausibilityFindingLevel,
+      transactionId: z.string(),
+      attachmentId: z.string(),
+    }),
+    z.object({
+      type: z.literal('transactionConsumesMoreAssetAmountThanAvailable'),
+      date: z.string(),
+      level: plausibilityFindingLevel,
+      transactionId: z.string(),
+      assetAccountId: z.string(),
+      assetId: z.string(),
+      excessiveAssetAmount: z.string(),
+    }),
+  ])
+)
 
 export function createRpcV1Evaluations(database: Database) {
   return {
     evaluateSummary: createRpcCall(
-      z.object({
-        when: z.discriminatedUnion('type', [
-          z.object({ type: z.literal('now') }),
-          z.object({ type: z.literal('dates'), dates: z.array(z.string().regex(/^(\d{4}-\d{2}-\d{2})$/)).min(1) }),
-          z.object({ type: z.literal('historical'), resolution: dateUnitSchema.optional() }),
-        ]),
-        buckets: z.array(
-          z.discriminatedUnion('type', [
-            z.object({ type: z.literal('all') }),
-            z.object({ type: z.literal('portfolio'), portfolioId: z.string() }),
-            z.object({ type: z.literal('account'), accountId: z.string() }),
-          ])
-        ),
-        values: z
-          .array(
-            z.enum([
-              'total',
-              'deposit',
-              'cash',
-              'cashInterest',
-              'cashDividend',
-              'cashFee',
-              'cashTax',
-              'assetsOpenPrice',
-              'assetsCurrentPrice',
-              'realizedProfits',
-            ])
-          )
-          .min(1),
-      }),
-      responseSchema(
-        z.object({
-          value: z.record(z.string(), z.array(z.array(z.string()))),
-          errors: z.array(z.never()),
-        })
-      ),
+      evaluateSummaryRequestSchema,
+      evaluateSummaryResponseSchema,
       async (ctx: RpcCtx, input) => {
         if (!ctx.user) throw RpcError.unauthorized()
         const accounts = await database.accounts.listByUserId(ctx.user.id)
@@ -148,68 +243,8 @@ export function createRpcV1Evaluations(database: Database) {
       }
     ),
     evaluatePositions: createRpcCall(
-      z.object({
-        when: z.discriminatedUnion('type', [
-          z.object({ type: z.literal('now') }),
-          z.object({ type: z.literal('date'), date: z.string().regex(/^(\d{4}-\d{2}-\d{2})$/) }),
-        ]),
-      }),
-      responseSchema(
-        z.object({
-          value: z.object({
-            openAssetPositions: z.array(
-              z.object({
-                type: z.literal('open'),
-                accountId: z.string(),
-                assetId: z.string(),
-                amount: z.string(),
-                openDate: z.string(),
-                openTime: z.string(),
-                openPrice: z.string(),
-                currentPrice: z.string(),
-                positions: z.array(
-                  z.object({
-                    amount: z.string(),
-                    openTransactionId: z.string(),
-                    openDate: z.string(),
-                    openTime: z.string(),
-                    openPrice: z.string(),
-                    currentPrice: z.string(),
-                  })
-                ),
-              })
-            ),
-            closedAssetPositions: z.array(
-              z.object({
-                type: z.literal('closed'),
-                accountId: z.string(),
-                assetId: z.string(),
-                amount: z.string(),
-                openDate: z.string(),
-                openTime: z.string(),
-                openPrice: z.string(),
-                closeDate: z.string(),
-                closeTime: z.string(),
-                closePrice: z.string(),
-                positions: z.array(
-                  z.object({
-                    amount: z.string(),
-                    openTransactionId: z.string(),
-                    openDate: z.string(),
-                    openTime: z.string(),
-                    openPrice: z.string(),
-                    closeTransactionId: z.string(),
-                    closeDate: z.string(),
-                    closeTime: z.string(),
-                    closePrice: z.string(),
-                  })
-                ),
-              })
-            ),
-          }),
-          errors: z.array(z.never()),
-        })
-      ),
+      evaluatePositionsRequestSchema,
+      evaluatePositionsResponseSchema,
       async (ctx: RpcCtx, input) => {
         if (!ctx.user) throw RpcError.unauthorized()
         const transactions = await database.transactions.listByUserId(
@@ -303,6 +338,96 @@ export function createRpcV1Evaluations(database: Database) {
           errors: [],
         }
         return { data }
+      }
+    ),
+    evaluatePlausibility: createRpcCall(
+      evaluatePlausibilityRequestSchema,
+      evaluatePlausibilityResponseSchema,
+      async (ctx: RpcCtx) => {
+        if (!ctx.user) throw RpcError.unauthorized()
+        const data: z.infer<typeof evaluatePlausibilityResponseSchema>['data'] = []
+        const transactions = await database.transactions.listByUserId(ctx.user.id, {}, 'asc')
+        const attachmentContents = await database.attachments.listContentsByUserId(ctx.user.id)
+        const { errors: evaluateAllErrors } = evaluateAll(transactions, {})
+        transactions.forEach(transaction => {
+          const {
+            id,
+            data: { type },
+            attachmentIds,
+          } = transaction
+          if (attachmentIds.length === 0 && ['assetBuy', 'assetSell'].includes(type)) {
+            data.push({
+              type: 'transactionHasNoAttachment',
+              date: transaction.date,
+              level: 'info',
+              transactionId: id,
+            })
+          }
+        })
+        transactions.forEach(transaction => {
+          const linkedAttachmentContents = attachmentContents.filter(ac =>
+            transaction.attachmentIds.includes(ac.attachmentId)
+          )
+          linkedAttachmentContents.forEach(({ attachmentId, parsed }) => {
+            const conflict = (() => {
+              if (!parsed) {
+                return false
+              }
+              if (parsed.type !== 'assetBuy' && parsed.type !== 'assetSell') {
+                return false
+              }
+              const { date, time, data } = transaction
+              if (data.type !== 'assetBuy' && data.type !== 'assetSell') {
+                return false
+              }
+              if (date !== parsed.date) {
+                return true
+              }
+              if (time !== parsed.time) {
+                return true
+              }
+              if (data.assetAmount !== parsed.amount) {
+                return true
+              }
+              if (data.cashAmount !== parsed.price) {
+                return true
+              }
+              if (data.feeCashAmount !== parsed.fee) {
+                return true
+              }
+              if (data.type === 'assetSell' && data.taxCashAmount !== parsed.tax) {
+                return true
+              }
+              return false
+            })()
+            if (conflict) {
+              data.push({
+                type: 'transactionDataConflictsWithAttachmentContent',
+                date: transaction.date,
+                level: 'warning',
+                transactionId: transaction.id,
+                attachmentId: attachmentId,
+              })
+            }
+          })
+        })
+        evaluateAllErrors.forEach(error => {
+          if (error.type === 'consumeExcessiveAssetAmount') {
+            const transaction = transactions.find(t => t.id === error.transactionId)!
+            data.push({
+              type: 'transactionConsumesMoreAssetAmountThanAvailable',
+              date: transaction.date,
+              level: 'error',
+              transactionId: error.transactionId,
+              assetAccountId: error.assetAccountId,
+              assetId: error.assetId,
+              excessiveAssetAmount: error.excessiveAssetAmount.toString(),
+            })
+          }
+        })
+        return {
+          data: selectionSortBy(data, (f1, f2) => (f1.date === f2.date ? 0 : f1.date < f2.date ? -1 : 1)),
+        }
       }
     ),
   }

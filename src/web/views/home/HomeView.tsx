@@ -24,6 +24,7 @@ import { ChartView } from '../chart/ChartView'
 import { DashboardView } from '../dashboard/DashboardView'
 import { ErrorView } from '../error/ErrorView'
 import { LoadingView } from '../loading/LoadingView'
+import { PlausibilityView } from '../plausibility/PlausibilityView'
 import { PortfolioDialog } from '../portfolios/PortfolioDialog'
 import { PortfoliosView } from '../portfolios/PortfoliosView'
 import { TestView } from '../test/TestView'
@@ -133,22 +134,26 @@ export const HomeView: React.FC = () => {
             <Menu
               items={[
                 {
-                  label: 'Account',
-                  onClick: async () => {
-                    await openDialog(UserDialog, {})
-                  },
-                },
-                {
                   label: 'Privacy mode',
                   icon: privacy ? <FaCheck /> : <div />,
                   onClick: () => setPrivacy(!privacy),
                 },
                 null,
                 {
+                  label: 'Account',
+                  onClick: async () => {
+                    await openDialog(UserDialog, {})
+                  },
+                },
+                {
+                  label: 'Plausibility',
+                  onClick: () => navigate('/plausibility'),
+                },
+                null,
+                {
                   label: 'Reload',
                   onClick: () => window.location.reload(),
                 },
-                null,
                 {
                   label: 'Logout',
                   onClick: async () => {
@@ -183,6 +188,7 @@ export const HomeView: React.FC = () => {
                   <Route path="assets" element={<AssetsView />} />
                   <Route path="transactions" element={<TransactionsView />} />
                   <Route path="attachments" element={<AttachmentsView />} />
+                  <Route path="plausibility" element={<PlausibilityView />} />
                   <Route path="chart/:type/:id?" element={<ChartView />} />
                   <Route path="test" element={<TestView />} />
                   <Route

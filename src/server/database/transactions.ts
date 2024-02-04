@@ -39,13 +39,13 @@ export class DatabaseTransactions extends DatabaseEntity<Transaction, 'createdAt
     const rows = await this.sql`
       SELECT
           t.*,
-          (SELECT count(1)::int FROM "attachment_transaction_link" atl WHERE atl."transactionId" = t."id") "attachmentCount"
+          (SELECT array_agg(atl."attachmentId") FROM "attachment_transaction_link" atl WHERE atl."transactionId" = t."id") "attachmentIds"
       FROM "transaction" t
       WHERE "userId" = ${userId} AND ${typeFilterQ} AND ${fromDateFilterQ} AND ${portfolioQ} AND ${accountQ} AND ${assetQ} AND ${attachmentQ} AND ${toDateFilterQ} AND ${referenceFilterQ}
       ORDER BY t."date" ${orderQ}, t."time" ${orderQ}, t."id" ${orderQ}
       OFFSET ${skip} LIMIT ${top}
     `
-    return rows.map(row => transactionSearchResultSchema.parse(row))
+    return rows.map(row => transactionSearchResultSchema.parse({ ...row, attachmentIds: row.attachmentIds || [] }))
   }
 
   public async countForPortfolioId(portfolioId: string): Promise<number> {

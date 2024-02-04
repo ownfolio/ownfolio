@@ -145,7 +145,7 @@ export const transactionSearchSchema = z.object({
 
 export type TransactionSearch = z.infer<typeof transactionSearchSchema>
 
-export const transactionSearchResultSchema = transactionSchema.extend({ attachmentCount: z.number() })
+export const transactionSearchResultSchema = transactionSchema.extend({ attachmentIds: z.array(z.string()) })
 
 export type TransactionSearchResult = z.infer<typeof transactionSearchResultSchema>
 
