@@ -268,75 +268,96 @@ export function generateTransactionReference(): string {
   return formatInt(time, 13) + formatInt(random, 6)
 }
 
-export function renderTransactionAsString(transaction: Transaction, accounts: Account[], assets: Asset[]): string {
-  const { date, data } = transaction
+export function renderTransactionAsString(
+  transaction: Transaction,
+  accounts: Account[],
+  assets: Asset[],
+  includeDate: boolean
+): string {
+  const { data } = transaction
+  const dateStr = includeDate ? `${transaction.date} ` : ''
   switch (data.type) {
     case 'cashDeposit': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
-      return `${date} - Deposit ${formatAmount(data.cashAmount, currency)} to ${cashAccount?.name || '???'}`
+      return dateStr + `Deposit ${formatAmount(data.cashAmount, currency)} to ${cashAccount?.name || '???'}`
     }
     case 'cashWithdrawal': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
-      return `${date} - Withdraw ${formatAmount(data.cashAmount, currency)} from ${cashAccount?.name || '???'}`
+      return dateStr + `Withdraw ${formatAmount(data.cashAmount, currency)} from ${cashAccount?.name || '???'}`
     }
     case 'cashTransfer': {
       const fromCashAccount = accounts.find(a => a.id === data.fromCashAccountId)
       const toCashAccount = accounts.find(a => a.id === data.toCashAccountId)
       const currency = allCurrencies.find(c => c.symbol === fromCashAccount?.currency)
-      return `${date} - Transfer ${formatAmount(data.cashAmount, currency)} from ${fromCashAccount?.name || '???'} to ${toCashAccount?.name || '???'}`
+      return (
+        dateStr +
+        `Transfer ${formatAmount(data.cashAmount, currency)} from ${fromCashAccount?.name || '???'} to ${toCashAccount?.name || '???'}`
+      )
     }
     case 'assetBuy': {
       const asset = assets.find(a => a.id === data.assetId)
       const assetAccount = accounts.find(a => a.id === data.assetAccountId)
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
-      return `${date} - Buy ${formatAmount(data.assetAmount, asset)} on ${assetAccount?.name || '???'} for ${formatAmount(data.cashAmount, currency)} on ${cashAccount?.name || '???'}`
+      return (
+        dateStr +
+        `Buy ${formatAmount(data.assetAmount, asset)} on ${assetAccount?.name || '???'} for ${formatAmount(data.cashAmount, currency)} on ${cashAccount?.name || '???'}`
+      )
     }
     case 'assetSell': {
       const asset = assets.find(a => a.id === data.assetId)
       const assetAccount = accounts.find(a => a.id === data.assetAccountId)
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
-      return `${date} - Sell ${formatAmount(data.assetAmount, asset)} on ${assetAccount?.name || '???'} for ${formatAmount(data.cashAmount, currency)} on ${cashAccount?.name || '???'}`
+      return (
+        dateStr +
+        `Sell ${formatAmount(data.assetAmount, asset)} on ${assetAccount?.name || '???'} for ${formatAmount(data.cashAmount, currency)} on ${cashAccount?.name || '???'}`
+      )
     }
     case 'assetDeposit': {
       const asset = assets.find(a => a.id === data.assetId)
       const assetAccount = accounts.find(a => a.id === data.assetAccountId)
-      return `${date} - Deposit ${formatAmount(data.assetAmount, asset)} to ${assetAccount?.name || '???'}`
+      return dateStr + `Deposit ${formatAmount(data.assetAmount, asset)} to ${assetAccount?.name || '???'}`
     }
     case 'assetWithdrawal': {
       const asset = assets.find(a => a.id === data.assetId)
       const assetAccount = accounts.find(a => a.id === data.assetAccountId)
-      return `${date} - Withdraw ${formatAmount(data.assetAmount, asset)} from ${assetAccount?.name || '???'}`
+      return dateStr + `Withdraw ${formatAmount(data.assetAmount, asset)} from ${assetAccount?.name || '???'}`
     }
     case 'assetTransfer': {
       const asset = assets.find(a => a.id === data.assetId)
       const fromAssetAccount = accounts.find(a => a.id === data.fromAssetAccountId)
       const toAssetAccount = accounts.find(a => a.id === data.toAssetAccountId)
-      return `${date} - Transfer ${formatAmount(data.assetAmount, asset)} from ${fromAssetAccount?.name || '???'} to ${toAssetAccount?.name || '???'}`
+      return (
+        dateStr +
+        `Transfer ${formatAmount(data.assetAmount, asset)} from ${fromAssetAccount?.name || '???'} to ${toAssetAccount?.name || '???'}`
+      )
     }
     case 'interest': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
-      return `${date} - Receive ${formatAmount(data.cashAmount, currency)} interest to ${cashAccount?.name || '???'}`
+      return dateStr + `Receive ${formatAmount(data.cashAmount, currency)} interest to ${cashAccount?.name || '???'}`
     }
     case 'dividend': {
       const asset = assets.find(a => a.id === data.assetId)
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
-      return `${date} - Receive ${formatAmount(data.cashAmount, currency)} dividend to ${cashAccount?.name || '???'} for ${formatAmount(data.assetAmount, asset)}`
+      return (
+        dateStr +
+        `Receive ${formatAmount(data.cashAmount, currency)} dividend to ${cashAccount?.name || '???'} for ${formatAmount(data.assetAmount, asset)}`
+      )
     }
     case 'tax': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
-      return `${date} - Pay ${formatAmount(data.taxCashAmount, currency)} tax from ${cashAccount?.name || '???'}`
+      return dateStr + `Pay ${formatAmount(data.taxCashAmount, currency)} tax from ${cashAccount?.name || '???'}`
     }
     case 'fee': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
       const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
-      return `${date} - Pay ${formatAmount(data.feeCashAmount, currency)} fee from ${cashAccount?.name || '???'}`
+      return dateStr + `Pay ${formatAmount(data.feeCashAmount, currency)} fee from ${cashAccount?.name || '???'}`
     }
   }
 }

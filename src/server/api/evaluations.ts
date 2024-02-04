@@ -126,6 +126,15 @@ export const evaluatePlausibilityResponseSchema = listResponseSchema(
       level: plausibilityFindingLevel,
       transactionId: z.string(),
       attachmentId: z.string(),
+      conflicts: z
+        .array(
+          z.object({
+            key: z.enum(['date', 'time', 'assetAmount', 'cashAmount', 'feeCashAmount', 'taxCashAmount', 'reference']),
+            actual: z.string(),
+            expected: z.string(),
+          })
+        )
+        .min(1),
     }),
     z.object({
       type: z.literal('transactionConsumesMoreAssetAmountThanAvailable'),
@@ -138,6 +147,8 @@ export const evaluatePlausibilityResponseSchema = listResponseSchema(
     }),
   ])
 )
+
+type ArrayElements<A> = A extends (infer B)[] ? B : never
 
 export function createRpcV1Evaluations(database: Database) {
   return {
@@ -369,44 +380,79 @@ export function createRpcV1Evaluations(database: Database) {
             transaction.attachmentIds.includes(ac.attachmentId)
           )
           linkedAttachmentContents.forEach(({ attachmentId, parsed }) => {
-            const conflict = (() => {
-              if (!parsed) {
-                return false
-              }
-              if (parsed.type !== 'assetBuy' && parsed.type !== 'assetSell') {
-                return false
-              }
-              const { date, time, data } = transaction
-              if (data.type !== 'assetBuy' && data.type !== 'assetSell') {
-                return false
-              }
-              if (date !== parsed.date) {
-                return true
-              }
-              if (time !== parsed.time) {
-                return true
-              }
-              if (data.assetAmount !== parsed.amount) {
-                return true
-              }
-              if (data.cashAmount !== parsed.price) {
-                return true
-              }
-              if (data.feeCashAmount !== parsed.fee) {
-                return true
-              }
-              if (data.type === 'assetSell' && data.taxCashAmount !== parsed.tax) {
-                return true
-              }
-              return false
-            })()
-            if (conflict) {
+            if (!parsed) {
+              return
+            }
+            if (parsed.type !== 'assetBuy' && parsed.type !== 'assetSell') {
+              return
+            }
+            const { date: txDate, time: txTime, data: txData, reference: txReference } = transaction
+            if (txData.type !== 'assetBuy' && txData.type !== 'assetSell') {
+              return
+            }
+
+            const conflicts: Extract<
+              ArrayElements<z.infer<typeof evaluatePlausibilityResponseSchema>['data']>,
+              { type: 'transactionDataConflictsWithAttachmentContent' }
+            >['conflicts'] = []
+            if (txDate !== parsed.date) {
+              conflicts.push({
+                key: 'date',
+                expected: parsed.date,
+                actual: txDate,
+              })
+            }
+            if (txTime !== parsed.time) {
+              conflicts.push({
+                key: 'time',
+                expected: parsed.time,
+                actual: txTime,
+              })
+            }
+            if (txData.assetAmount !== parsed.amount) {
+              conflicts.push({
+                key: 'assetAmount',
+                expected: parsed.amount,
+                actual: txData.assetAmount,
+              })
+            }
+            if (txData.cashAmount !== parsed.price) {
+              conflicts.push({
+                key: 'cashAmount',
+                expected: parsed.price,
+                actual: txData.cashAmount,
+              })
+            }
+            if (txData.feeCashAmount !== parsed.fee) {
+              conflicts.push({
+                key: 'feeCashAmount',
+                expected: parsed.fee,
+                actual: txData.feeCashAmount,
+              })
+            }
+            if (txData.type === 'assetSell' && txData.taxCashAmount !== parsed.tax) {
+              conflicts.push({
+                key: 'taxCashAmount',
+                expected: parsed.tax,
+                actual: txData.taxCashAmount,
+              })
+            }
+            if (parsed.reference && txReference !== parsed.reference) {
+              conflicts.push({
+                key: 'reference',
+                expected: parsed.reference,
+                actual: txReference,
+              })
+            }
+
+            if (conflicts.length > 0) {
               data.push({
                 type: 'transactionDataConflictsWithAttachmentContent',
                 date: transaction.date,
                 level: 'warning',
                 transactionId: transaction.id,
                 attachmentId: attachmentId,
+                conflicts: conflicts,
               })
             }
           })

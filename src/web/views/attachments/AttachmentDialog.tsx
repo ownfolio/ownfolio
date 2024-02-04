@@ -1,7 +1,7 @@
 import { css } from '@linaria/core'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import React from 'react'
-import { FaDeleteLeft } from 'react-icons/fa6'
+import { FaDeleteLeft, FaMagnifyingGlass } from 'react-icons/fa6'
 
 import { Attachment } from '../../../shared/models/Attachment'
 import { renderTransactionAsString } from '../../../shared/models/Transaction'
@@ -12,6 +12,7 @@ import { DialogContentProps, DialogOpts, useDialogs } from '../../components/Dia
 import { IconLink } from '../../components/IconLink'
 import { PdfPreview } from '../../components/PdfPreview'
 import { LoadingView } from '../loading/LoadingView'
+import { TransactionDialog } from '../transactions/TransactionDialog'
 import { TransactionSelectionDialog } from '../transactions/TransactionSelectionDialog'
 
 interface Props extends DialogContentProps<void> {
@@ -47,7 +48,17 @@ export const AttachmentDialog: React.FC<Props> & DialogOpts = ({ attachmentId, d
       <div className={stylesTransactionsRow}>
         {transactions.map(transaction => (
           <div key={transaction.id} className={stylesTransaction}>
-            <div className={stylesTransactionName}>{renderTransactionAsString(transaction, accounts, assets)}</div>
+            <div
+              className={stylesTransactionName}
+            >{`${renderTransactionAsString(transaction, accounts, assets, true)}`}</div>
+            <IconLink
+              icon={FaMagnifyingGlass}
+              href="#"
+              onClick={event => {
+                event.preventDefault()
+                openDialog(TransactionDialog, { mode: { type: 'edit', transactionId: transaction.id } }, dialogId)
+              }}
+            />
             <IconLink
               icon={FaDeleteLeft}
               href="#"

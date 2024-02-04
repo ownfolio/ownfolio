@@ -21,7 +21,10 @@ export const SelectTransaction = React.forwardRef<HTMLSelectElement, Props>(
           {
             id: 'all',
             label: 'Transaction',
-            options: options.map(o => ({ value: o.id, label: renderTransactionAsString(o, accounts, assets) })),
+            options: options.map(o => ({
+              value: o.id,
+              label: `${renderTransactionAsString(o, accounts, assets, true)}`,
+            })),
           },
         ],
         emptyLabel,

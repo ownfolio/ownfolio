@@ -151,6 +151,7 @@ export const TransactionDialog: React.FC<Props> & DialogOpts = ({
           <Input
             id="dateTime"
             type="datetime-local"
+            step={1}
             value={transaction.date + 'T' + transaction.time}
             onChange={event => {
               const [, date, time] = event.target.value.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}(?::\d{2})?)$/)!

@@ -34,5 +34,5 @@ export const DashboardView: React.FC = () => {
 const stylesToolbar = css`
   display: grid;
   gap: var(--spacing-large);
-  grid-template-columns: 1fr 175px;
+  grid-template-columns: 1fr auto;
 `
