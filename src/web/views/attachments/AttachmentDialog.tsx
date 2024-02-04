@@ -27,7 +27,6 @@ export const AttachmentDialog: React.FC<Props> & DialogOpts = ({ attachmentId, d
   const transactions = useQuery(['attachments', attachmentId, 'transactions'], () => {
     return rpcClient.listTransactions({ attachmentId }).then(r => r.data)
   }).data!
-  console.log(transactions)
   React.useEffect(() => {
     rpcClient
       .retrieveAttachment({ id: attachmentId })

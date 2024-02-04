@@ -63,26 +63,3 @@ export class AxiosMockError extends Error {
     this.config = config
   }
 }
-
-// async function updateMockData(): Promise<void> {
-//   const symbols = ['VOW.DE', 'EUNL.DE', 'APC.DE', 'TL0.DE', 'BTC-EUR']
-//   const mockData = await symbols.reduce<Promise<{ [symbol: string]: string }>>(async (accP, symbol) => {
-//     console.log(`Fetch ${symbol}`)
-//     const acc = await accP
-//     const baseURL = 'https://query1.finance.yahoo.com'
-//     const res = await axios.get<string>(`/v7/finance/download/${symbol}`, {
-//       baseURL: baseURL,
-//       params: {
-//         period1: 0,
-//         period2: Math.floor(Date.now() / 1000),
-//         interval: '1d',
-//         events: 'history',
-//       },
-//     })
-//     return {
-//       ...acc,
-//       [symbol]: res.data,
-//     }
-//   }, Promise.resolve({}))
-//   await fs.writeFile(mockDataPath, JSON.stringify(mockData, null, 2), 'utf-8')
-// }
