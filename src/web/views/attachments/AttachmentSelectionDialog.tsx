@@ -20,7 +20,7 @@ export const AttachmentSelectionDialog: React.FC<Props> & DialogOpts = ({ closeD
         variant="primary"
         onClick={async () => {
           if (attachmentId) {
-            const attachment = await rpcClient.retrieveAttachment({ id: attachmentId })
+            const attachment = await rpcClient.retrieveAttachment({ id: attachmentId }).then(r => r.data)
             closeDialog(attachment)
           }
         }}

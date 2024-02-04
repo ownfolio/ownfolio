@@ -13,7 +13,7 @@ import { PortfolioDialog } from './PortfolioDialog'
 export const PortfoliosView: React.FC = () => {
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
-  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({})).data!
+  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({}).then(r => r.data)).data!
 
   const columns = React.useMemo<TableDefinitionColumn[]>(() => [{ id: 'name', title: 'Name', minWidth: 200 }], [])
 

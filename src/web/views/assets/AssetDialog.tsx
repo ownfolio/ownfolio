@@ -32,6 +32,7 @@ export const AssetDialog: React.FC<Props> & DialogOpts = ({ mode, closeDialog })
     } else {
       rpcClient
         .retrieveAsset({ id: mode.assetId })
+        .then(r => r.data)
         .then(setAsset)
         .catch(err => {
           closeDialog(undefined)

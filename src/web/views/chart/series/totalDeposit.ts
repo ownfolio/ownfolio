@@ -15,11 +15,13 @@ export const totalDepositSeries: ChartViewSeries<TotalDepositSeriesConfig> = asy
   config: TotalDepositSeriesConfig
 ): Promise<StockChartSeries[]> => {
   const key = !config.portfolioId ? 'all' : config.portfolioId
-  const data = await rpcClient.evaluateSummary({
-    when: { type: 'historical', resolution },
-    buckets: [!config.portfolioId ? { type: 'all' } : { type: 'portfolio', portfolioId: config.portfolioId }],
-    values: ['deposit'],
-  })
+  const data = await rpcClient
+    .evaluateSummary({
+      when: { type: 'historical', resolution },
+      buckets: [!config.portfolioId ? { type: 'all' } : { type: 'portfolio', portfolioId: config.portfolioId }],
+      values: ['deposit'],
+    })
+    .then(r => r.data)
   return [
     {
       type: 'line',

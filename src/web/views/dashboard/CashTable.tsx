@@ -14,14 +14,16 @@ import { TransactionDialog } from '../transactions/TransactionDialog'
 
 export const CashTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => {
   const { openDialog } = useDialogs()
-  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({})).data!
-  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({})).data!
+  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({}).then(r => r.data)).data!
+  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
   const evaluations = useQuery(['cashTable', 'data', timetravel, accounts.map(a => a.id).join(',')], async () => {
-    const raw = await rpcClient.evaluateSummary({
-      when: !timetravel ? { type: 'now' } : { type: 'dates', dates: [timetravel] },
-      buckets: accounts.filter(a => a.status !== 'hidden').map(a => ({ type: 'account', accountId: a.id })),
-      values: ['cash'],
-    })
+    const raw = await rpcClient
+      .evaluateSummary({
+        when: !timetravel ? { type: 'now' } : { type: 'dates', dates: [timetravel] },
+        buckets: accounts.filter(a => a.status !== 'hidden').map(a => ({ type: 'account', accountId: a.id })),
+        values: ['cash'],
+      })
+      .then(r => r.data)
     return {
       ...raw,
       value: recordMap(raw.value, items => {

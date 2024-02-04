@@ -11,7 +11,7 @@ type Props = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElemen
 
 export const SelectPortfolio = React.forwardRef<HTMLSelectElement, Props>(
   ({ value, onChange, emptyLabel = '-', clearable, className, ...other }, ref: any) => {
-    const options = useQuery(['portfolios'], () => rpcClient.listPortfolios({})).data || []
+    const options = useQuery(['portfolios'], () => rpcClient.listPortfolios({}).then(r => r.data)).data || []
     const selectProps = React.useMemo(() => {
       return {
         optionGroups: [{ id: 'all', label: 'Portfolio', options: options.map(o => ({ value: o.id, label: o.name })) }],

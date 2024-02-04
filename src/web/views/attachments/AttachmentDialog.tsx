@@ -22,15 +22,16 @@ export const AttachmentDialog: React.FC<Props> & DialogOpts = ({ attachmentId, d
   const { openDialog } = useDialogs()
   const queryClient = useQueryClient()
   const [attachment, setAttachment] = React.useState<Attachment | undefined>(undefined)
-  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({})).data!
-  const assets = useQuery(['assets'], () => rpcClient.listAssets({})).data!
+  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
+  const assets = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data!
   const transactions = useQuery(['attachments', attachmentId, 'transactions'], () => {
-    return rpcClient.listTransactions({ attachmentId })
+    return rpcClient.listTransactions({ attachmentId }).then(r => r.data)
   }).data!
   console.log(transactions)
   React.useEffect(() => {
     rpcClient
       .retrieveAttachment({ id: attachmentId })
+      .then(r => r.data)
       .then(setAttachment)
       .catch(err => {
         closeDialog(undefined)
@@ -76,7 +77,7 @@ export const AttachmentDialog: React.FC<Props> & DialogOpts = ({ attachmentId, d
       <Button
         variant="primary"
         onClick={async () => {
-          const download = await rpcClient.downloadAttachment({ id: attachment.id })
+          const download = await rpcClient.downloadAttachment({ id: attachment.id }).then(r => r.data)
           await fileDownload(download)
         }}
       >

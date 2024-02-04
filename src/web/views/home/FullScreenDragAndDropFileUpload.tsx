@@ -33,11 +33,11 @@ export const FullScreenDragAndDropFileUpload: React.FC = () => {
           return
         }
         const attachment = await fileUpload(file)
-        const attachmentContent = await rpcClient.retrieveAttachmentContent({ id: attachment.id })
+        const attachmentContent = await rpcClient.retrieveAttachmentContent({ id: attachment.id }).then(r => r.data)
         const extraction = attachmentContent?.parsed
         if (extraction?.type === 'assetSell' || extraction?.type === 'assetBuy') {
-          const accounts = await rpcClient.listAccounts({})
-          const assets = await rpcClient.listAssets({})
+          const accounts = await rpcClient.listAccounts({}).then(r => r.data)
+          const assets = await rpcClient.listAssets({}).then(r => r.data)
           const cashAccount = accounts.find(
             a => !!extraction.cashAccount.find(m => a.number === m || a.name.includes(m))
           )

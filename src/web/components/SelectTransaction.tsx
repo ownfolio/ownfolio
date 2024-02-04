@@ -12,9 +12,9 @@ type Props = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElemen
 
 export const SelectTransaction = React.forwardRef<HTMLSelectElement, Props>(
   ({ value, onChange, emptyLabel = '-', clearable = false, className, ...other }, ref: any) => {
-    const options = useQuery(['transactions'], () => rpcClient.listTransactions({})).data || []
-    const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({})).data!
-    const assets = useQuery(['assets'], () => rpcClient.listAssets({})).data!
+    const options = useQuery(['transactions'], () => rpcClient.listTransactions({}).then(r => r.data)).data || []
+    const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
+    const assets = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data!
     const selectProps = React.useMemo(() => {
       return {
         optionGroups: [

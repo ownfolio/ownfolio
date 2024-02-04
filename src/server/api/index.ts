@@ -16,14 +16,15 @@ import { createRpcV1Quote } from './quote'
 import { createRpcV1Report } from './report'
 import { createRpcV1Transaction } from './transaction'
 import { createRpcV1User } from './user'
+import { responseSchema } from './utils'
 
 export type { RpcCtx } from './context'
 
 export function createRpcV1(database: Database, config: Config) {
   return {
-    ping: createRpcCall(z.void(), z.void(), async (_ctx: RpcCtx) => {}),
-    version: createRpcCall(z.void(), z.object({ version: z.string() }), async (_ctx: RpcCtx) => ({
-      version: 'dev',
+    ping: createRpcCall(z.void(), responseSchema(z.void()), async (_ctx: RpcCtx) => ({})),
+    version: createRpcCall(z.void(), responseSchema(z.object({ version: z.string() })), async (_ctx: RpcCtx) => ({
+      data: { version: 'dev' },
     })),
     ...createRpcV1Account(database),
     ...createRpcV1Asset(database),

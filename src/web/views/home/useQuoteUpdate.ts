@@ -11,7 +11,7 @@ export function useQuoteUpdate(interval: number): [boolean, () => Promise<void>]
   const run = React.useCallback(async (manual: boolean) => {
     try {
       setUpdating(true)
-      const updates = await rpcClient.updateQuotes()
+      const updates = await rpcClient.updateQuotes().then(r => r.data)
       if (manual || updates.assetQuotesUpdates.length > 0) {
         await queryClient.invalidateQueries()
       }

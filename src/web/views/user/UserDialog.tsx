@@ -16,7 +16,7 @@ import { useMultiState } from '../../hooks/useMultiState'
 import { AttachmentDialog } from '../attachments/AttachmentDialog'
 
 export const UserDialog: React.FC<DialogContentProps<void>> = ({ closeDialog }) => {
-  const me = useQuery(['me'], () => rpcClient.me()).data!
+  const me = useQuery(['me'], () => rpcClient.me().then(r => r.data)).data!
   return (
     <div className={stylesRoot}>
       <EmailForm email={me.email} />
@@ -172,7 +172,7 @@ const ImportExportSection: React.FC = () => {
       <Button
         type="button"
         onClick={async () => {
-          const download = await rpcClient.exportUserTransactionsAsCsv()
+          const download = await rpcClient.exportUserTransactionsAsCsv().then(r => r.data)
           await fileDownload(download)
         }}
       >
@@ -220,8 +220,8 @@ const ReportSection: React.FC<{ closeDialog: () => void }> = ({ closeDialog }) =
       <Button
         type="button"
         onClick={async () => {
-          const download = await rpcClient.generateYearlyPdfReport()
-          const attachment = await rpcClient.uploadAttachment(download)
+          const download = await rpcClient.generateYearlyPdfReport().then(r => r.data)
+          const attachment = await rpcClient.uploadAttachment(download).then(r => r.data)
           queryClient.invalidateQueries()
           closeDialog()
           openDialog(AttachmentDialog, { attachmentId: attachment.id })

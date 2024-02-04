@@ -12,7 +12,7 @@ type Props = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElemen
 
 export const SelectAsset = React.forwardRef<HTMLSelectElement, Props>(
   ({ value, onChange, emptyLabel = '-', clearable, showInactiveAndHidden = false, className, ...other }, ref: any) => {
-    const options = useQuery(['assets'], () => rpcClient.listAssets({})).data || []
+    const options = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data || []
     const selectProps = React.useMemo(() => {
       return {
         optionGroups: [

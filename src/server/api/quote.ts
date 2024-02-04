@@ -7,42 +7,42 @@ import { Database } from '../database'
 import { logger } from '../logger'
 import { updateAssetQuotes } from '../quotes'
 import { RpcCtx } from './context'
-import { byIdSchema } from './utils'
+import { byIdSchema, listResponseSchema, responseSchema } from './utils'
 
 export function createRpcV1Quote(database: Database) {
   return {
     listLatestQuotes: createRpcCall(
       z.object({ date: z.string().optional() }),
-      z.array(quoteSchema),
+      listResponseSchema(quoteSchema),
       async (ctx: RpcCtx, input) => {
         if (!ctx.user) throw RpcError.unauthorized()
         const lastestQuotes = await database.quotes.listLatestClosesByUserId(ctx.user.id, input.date || undefined)
-        return lastestQuotes
+        return { data: lastestQuotes }
       }
     ),
-    listQuotesForAsset: createRpcCall(byIdSchema, z.array(quoteSchema), async (ctx: RpcCtx, input) => {
+    listQuotesForAsset: createRpcCall(byIdSchema, listResponseSchema(quoteSchema), async (ctx: RpcCtx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const asset = await database.assets.find(input.id)
       if (!asset || (!!asset.userId && asset.userId !== ctx.user.id))
         throw RpcError.badRequest(`Unknown asset ${input}`)
       const quotes = await database.quotes.listByAssetId(input.id)
-      return quotes
+      return { data: quotes }
     }),
     retrieveQuoteForAsset: createRpcCall(
       byIdSchema.extend({ date: z.string().regex(/^(\d{4}-\d{2}-\d{2})$/) }),
-      quoteSchema.nullable(),
+      responseSchema(quoteSchema.nullable()),
       async (ctx: RpcCtx, input) => {
         if (!ctx.user) throw RpcError.unauthorized()
         const asset = await database.assets.find(input.id)
         if (!asset || (!!asset.userId && asset.userId !== ctx.user.id))
           throw RpcError.badRequest(`Unknown asset ${input}`)
         const quotes = await database.quotes.listByAssetId(input.id)
-        return quotes.reverse().find(quote => quote.date <= input.date) || null
+        return { data: quotes.reverse().find(quote => quote.date <= input.date) || null }
       }
     ),
     updateQuotes: createRpcCall(
       z.void(),
-      z.object({ assetQuotesUpdates: z.array(z.string()) }),
+      responseSchema(z.object({ assetQuotesUpdates: z.array(z.string()) })),
       async (ctx: RpcCtx) => {
         if (!ctx.user) throw RpcError.unauthorized()
         const assets = await database.assets.listByUserId(ctx.user.id)
@@ -58,7 +58,9 @@ export function createRpcV1Quote(database: Database) {
           })
         )
         return {
-          assetQuotesUpdates: filterNotFalse(assetQuotesUpdates),
+          data: {
+            assetQuotesUpdates: filterNotFalse(assetQuotesUpdates),
+          },
         }
       }
     ),

@@ -15,7 +15,7 @@ export const LoginGate: React.FC<Props> = ({ onLoginRequired, children }) => {
   React.useEffect(() => {
     const run = async () => {
       try {
-        const me = await rpcClient.me()
+        const me = await rpcClient.me().then(r => r.data)
         queryClient.setQueryData(['me'], me)
         setDone(true)
       } catch (err) {

@@ -14,8 +14,8 @@ export const assetTransactionsSeries: ChartViewSeries<AssetTransactionsSeriesCon
   _resolution: DateUnit,
   config: AssetTransactionsSeriesConfig
 ): Promise<StockChartSeries[]> => {
-  const asset = await rpcClient.retrieveAsset({ id: config.assetId })
-  const transactions = await rpcClient.listTransactions({})
+  const asset = await rpcClient.retrieveAsset({ id: config.assetId }).then(r => r.data)
+  const transactions = await rpcClient.listTransactions({}).then(r => r.data)
   return [
     {
       type: 'point',

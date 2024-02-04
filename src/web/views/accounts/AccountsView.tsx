@@ -14,8 +14,8 @@ import { AccountDialog } from './AccountDialog'
 export const AccountsView: React.FC = () => {
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
-  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({})).data!
-  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({})).data!
+  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({}).then(r => r.data)).data!
+  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
   const [showHidden, setShowHidden] = React.useState(false)
 
   const columns = React.useMemo<TableDefinitionColumn[]>(

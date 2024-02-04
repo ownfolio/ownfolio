@@ -34,6 +34,7 @@ export const AccountDialog: React.FC<Props> & DialogOpts = ({ mode, closeDialog 
     } else {
       rpcClient
         .retrieveAccount({ id: mode.accountId })
+        .then(r => r.data)
         .then(setAccount)
         .catch(err => {
           closeDialog(undefined)

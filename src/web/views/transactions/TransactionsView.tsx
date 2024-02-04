@@ -30,7 +30,7 @@ export const TransactionsView: React.FC = () => {
   const [search, setSearch] = React.useState<TransactionSearch>({})
   const [top, setTop] = React.useState(100)
   const transactions = useQuery(['transactions', search, 0, top], () =>
-    rpcClient.listTransactions({ ...search, skip: 0, top })
+    rpcClient.listTransactions({ ...search, skip: 0, top }).then(r => r.data)
   ).data!
 
   const columns = React.useMemo<TableDefinitionColumn[]>(
@@ -185,8 +185,8 @@ const AccountLink: React.FC<{ account?: Account }> = ({ account }) => {
 }
 
 const TransactionData: React.FC<{ data: TransactionData }> = ({ data }): React.ReactElement => {
-  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({})).data!
-  const assets = useQuery(['assets'], () => rpcClient.listAssets({})).data!
+  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
+  const assets = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data!
 
   switch (data.type) {
     case 'cashDeposit': {

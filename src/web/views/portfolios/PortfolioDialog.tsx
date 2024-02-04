@@ -32,6 +32,7 @@ export const PortfolioDialog: React.FC<Props> & DialogOpts = ({ mode, closeDialo
     } else {
       rpcClient
         .retrievePortfolio({ id: mode.portfolioId })
+        .then(r => r.data)
         .then(setPortfolio)
         .catch(err => {
           closeDialog(undefined)
