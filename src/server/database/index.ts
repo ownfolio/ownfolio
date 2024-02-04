@@ -75,6 +75,7 @@ export class Database {
     await this.migrate('quotes.init', sql => this.quotes.init(sql))
     await this.migrate('attachments.init', sql => this.attachments.init(sql))
     await this.migrate('attachments.addContentTable', sql => this.attachments.addContentTable(sql))
+    await this.migrate('attachments.addDerivationCacheTable', sql => this.attachments.addDerivationCacheTable(sql))
     logger.info(`Finished database migrations`)
   }
 

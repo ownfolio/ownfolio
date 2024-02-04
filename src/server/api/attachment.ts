@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { attachmentContentSchema, attachmentSchema, attachmentSearchSchema } from '../../shared/models/Attachment'
 import { fileSchema, parseDataUrl, renderDataUrl } from '../../shared/utils/file'
 import { Database } from '../database'
-import { pdfToPng } from '../pdf/pdfToPng'
+import { pdfToConcatenatedPngs, splitConcatenatedPngs } from '../pdf/pdfToPngs'
 import { RpcCtx } from './context'
 import { byIdSchema, listResponseSchema, pagingParamsSchema, responseSchema } from './utils'
 
@@ -81,9 +81,15 @@ export function createRpcV1Attachment(database: Database) {
       if (attachment.mimeType !== 'application/pdf') {
         throw RpcError.conflict(`Only PDF attachments can be download as PNG`)
       }
-      const pdfBytes = await database.attachments.read(input.id)
-      const pngsBytes = await pdfToPng(pdfBytes)
-      return { data: pngsBytes.map(pngBytes => renderDataUrl('image/png', pngBytes.toString('base64'))) }
+      const pngsBytes = await database.attachments.readDerivation(
+        input.id,
+        'pdfToConcatenatedPngs',
+        30 * 24 * 60 * 60 * 1000,
+        pdfToConcatenatedPngs
+      )
+      return {
+        data: splitConcatenatedPngs(pngsBytes).map(pngBytes => renderDataUrl('image/png', pngBytes.toString('base64'))),
+      }
     }),
     retrieveAttachmentContent: createRpcCall(
       byIdSchema,

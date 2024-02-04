@@ -69,6 +69,19 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
     }
   }
 
+  public async addDerivationCacheTable(sql: postgres.Sql<{}>): Promise<void> {
+    await sql`
+      CREATE TABLE "attachment_derivation_cache" (
+        "attachmentId" VARCHAR(32) NOT NULL,
+        "key" VARCHAR(256) NOT NULL,
+        "expiresAt" TIMESTAMP WITH TIME ZONE NOT NULL,
+        "bytes" BYTEA NOT NULL,
+        PRIMARY KEY ("attachmentId", "key"),
+        CONSTRAINT "fk__attachment_bytes__attachmentId__attachment__id" FOREIGN KEY("attachmentId") REFERENCES "attachment"("id") ON DELETE CASCADE
+      )
+    `
+  }
+
   public async listByUserId(
     userId: string,
     search?: AttachmentSearch,
@@ -127,6 +140,28 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
     DatabaseError.ensureHit(rows, this.table, id)
     const bytes = rows[0].bytes
     return Buffer.from(bytes)
+  }
+
+  public async readDerivation(
+    id: string,
+    key: string,
+    ttl: number,
+    fn: (bytes: Buffer) => Promise<Buffer>
+  ): Promise<Buffer> {
+    await this.sql`DELETE FROM ${this.sql('attachment_derivation_cache')} WHERE "expiresAt" < now()`
+    const existingDerivation = await this
+      .sql`SELECT * FROM ${this.sql('attachment_derivation_cache')} WHERE "attachmentId" = ${id} AND "key" = ${key}`
+    if (existingDerivation.length > 0) {
+      return existingDerivation[0].bytes
+    }
+    const derivedBytes = await this.read(id).then(fn)
+    const expiresAt = new Date(Date.now() + ttl).toISOString()
+    await this.sql`
+      INSERT INTO ${this.sql('attachment_derivation_cache')}
+      ${this.sql({ attachmentId: id, key, expiresAt, bytes: derivedBytes })}
+      ON CONFLICT DO NOTHING
+    `
+    return derivedBytes
   }
 
   public async content(id: string): Promise<AttachmentContent | null> {

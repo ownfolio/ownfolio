@@ -1,14 +1,17 @@
 import { execAsync } from './utils'
 
-export async function pdfToPng(pdf: Buffer): Promise<Buffer[]> {
-  const pngs = await execAsync('convert', ['-density', '144', '-', '-quality', '100', '-alpha', 'remove', 'png:-'], pdf)
-  return splitConcatenatedPngs(pngs)
+export async function pdfToPngs(pdf: Buffer): Promise<Buffer[]> {
+  return await pdfToConcatenatedPngs(pdf).then(splitConcatenatedPngs)
+}
+
+export async function pdfToConcatenatedPngs(pdf: Buffer): Promise<Buffer> {
+  return await execAsync('convert', ['-density', '144', '-', '-quality', '100', '-alpha', 'remove', 'png:-'], pdf)
 }
 
 const SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
 const IEND = 'IEND'
 
-function splitConcatenatedPngs(pngs: Buffer): Buffer[] {
+export function splitConcatenatedPngs(pngs: Buffer): Buffer[] {
   const result: Buffer[] = []
   let startAt = 0
   while (startAt < pngs.length) {
