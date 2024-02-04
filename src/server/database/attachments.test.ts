@@ -89,3 +89,60 @@ it(
     timeout: 60000,
   }
 )
+
+it(
+  'attachmentsDerivationCache',
+  databaseTest(async db => {
+    await db.init()
+    const u = await db.users.create({ email: 'user@domain.com' }, 'password')
+    const a1b = Buffer.from('Hello\nWorld\n1\n\x00')
+    const a1 = await db.attachments.createAndWrite(u.id, 'test.txt', 'text/plain', a1b)
+    const a2b = Buffer.from('Hello\nWorld\n2\n\x00')
+    const a2 = await db.attachments.createAndWrite(u.id, 'test2.txt', 'text/plain', a2b)
+    await expect(db.attachments.read(a1.id)).resolves.toEqual(a1b)
+    await expect(db.attachments.read(a2.id)).resolves.toEqual(a2b)
+    await expect(db.attachments.read('attm_???')).rejects.toThrowError()
+    let doubleCount = 0
+    let tripleCount = 0
+    const doubleBuffer = (buf: Buffer, noCount: boolean = false) => {
+      if (!noCount) {
+        doubleCount++
+      }
+      return Buffer.concat([buf, buf])
+    }
+    const tripleBuffer = (buf: Buffer, noCount: boolean = false) => {
+      if (!noCount) {
+        tripleCount++
+      }
+      return Buffer.concat([buf, buf])
+    }
+    expect([doubleCount, tripleCount]).toEqual([0, 0])
+    await expect(
+      db.attachments.readDerivation(a1.id, 'double', 60 * 1000, async b => doubleBuffer(b))
+    ).resolves.toEqual(doubleBuffer(a1b, true))
+    expect([doubleCount, tripleCount]).toEqual([1, 0])
+    await expect(
+      db.attachments.readDerivation(a1.id, 'double', 60 * 1000, async b => doubleBuffer(b))
+    ).resolves.toEqual(doubleBuffer(a1b, true))
+    expect([doubleCount, tripleCount]).toEqual([1, 0])
+    await expect(
+      db.attachments.readDerivation(a1.id, 'triple', 60 * 1000, async b => tripleBuffer(b))
+    ).resolves.toEqual(tripleBuffer(a1b, true))
+    expect([doubleCount, tripleCount]).toEqual([1, 1])
+    await expect(
+      db.attachments.readDerivation(a1.id, 'triple', 60 * 1000, async b => tripleBuffer(b))
+    ).resolves.toEqual(tripleBuffer(a1b, true))
+    expect([doubleCount, tripleCount]).toEqual([1, 1])
+    await expect(
+      db.attachments.readDerivation(a2.id, 'double', 60 * 1000, async b => doubleBuffer(b))
+    ).resolves.toEqual(doubleBuffer(a2b, true))
+    expect([doubleCount, tripleCount]).toEqual([2, 1])
+    await expect(
+      db.attachments.readDerivation(a2.id, 'double', 60 * 1000, async b => doubleBuffer(b))
+    ).resolves.toEqual(doubleBuffer(a2b, true))
+    expect([doubleCount, tripleCount]).toEqual([2, 1])
+  }),
+  {
+    timeout: 60000,
+  }
+)
