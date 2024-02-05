@@ -24,4 +24,5 @@ const stylesRoot = css`
 
 const stylesIcon = css`
   display: block;
+  cursor: pointer;
 `
