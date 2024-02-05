@@ -27,6 +27,7 @@ import { Textarea } from '../../components/Textarea'
 import { useAttachmentUpload } from '../../hooks/useAttachmentUpload'
 import { AttachmentSelectionDialog } from '../attachments/AttachmentSelectionDialog'
 import { LoadingView } from '../loading/LoadingView'
+import { SuggestionsMenu } from './SuggestionsMenu'
 import { TransactionDataFields } from './TransactionDataFields'
 
 type Mode =
@@ -150,21 +151,85 @@ export const TransactionDialog: React.FC<Props> = ({
       }}
     >
       <div className={stylesRowSplit}>
-        <Label text="Date/Time" htmlFor="dateTime">
+        <Label
+          text="Date/Time"
+          htmlFor="dateTime"
+          addition={
+            <SuggestionsMenu
+              valueGenerators={[
+                {
+                  label: value => `Fill "${value}" from attachment`,
+                  value: async () => {
+                    if (!previewedAttachment) {
+                      return undefined
+                    }
+                    const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                    if (!content || !content.parsed || !content.parsed.date || !content.parsed.time) {
+                      return undefined
+                    }
+                    return `${content.parsed.date}T${content.parsed.time}`
+                  },
+                  deps: [previewedAttachment],
+                },
+              ]}
+              value={transaction.date + 'T' + transaction.time}
+              setValue={value => {
+                const match = value.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}(?::\d{2})?)$/)
+                if (match) {
+                  const [, date, time] = match
+                  setTransaction(transaction => ({ ...transaction!, date, time }))
+                }
+              }}
+            />
+          }
+        >
           <Input
             id="dateTime"
             type="datetime-local"
             step={1}
             value={transaction.date + 'T' + transaction.time}
             onChange={event => {
-              const [, date, time] = event.target.value.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}(?::\d{2})?)$/)!
-              setTransaction(transaction => ({ ...transaction!, date, time }))
+              const match = event.target.value.match(/^(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2}(?::\d{2})?)$/)
+              if (match) {
+                const [, date, time] = match
+                setTransaction(transaction => ({ ...transaction!, date, time }))
+              }
             }}
             autoFocus
             required
           />
         </Label>
-        <Label text="Type" htmlFor="type">
+        <Label
+          text="Type"
+          htmlFor="type"
+          addition={
+            <SuggestionsMenu
+              valueGenerators={[
+                {
+                  label: value => `Fill "${value}" from attachment`,
+                  value: async () => {
+                    if (!previewedAttachment) {
+                      return undefined
+                    }
+                    const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                    if (!content || !content.parsed || !['assetBuy', 'assetSell'].includes(content.parsed.type)) {
+                      return undefined
+                    }
+                    return content.parsed.type
+                  },
+                  deps: [previewedAttachment],
+                },
+              ]}
+              value={transaction.data.type}
+              setValue={value =>
+                setTransaction(transaction => ({
+                  ...transaction!,
+                  data: createEmptyTransactionData(value as TransactionType, transaction?.data),
+                }))
+              }
+            />
+          }
+        >
           <SelectTransactionType
             id="type"
             value={transaction.data.type}
@@ -184,6 +249,7 @@ export const TransactionDialog: React.FC<Props> = ({
             transaction={transaction}
             data={transaction.data}
             setData={data => setTransaction({ ...transaction, data })}
+            previewedAttachment={previewedAttachment}
           />
         )}
       </div>
@@ -192,16 +258,31 @@ export const TransactionDialog: React.FC<Props> = ({
           text="Reference"
           htmlFor="reference"
           addition={
-            <a
-              href="#"
-              tabIndex={-1}
-              onClick={event => {
-                event.preventDefault()
-                setTransaction(transaction => ({ ...transaction!, reference: generateTransactionReference() }))
-              }}
-            >
-              (generate)
-            </a>
+            <SuggestionsMenu
+              valueGenerators={[
+                {
+                  label: value => `Fill "${value}" from attachment`,
+                  value: async () => {
+                    if (!previewedAttachment) {
+                      return undefined
+                    }
+                    const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                    if (!content || !content.parsed || !content.parsed.reference) {
+                      return undefined
+                    }
+                    return content.parsed.reference
+                  },
+                  deps: [previewedAttachment],
+                },
+                {
+                  label: value => `Fill "${value}" (generated)`,
+                  value: () => generateTransactionReference(),
+                  deps: [],
+                },
+              ]}
+              value={transaction.reference}
+              setValue={value => setTransaction(transaction => ({ ...transaction!, reference: value }))}
+            />
           }
         >
           <Input

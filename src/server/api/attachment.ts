@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { attachmentSchema, attachmentSearchSchema } from '../../shared/models/Attachment'
 import { fileSchema, parseDataUrl, renderDataUrl } from '../../shared/utils/file'
 import { Database } from '../database'
+import { PdfParserResult } from '../pdf/parse'
 import { pdfToConcatenatedPngs, splitConcatenatedPngs } from '../pdf/pdfToPngs'
 import { pdfToText } from '../pdf/pdfToText'
 import { RpcCtx } from './context'
@@ -26,6 +27,24 @@ export function createRpcV1Attachment(database: Database) {
       if (!attachment || attachment.userId !== ctx.user.id) throw RpcError.badRequest(`Unknown attachment ${input.id}`)
       return { data: attachment }
     }),
+    retrieveAttachmentContent: createRpcCall(
+      byIdSchema,
+      responseSchema(z.object({ parsed: z.any().nullable() })),
+      async (ctx: RpcCtx, input) => {
+        if (!ctx.user) throw RpcError.unauthorized()
+        const attachment = await database.attachments.find(input.id)
+        if (!attachment || attachment.userId !== ctx.user.id)
+          throw RpcError.badRequest(`Unknown attachment ${input.id}`)
+        const parsed = await database.attachments
+          .readDerivationIfExists(input.id, 'pdfParse')
+          .then(buf => (buf ? (JSON.parse(buf.toString('utf-8')) as PdfParserResult) : null))
+        return {
+          data: {
+            parsed,
+          },
+        }
+      }
+    ),
     linkAttachmentToTransaction: createRpcCall(
       byIdSchema.extend({ transactionId: z.string() }),
       responseSchema(z.void()),

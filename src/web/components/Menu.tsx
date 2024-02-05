@@ -90,7 +90,7 @@ const stylesMenuItems = css`
   border-radius: var(--border-radius-medium);
   padding: var(--spacing-small);
   position: absolute;
-  max-width: 300px;
+  max-width: min(400px, 80vw);
   z-index: 1;
 `
 

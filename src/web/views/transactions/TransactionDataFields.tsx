@@ -2,6 +2,7 @@ import { css } from '@linaria/core'
 import BigNumber from 'bignumber.js'
 import React from 'react'
 
+import { Attachment } from '../../../shared/models/Attachment'
 import { Transaction, TransactionData } from '../../../shared/models/Transaction'
 import { dateFormat, dateMinus, dateParse } from '../../../shared/utils/date'
 import { rpcClient } from '../../api'
@@ -9,37 +10,123 @@ import { calculatorInputProps, Input } from '../../components/Input'
 import { Label } from '../../components/Label'
 import { SelectAccount } from '../../components/SelectAccount'
 import { SelectAsset } from '../../components/SelectAsset'
+import { SuggestionsMenu } from './SuggestionsMenu'
 
 export const TransactionDataFields: React.FC<{
   transaction: Transaction
   data: TransactionData
   setData: (data: TransactionData) => void
-}> = ({ transaction, data, setData }): React.ReactElement => {
+  previewedAttachment?: Attachment
+}> = ({ transaction, data, setData, previewedAttachment }): React.ReactElement => {
   switch (data.type) {
     case 'cashDeposit':
-      return <CashDepositTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <CashDepositTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
     case 'cashWithdrawal':
-      return <CashWithdrawalTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <CashWithdrawalTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
     case 'cashTransfer':
-      return <CashTransferTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <CashTransferTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
     case 'assetBuy':
-      return <AssetBuyTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <AssetBuyTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
     case 'assetSell':
-      return <AssetSellTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <AssetSellTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
     case 'assetDeposit':
-      return <AssetDepositTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <AssetDepositTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
     case 'assetWithdrawal':
-      return <AssetWithdrawalTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <AssetWithdrawalTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
     case 'assetTransfer':
-      return <AssetTransferTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <AssetTransferTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
     case 'interest':
-      return <InterestTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <InterestTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
     case 'dividend':
-      return <DividendTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <DividendTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
     case 'tax':
-      return <TaxTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <TaxTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
     case 'fee':
-      return <FeeTransactionDataFields transaction={transaction} data={data} setData={setData} />
+      return (
+        <FeeTransactionDataFields
+          transaction={transaction}
+          data={data}
+          setData={setData}
+          previewedAttachment={previewedAttachment}
+        />
+      )
   }
 }
 
@@ -47,6 +134,7 @@ const CashDepositTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'cashDeposit' }>
   setData: (data: Extract<TransactionData, { type: 'cashDeposit' }>) => void
+  previewedAttachment?: Attachment
 }> = ({ data, setData }) => {
   return (
     <>
@@ -75,6 +163,7 @@ const CashWithdrawalTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'cashWithdrawal' }>
   setData: (data: Extract<TransactionData, { type: 'cashWithdrawal' }>) => void
+  previewedAttachment?: Attachment
 }> = ({ data, setData }) => {
   return (
     <>
@@ -103,6 +192,7 @@ const CashTransferTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'cashTransfer' }>
   setData: (data: Extract<TransactionData, { type: 'cashTransfer' }>) => void
+  previewedAttachment?: Attachment
 }> = ({ data, setData }) => {
   return (
     <>
@@ -148,7 +238,8 @@ const AssetBuyTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'assetBuy' }>
   setData: (data: Extract<TransactionData, { type: 'assetBuy' }>) => void
-}> = ({ transaction, data, setData }) => {
+  previewedAttachment?: Attachment
+}> = ({ transaction, data, setData, previewedAttachment }) => {
   return (
     <>
       <Label text="Asset Account" htmlFor="assetAccountId">
@@ -167,7 +258,32 @@ const AssetBuyTransactionDataFields: React.FC<{
           required
         />
       </Label>
-      <Label text="Asset Amount" htmlFor="assetAmount">
+      <Label
+        text="Asset Amount"
+        htmlFor="assetAmount"
+        addition={
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from attachment`,
+                value: async () => {
+                  if (!previewedAttachment) {
+                    return undefined
+                  }
+                  const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                  if (!content || !content.parsed || !['assetBuy', 'assetSell'].includes(content.parsed.type)) {
+                    return undefined
+                  }
+                  return content.parsed.assetAmount
+                },
+                deps: [previewedAttachment],
+              },
+            ]}
+            value={data.assetAmount}
+            setValue={value => setData({ ...data, assetAmount: value })}
+          />
+        }
+      >
         <Input
           id="assetAmount"
           type="decimal"
@@ -188,27 +304,44 @@ const AssetBuyTransactionDataFields: React.FC<{
         text="Cash Amount"
         htmlFor="cashAmount"
         addition={
-          <a
-            href="#"
-            tabIndex={-1}
-            onClick={async event => {
-              event.preventDefault()
-              const quote = await rpcClient
-                .retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
-                .then(r => r.data)
-              if (quote) {
-                const midDayPrice = BigNumber(quote.close)
-                  .plus(quote.open || quote.close)
-                  .dividedBy(2)
-                const cashAmount = midDayPrice.multipliedBy(data.assetAmount)
-                if (cashAmount.isFinite()) {
-                  setData({ ...data, cashAmount: cashAmount.toFixed(0) })
-                }
-              }
-            }}
-          >
-            (autofill)
-          </a>
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from attachment`,
+                value: async () => {
+                  if (!previewedAttachment) {
+                    return undefined
+                  }
+                  const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                  if (!content || !content.parsed || content.parsed.type !== 'assetBuy') {
+                    return undefined
+                  }
+                  return content.parsed.assetPrice
+                },
+                deps: [previewedAttachment],
+              },
+              {
+                label: value => `Fill "${value}" from quotes`,
+                value: async () => {
+                  const { data: quote } = await rpcClient.retrieveQuoteForAsset({
+                    id: data.assetId,
+                    date: transaction.date,
+                  })
+                  if (!quote) {
+                    return undefined
+                  }
+                  const midDayPrice = BigNumber(quote.close)
+                    .plus(quote.open || quote.close)
+                    .dividedBy(2)
+                  const cashAmount = midDayPrice.multipliedBy(data.assetAmount)
+                  return cashAmount.isFinite() ? cashAmount.toFixed(0) : undefined
+                },
+                deps: [data.assetId, transaction.date, data.assetAmount],
+              },
+            ]}
+            value={data.cashAmount}
+            setValue={value => setData({ ...data, cashAmount: value })}
+          />
         }
       >
         <Input
@@ -219,7 +352,32 @@ const AssetBuyTransactionDataFields: React.FC<{
           required
         />
       </Label>
-      <Label text="Fee Cash Amount" htmlFor="feeCashAmount">
+      <Label
+        text="Fee Cash Amount"
+        htmlFor="feeCashAmount"
+        addition={
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from attachment`,
+                value: async () => {
+                  if (!previewedAttachment) {
+                    return undefined
+                  }
+                  const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                  if (!content || !content.parsed || content.parsed.type !== 'assetBuy') {
+                    return undefined
+                  }
+                  return content.parsed.fee
+                },
+                deps: [previewedAttachment],
+              },
+            ]}
+            value={data.feeCashAmount}
+            setValue={value => setData({ ...data, feeCashAmount: value })}
+          />
+        }
+      >
         <Input
           id="feeCashAmount"
           type="decimal"
@@ -236,7 +394,8 @@ const AssetSellTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'assetSell' }>
   setData: (data: Extract<TransactionData, { type: 'assetSell' }>) => void
-}> = ({ transaction, data, setData }) => {
+  previewedAttachment?: Attachment
+}> = ({ transaction, data, setData, previewedAttachment }) => {
   return (
     <>
       <Label text="Asset Account" htmlFor="assetAccountId">
@@ -254,7 +413,32 @@ const AssetSellTransactionDataFields: React.FC<{
           onChange={event => setData({ ...data, assetId: event.target.value })}
         />
       </Label>
-      <Label text="Asset Amount" htmlFor="assetAmount">
+      <Label
+        text="Asset Amount"
+        htmlFor="assetAmount"
+        addition={
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from attachment`,
+                value: async () => {
+                  if (!previewedAttachment) {
+                    return undefined
+                  }
+                  const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                  if (!content || !content.parsed || !['assetBuy', 'assetSell'].includes(content.parsed.type)) {
+                    return undefined
+                  }
+                  return content.parsed.assetAmount
+                },
+                deps: [previewedAttachment],
+              },
+            ]}
+            value={data.assetAmount}
+            setValue={value => setData({ ...data, assetAmount: value })}
+          />
+        }
+      >
         <Input
           id="assetAmount"
           type="decimal"
@@ -275,27 +459,44 @@ const AssetSellTransactionDataFields: React.FC<{
         text="Cash Amount"
         htmlFor="cashAmount"
         addition={
-          <a
-            href="#"
-            tabIndex={-1}
-            onClick={async event => {
-              event.preventDefault()
-              const quote = await rpcClient
-                .retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
-                .then(r => r.data)
-              if (quote) {
-                const midDayPrice = BigNumber(quote.close)
-                  .plus(quote.open || quote.close)
-                  .dividedBy(2)
-                const cashAmount = midDayPrice.multipliedBy(data.assetAmount)
-                if (cashAmount.isFinite()) {
-                  setData({ ...data, cashAmount: cashAmount.toFixed(0) })
-                }
-              }
-            }}
-          >
-            (autofill)
-          </a>
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from attachment`,
+                value: async () => {
+                  if (!previewedAttachment) {
+                    return undefined
+                  }
+                  const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                  if (!content || !content.parsed || content.parsed.type !== 'assetSell') {
+                    return undefined
+                  }
+                  return content.parsed.assetPrice
+                },
+                deps: [previewedAttachment],
+              },
+              {
+                label: value => `Fill "${value}" from quotes`,
+                value: async () => {
+                  const { data: quote } = await rpcClient.retrieveQuoteForAsset({
+                    id: data.assetId,
+                    date: transaction.date,
+                  })
+                  if (!quote) {
+                    return undefined
+                  }
+                  const midDayPrice = BigNumber(quote.close)
+                    .plus(quote.open || quote.close)
+                    .dividedBy(2)
+                  const cashAmount = midDayPrice.multipliedBy(data.assetAmount)
+                  return cashAmount.isFinite() ? cashAmount.toFixed(0) : undefined
+                },
+                deps: [data.assetId, transaction.date, data.assetAmount],
+              },
+            ]}
+            value={data.cashAmount}
+            setValue={value => setData({ ...data, cashAmount: value })}
+          />
         }
       >
         <Input
@@ -306,7 +507,32 @@ const AssetSellTransactionDataFields: React.FC<{
           required
         />
       </Label>
-      <Label text="Fee Cash Amount" htmlFor="feeCashAmount">
+      <Label
+        text="Fee Cash Amount"
+        htmlFor="feeCashAmount"
+        addition={
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from attachment`,
+                value: async () => {
+                  if (!previewedAttachment) {
+                    return undefined
+                  }
+                  const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                  if (!content || !content.parsed || content.parsed.type !== 'assetSell') {
+                    return undefined
+                  }
+                  return content.parsed.fee
+                },
+                deps: [previewedAttachment],
+              },
+            ]}
+            value={data.feeCashAmount}
+            setValue={value => setData({ ...data, feeCashAmount: value })}
+          />
+        }
+      >
         <Input
           id="feeCashAmount"
           type="decimal"
@@ -315,7 +541,32 @@ const AssetSellTransactionDataFields: React.FC<{
           required
         />
       </Label>
-      <Label text="Tax Cash Amount" htmlFor="taxCashAmount">
+      <Label
+        text="Tax Cash Amount"
+        htmlFor="taxCashAmount"
+        addition={
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from attachment`,
+                value: async () => {
+                  if (!previewedAttachment) {
+                    return undefined
+                  }
+                  const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                  if (!content || !content.parsed || content.parsed.type !== 'assetSell') {
+                    return undefined
+                  }
+                  return content.parsed.tax
+                },
+                deps: [previewedAttachment],
+              },
+            ]}
+            value={data.taxCashAmount}
+            setValue={value => setData({ ...data, taxCashAmount: value })}
+          />
+        }
+      >
         <Input
           id="taxCashAmount"
           type="decimal"
@@ -332,7 +583,8 @@ const AssetDepositTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'assetDeposit' }>
   setData: (data: Extract<TransactionData, { type: 'assetDeposit' }>) => void
-}> = ({ transaction, data, setData }) => {
+  previewedAttachment?: Attachment
+}> = ({ transaction, data, setData, previewedAttachment }) => {
   return (
     <>
       <Label text="Asset Account" htmlFor="assetAccountId">
@@ -351,7 +603,32 @@ const AssetDepositTransactionDataFields: React.FC<{
           required
         />
       </Label>
-      <Label text="Asset Amount" htmlFor="assetAmount">
+      <Label
+        text="Asset Amount"
+        htmlFor="assetAmount"
+        addition={
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from attachment`,
+                value: async () => {
+                  if (!previewedAttachment) {
+                    return undefined
+                  }
+                  const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                  if (!content || !content.parsed || !['assetBuy', 'assetSell'].includes(content.parsed.type)) {
+                    return undefined
+                  }
+                  return content.parsed.assetAmount
+                },
+                deps: [previewedAttachment],
+              },
+            ]}
+            value={data.assetAmount}
+            setValue={value => setData({ ...data, assetAmount: value })}
+          />
+        }
+      >
         <Input
           id="assetAmount"
           type="decimal"
@@ -364,27 +641,30 @@ const AssetDepositTransactionDataFields: React.FC<{
         text="Cash Amount"
         htmlFor="cashAmount"
         addition={
-          <a
-            href="#"
-            tabIndex={-1}
-            onClick={async event => {
-              event.preventDefault()
-              const quote = await rpcClient
-                .retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
-                .then(r => r.data)
-              if (quote) {
-                const midDayPrice = BigNumber(quote.close)
-                  .plus(quote.open || quote.close)
-                  .dividedBy(2)
-                const price = midDayPrice.multipliedBy(data.assetAmount)
-                if (price.isFinite()) {
-                  setData({ ...data, cashAmount: price.toFixed(0) })
-                }
-              }
-            }}
-          >
-            (autofill)
-          </a>
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from quotes`,
+                value: async () => {
+                  const { data: quote } = await rpcClient.retrieveQuoteForAsset({
+                    id: data.assetId,
+                    date: transaction.date,
+                  })
+                  if (!quote) {
+                    return undefined
+                  }
+                  const midDayPrice = BigNumber(quote.close)
+                    .plus(quote.open || quote.close)
+                    .dividedBy(2)
+                  const cashAmount = midDayPrice.multipliedBy(data.assetAmount)
+                  return cashAmount.isFinite() ? cashAmount.toFixed(0) : undefined
+                },
+                deps: [data.assetId, transaction.date, data.assetAmount],
+              },
+            ]}
+            value={data.cashAmount}
+            setValue={value => setData({ ...data, cashAmount: value })}
+          />
         }
       >
         <Input
@@ -403,7 +683,8 @@ const AssetWithdrawalTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'assetWithdrawal' }>
   setData: (data: Extract<TransactionData, { type: 'assetWithdrawal' }>) => void
-}> = ({ transaction, data, setData }) => {
+  previewedAttachment?: Attachment
+}> = ({ transaction, data, setData, previewedAttachment }) => {
   return (
     <>
       <Label text="Asset Account" htmlFor="assetAccountId">
@@ -422,7 +703,32 @@ const AssetWithdrawalTransactionDataFields: React.FC<{
           required
         />
       </Label>
-      <Label text="Asset Amount" htmlFor="assetAmount">
+      <Label
+        text="Asset Amount"
+        htmlFor="assetAmount"
+        addition={
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from attachment`,
+                value: async () => {
+                  if (!previewedAttachment) {
+                    return undefined
+                  }
+                  const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                  if (!content || !content.parsed || !['assetBuy', 'assetSell'].includes(content.parsed.type)) {
+                    return undefined
+                  }
+                  return content.parsed.assetAmount
+                },
+                deps: [previewedAttachment],
+              },
+            ]}
+            value={data.assetAmount}
+            setValue={value => setData({ ...data, assetAmount: value })}
+          />
+        }
+      >
         <Input
           id="assetAmount"
           type="decimal"
@@ -435,27 +741,30 @@ const AssetWithdrawalTransactionDataFields: React.FC<{
         text="Cash Amount"
         htmlFor="cashAmount"
         addition={
-          <a
-            href="#"
-            tabIndex={-1}
-            onClick={async event => {
-              event.preventDefault()
-              const quote = await rpcClient
-                .retrieveQuoteForAsset({ id: data.assetId, date: transaction.date })
-                .then(r => r.data)
-              if (quote) {
-                const midDayPrice = BigNumber(quote.close)
-                  .plus(quote.open || quote.close)
-                  .dividedBy(2)
-                const price = midDayPrice.multipliedBy(data.assetAmount)
-                if (price.isFinite()) {
-                  setData({ ...data, cashAmount: price.toFixed(0) })
-                }
-              }
-            }}
-          >
-            (autofill)
-          </a>
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from quotes`,
+                value: async () => {
+                  const { data: quote } = await rpcClient.retrieveQuoteForAsset({
+                    id: data.assetId,
+                    date: transaction.date,
+                  })
+                  if (!quote) {
+                    return undefined
+                  }
+                  const midDayPrice = BigNumber(quote.close)
+                    .plus(quote.open || quote.close)
+                    .dividedBy(2)
+                  const cashAmount = midDayPrice.multipliedBy(data.assetAmount)
+                  return cashAmount.isFinite() ? cashAmount.toFixed(0) : undefined
+                },
+                deps: [data.assetId, transaction.date, data.assetAmount],
+              },
+            ]}
+            value={data.cashAmount}
+            setValue={value => setData({ ...data, cashAmount: value })}
+          />
         }
       >
         <Input
@@ -474,7 +783,8 @@ const AssetTransferTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'assetTransfer' }>
   setData: (data: Extract<TransactionData, { type: 'assetTransfer' }>) => void
-}> = ({ data, setData }) => {
+  previewedAttachment?: Attachment
+}> = ({ data, setData, previewedAttachment }) => {
   return (
     <>
       <Label text="From Asset Account" htmlFor="fromAssetAccountId">
@@ -501,7 +811,32 @@ const AssetTransferTransactionDataFields: React.FC<{
           required
         />
       </Label>
-      <Label text="Asset Amount" htmlFor="assetAmount">
+      <Label
+        text="Asset Amount"
+        htmlFor="assetAmount"
+        addition={
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from attachment`,
+                value: async () => {
+                  if (!previewedAttachment) {
+                    return undefined
+                  }
+                  const { data: content } = await rpcClient.retrieveAttachmentContent({ id: previewedAttachment.id })
+                  if (!content || !content.parsed || !['assetBuy', 'assetSell'].includes(content.parsed.type)) {
+                    return undefined
+                  }
+                  return content.parsed.assetAmount
+                },
+                deps: [previewedAttachment],
+              },
+            ]}
+            value={data.assetAmount}
+            setValue={value => setData({ ...data, assetAmount: value })}
+          />
+        }
+      >
         <Input
           id="assetAmount"
           type="decimal"
@@ -527,6 +862,7 @@ const InterestTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'interest' }>
   setData: (data: Extract<TransactionData, { type: 'interest' }>) => void
+  previewedAttachment?: Attachment
 }> = ({ data, setData }) => {
   return (
     <>
@@ -564,6 +900,7 @@ const DividendTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'dividend' }>
   setData: (data: Extract<TransactionData, { type: 'dividend' }>) => void
+  previewedAttachment?: Attachment
 }> = ({ transaction, data, setData }) => {
   return (
     <>
@@ -604,29 +941,28 @@ const DividendTransactionDataFields: React.FC<{
         text="Asset Amount"
         htmlFor="assetAmount"
         addition={
-          <a
-            href="#"
-            tabIndex={-1}
-            onClick={async event => {
-              event.preventDefault()
-              const positions = await rpcClient
-                .evaluatePositions({
-                  when: {
-                    type: 'date',
-                    date: dateFormat(dateMinus(dateParse(transaction.date), 'day', 1), 'yyyy-MM-dd'),
-                  },
-                })
-                .then(r => r.data)
-              const openAccountAssetPosition = positions.value.openAssetPositions.find(
-                p => p.type === 'open' && p.accountId === data.assetAccountId && p.assetId === data.assetId
-              )
-              if (openAccountAssetPosition) {
-                setData({ ...data, assetAmount: openAccountAssetPosition.amount })
-              }
-            }}
-          >
-            (autofill)
-          </a>
+          <SuggestionsMenu
+            valueGenerators={[
+              {
+                label: value => `Fill "${value}" from quotes`,
+                value: async () => {
+                  const { data: positions } = await rpcClient.evaluatePositions({
+                    when: {
+                      type: 'date',
+                      date: dateFormat(dateMinus(dateParse(transaction.date), 'day', 1), 'yyyy-MM-dd'),
+                    },
+                  })
+                  const openAccountAssetPosition = positions.value.openAssetPositions.find(
+                    p => p.type === 'open' && p.accountId === data.assetAccountId && p.assetId === data.assetId
+                  )
+                  return openAccountAssetPosition ? openAccountAssetPosition.amount.toString() : undefined
+                },
+                deps: [data.assetId, transaction.date, data.assetAmount],
+              },
+            ]}
+            value={data.assetAmount}
+            setValue={value => setData({ ...data, cashAmount: value })}
+          />
         }
       >
         <Input
@@ -654,6 +990,7 @@ const TaxTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'tax' }>
   setData: (data: Extract<TransactionData, { type: 'tax' }>) => void
+  previewedAttachment?: Attachment
 }> = ({ data, setData }) => {
   return (
     <>
@@ -682,6 +1019,7 @@ const FeeTransactionDataFields: React.FC<{
   transaction: Transaction
   data: Extract<TransactionData, { type: 'fee' }>
   setData: (data: Extract<TransactionData, { type: 'fee' }>) => void
+  previewedAttachment?: Attachment
 }> = ({ data, setData }) => {
   return (
     <>
