@@ -19,4 +19,5 @@ COPY --from=builder /build/dist .
 RUN addgroup -g 1000 myfolio && adduser -u 1000 -G myfolio -s /bin/sh -D myfolio
 USER myfolio:myfolio
 ENTRYPOINT ["node", "--enable-source-maps", "index.js"]
+CMD ["server"]
 EXPOSE 3000

@@ -4,7 +4,6 @@ import React from 'react'
 
 import { fileUpload } from '../../../shared/utils/file'
 import { sleep } from '../../../shared/utils/promise'
-import { rpcClient } from '../../api'
 import { useDialogs } from '../../components/DialogsContext'
 import { TransactionDialog } from '../transactions/TransactionDialog'
 
@@ -33,58 +32,19 @@ export const FullScreenDragAndDropFileUpload: React.FC = () => {
           return
         }
         const attachment = await fileUpload(file)
-        const attachmentContent = await rpcClient.retrieveAttachmentContent({ id: attachment.id }).then(r => r.data)
-        const extraction = attachmentContent?.parsed
-        if (extraction?.type === 'assetSell' || extraction?.type === 'assetBuy') {
-          const accounts = await rpcClient.listAccounts({}).then(r => r.data)
-          const assets = await rpcClient.listAssets({}).then(r => r.data)
-          const cashAccount = accounts.find(
-            a => !!extraction.cashAccount.find(m => a.number === m || a.name.includes(m))
-          )
-          const assetAccount = accounts.find(
-            a => !!extraction.assetAccount.find(m => a.number === m || a.name.includes(m))
-          )
-          const asset = assets.find(a => !!extraction.asset.find(m => a.number === m || a.name.includes(m)))
-          await openDialog(TransactionDialog, {
-            mode: {
-              type: 'create',
-              transactionTemplate: {
-                date: extraction.date,
-                time: extraction.time,
-                data: {
-                  type: extraction.type,
-                  assetAccountId: assetAccount?.id || '',
-                  assetId: asset?.id || '',
-                  assetAmount: extraction.amount,
-                  cashAccountId: cashAccount?.id || '',
-                  cashAmount: extraction.price,
-                  feeCashAmount: extraction.fee,
-                  taxCashAmount: extraction.tax,
-                },
-                reference: extraction.reference,
-              },
-              pendingAttachments: [attachment],
+        await openDialog(TransactionDialog, {
+          mode: {
+            type: 'create',
+            transactionTemplate: {
+              data: {} as any,
             },
-            bulk: {
-              current: idx + 1,
-              total: files.length,
-            },
-          })
-        } else {
-          await openDialog(TransactionDialog, {
-            mode: {
-              type: 'create',
-              transactionTemplate: {
-                data: {} as any,
-              },
-              pendingAttachments: [attachment],
-            },
-            bulk: {
-              current: idx + 1,
-              total: files.length,
-            },
-          })
-        }
+            pendingAttachments: [attachment],
+          },
+          bulk: {
+            current: idx + 1,
+            total: files.length,
+          },
+        })
         await sleep(250)
       }, Promise.resolve())
       await queryClient.invalidateQueries()

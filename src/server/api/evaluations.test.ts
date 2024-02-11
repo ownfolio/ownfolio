@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
 import { databaseTest } from '../database/databaseTest'
+import { PdfParserResult } from '../pdf/parse'
 import { createRpcV1Evaluations, evaluatePlausibilityResponseSchema } from './evaluations'
 
 describe('evaluatePlausibility', () => {
@@ -159,45 +160,51 @@ describe('evaluatePlausibility', () => {
           .handler(ctx)
           .then(r => findingsForType(r, 'transactionDataConflictsWithAttachmentContent'))
       ).toEqual<FindingsForType>([])
-      await db.attachments.overwriteContent(attm.id, {
-        text: 'test',
-        parsed: {
-          type: 'assetBuy',
-          date: '2020-01-01',
-          time: '00:00:00',
-          currency: 'EUR',
-          amount: '10',
-          price: '100',
-          fee: '0',
-          tax: '0',
-          cashAccount: [''],
-          assetAccount: [''],
-          asset: [''],
-          reference: '',
-        },
-      })
+      await db.attachments.readDerivation(
+        attm.id,
+        'pdfParse',
+        'application/json',
+        async () =>
+          Buffer.from(
+            JSON.stringify({
+              type: 'assetBuy',
+              date: '2020-01-01',
+              time: '00:00:00',
+              currency: 'EUR',
+              assetAmount: '10',
+              assetPrice: '100',
+            } as PdfParserResult),
+            'utf-8'
+          ),
+        60 * 1000,
+        true
+      )
       expect(
         await api.evaluatePlausibility
           .handler(ctx)
           .then(r => findingsForType(r, 'transactionDataConflictsWithAttachmentContent'))
       ).toEqual<FindingsForType>([])
-      await db.attachments.overwriteContent(attm.id, {
-        text: 'test',
-        parsed: {
-          type: 'assetSell',
-          date: '2020-01-02',
-          time: '00:00:01',
-          currency: 'EUR',
-          amount: '11',
-          price: '101',
-          fee: '1',
-          tax: '1',
-          cashAccount: [''],
-          assetAccount: [''],
-          asset: [''],
-          reference: '',
-        },
-      })
+      await db.attachments.readDerivation(
+        attm.id,
+        'pdfParse',
+        'application/json',
+        async () =>
+          Buffer.from(
+            JSON.stringify({
+              type: 'assetSell',
+              date: '2020-01-02',
+              time: '00:00:01',
+              currency: 'EUR',
+              assetAmount: '11',
+              assetPrice: '101',
+              fee: '1',
+              tax: '1',
+            } as PdfParserResult),
+            'utf-8'
+          ),
+        60 * 1000,
+        true
+      )
       expect(
         await api.evaluatePlausibility
           .handler(ctx)

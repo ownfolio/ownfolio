@@ -7,6 +7,7 @@ import { dateEquals, dateList, dateParse, dateStartOf, dateUnitSchema } from '..
 import { Database } from '../database'
 import { evaluationSumOverAccounts, evaluationSumOverAccountsAndAssets } from '../evaluations/evaluate'
 import { evaluateAll, evaluateHistoricalAllWithQuotes } from '../evaluations/evaluateAll'
+import { PdfParserResult } from '../pdf/parse'
 import { RpcCtx } from './context'
 import { listResponseSchema, responseSchema } from './utils'
 
@@ -358,7 +359,20 @@ export function createRpcV1Evaluations(database: Database) {
         if (!ctx.user) throw RpcError.unauthorized()
         const data: z.infer<typeof evaluatePlausibilityResponseSchema>['data'] = []
         const transactions = await database.transactions.listByUserId(ctx.user.id, {}, 'asc')
-        const attachmentContents = await database.attachments.listContentsByUserId(ctx.user.id)
+        const attachments = await database.attachments.listByUserId(ctx.user.id)
+        const attachmentPdfParses = await database.attachments
+          .listDerivations(
+            attachments.map(a => a.id),
+            'pdfParse'
+          )
+          .then(result =>
+            result.map(([attachmentId, buf]) => {
+              return {
+                attachmentId,
+                parsed: JSON.parse(buf.toString('utf-8')) as PdfParserResult | null,
+              }
+            })
+          )
         const { errors: evaluateAllErrors } = evaluateAll(transactions, {})
         transactions.forEach(transaction => {
           const {
@@ -376,10 +390,10 @@ export function createRpcV1Evaluations(database: Database) {
           }
         })
         transactions.forEach(transaction => {
-          const linkedAttachmentContents = attachmentContents.filter(ac =>
-            transaction.attachmentIds.includes(ac.attachmentId)
+          const linkedAttachmentPdfParses = attachmentPdfParses.filter(({ attachmentId }) =>
+            transaction.attachmentIds.includes(attachmentId)
           )
-          linkedAttachmentContents.forEach(({ attachmentId, parsed }) => {
+          linkedAttachmentPdfParses.forEach(({ attachmentId, parsed }) => {
             if (!parsed) {
               return
             }
@@ -395,45 +409,50 @@ export function createRpcV1Evaluations(database: Database) {
               ArrayElements<z.infer<typeof evaluatePlausibilityResponseSchema>['data']>,
               { type: 'transactionDataConflictsWithAttachmentContent' }
             >['conflicts'] = []
-            if (txDate !== parsed.date) {
+            if (parsed.date && txDate !== parsed.date) {
               conflicts.push({
                 key: 'date',
                 expected: parsed.date,
                 actual: txDate,
               })
             }
-            if (txTime !== parsed.time) {
+            if (parsed.time && txTime !== parsed.time) {
               conflicts.push({
                 key: 'time',
                 expected: parsed.time,
                 actual: txTime,
               })
             }
-            if (txData.assetAmount !== parsed.amount) {
+            if (parsed.assetAmount && txData.assetAmount !== parsed.assetAmount.toString()) {
               conflicts.push({
                 key: 'assetAmount',
-                expected: parsed.amount,
+                expected: parsed.assetAmount.toString(),
                 actual: txData.assetAmount,
               })
             }
-            if (txData.cashAmount !== parsed.price) {
+            if (parsed.assetPrice && txData.cashAmount !== parsed.assetPrice.toString()) {
               conflicts.push({
                 key: 'cashAmount',
-                expected: parsed.price,
+                expected: parsed.assetPrice.toString(),
                 actual: txData.cashAmount,
               })
             }
-            if (txData.feeCashAmount !== parsed.fee) {
+            if (parsed.fee && txData.feeCashAmount !== parsed.fee.toString()) {
               conflicts.push({
                 key: 'feeCashAmount',
-                expected: parsed.fee,
+                expected: parsed.fee.toString(),
                 actual: txData.feeCashAmount,
               })
             }
-            if (txData.type === 'assetSell' && txData.taxCashAmount !== parsed.tax) {
+            if (
+              parsed.type === 'assetSell' &&
+              parsed.tax &&
+              txData.type === 'assetSell' &&
+              txData.taxCashAmount !== parsed.tax.toString()
+            ) {
               conflicts.push({
                 key: 'taxCashAmount',
-                expected: parsed.tax,
+                expected: parsed.tax.toString(),
                 actual: txData.taxCashAmount,
               })
             }

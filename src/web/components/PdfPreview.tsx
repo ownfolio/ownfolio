@@ -68,7 +68,7 @@ export const PdfPreview: React.FC<Props> = ({ attachmentId, className }) => {
     let blobUrls: string[] | undefined
     const run = async () => {
       try {
-        const pages = await rpcClient.downloadAttachmentAsPng({ id: attachmentId }).then(r => r.data)
+        const pages = await rpcClient.downloadPdfAttachmentAsPngs({ id: attachmentId }).then(r => r.data)
         const pageBlobs = await Promise.all(pages.map(page => fetch(page).then(res => res.blob())))
         blobUrls = pageBlobs.map(pageBlob => URL.createObjectURL(pageBlob))
         setBlobUrls(blobUrls)
