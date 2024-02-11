@@ -4,6 +4,14 @@ A personal portfolio tracker.
 
 ![Dashboard](https://choffmeister.github.io/myfolio/screenshots/dashboard.png)
 
+## Development
+
+```bash
+docker-compose up -d postgres
+npm run start -- create-user --email test@test.com --password testtest --demo-portfolio
+npm run start:dev
+```
+
 ## Quick start
 
 ```yaml
@@ -18,11 +26,7 @@ services:
       PGDATABASE: 'myfolio'
       PGUSER: 'myfolio'
       PGPASSWORD: 'myfolio'
-      # comment if you want to register manually
-      USER_EMAIL: 'test@test.com'
-      USER_PASSWORD: 'testtest'
-      # uncomment if you want to allow registration of new users
-      # USER_REGISTRATION_ENABLED: '1'
+      USER_REGISTRATION_ENABLED: '1'
     depends_on:
       - postgres
   postgres:

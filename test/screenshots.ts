@@ -5,12 +5,10 @@ import sharp from 'sharp'
 
 import { Database } from '../src/server/database'
 import { databaseTest } from '../src/server/database/databaseTest'
-import { yahooFinanceAxios } from '../src/server/quotes/yahooFinance'
+import { generateDemoPortfolio } from '../src/server/demo'
 import { createServer, runServer } from '../src/server/server'
 import { Portfolio } from '../src/shared/models/Portfolio'
 import { User } from '../src/shared/models/User'
-import { applyAxiosMock } from './axiosMock'
-import { createPortolioTestData } from './testdata'
 import { usingInstance } from './utils'
 
 const isDebug = process.env.DEBUG === '1'
@@ -101,11 +99,9 @@ async function prepare(
   const port = 3001
   const baseUrl = `http://localhost:${port}`
   await databaseTest(async database => {
-    const yahooFinanceAxiosMock = await applyAxiosMock(yahooFinanceAxios, __filename.replace(/\.ts$/, '.mock.json'))
     await database.init()
-    const user = await database.users.create({ email: 'john@doe.com' }, 'testtest')
-    const portfolio = await database.portfolios.create({ userId: user.id, name: 'Private' })
-    await createPortolioTestData(database, portfolio)
+    const user = await database.users.create({ email: 'test@test.com' }, 'testtest')
+    const portfolio = await generateDemoPortfolio(database, user.id)
     const session = await database.users.createSession(user.id, false)
     const server = await createServer(database, {
       httpPort: port,
@@ -189,7 +185,6 @@ async function prepare(
         )
       }
     )
-    await yahooFinanceAxiosMock.save()
   })()
 }
 
