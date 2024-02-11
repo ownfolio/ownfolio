@@ -1,20 +1,20 @@
 import BigNumber from 'bignumber.js'
 
-import { getEnvString } from '../src/server/config'
-import { Database } from '../src/server/database'
-import { evaluateAll } from '../src/server/evaluations/evaluateAll'
-import { generatePdf } from '../src/server/pdf/generatePdf'
-import { updateAssetQuotes } from '../src/server/quotes'
-import { Account } from '../src/shared/models/Account'
-import { Asset } from '../src/shared/models/Asset'
-import { Portfolio } from '../src/shared/models/Portfolio'
-import { findClosest } from '../src/shared/utils/array'
-import { bigNumberFormat } from '../src/shared/utils/bignumber'
-import { dateEndOf, dateFormat, dateList, dateParse, DateUnit } from '../src/shared/utils/date'
-import { usingInstance } from './utils'
+import { Account } from '../shared/models/Account'
+import { Asset } from '../shared/models/Asset'
+import { Portfolio } from '../shared/models/Portfolio'
+import { findClosest } from '../shared/utils/array'
+import { dateEndOf, dateFormat, dateList, dateParse, DateUnit } from '../shared/utils/date'
+import { Database } from './database'
+import { evaluateAll } from './evaluations/evaluateAll'
+import { updateAssetQuotes } from './quotes'
 
-export async function createPortolioTestData(database: Database, portfolio: Portfolio): Promise<void> {
+export async function generateDemoPortfolio(database: Database, userId: string): Promise<Portfolio> {
   const currency = 'EUR' as const
+  const portfolio = await database.portfolios.create({
+    userId,
+    name: 'Demo',
+  })
   const accountSavings = await database.accounts.create({
     currency,
     portfolioId: portfolio.id,
@@ -211,7 +211,7 @@ export async function createPortolioTestData(database: Database, portfolio: Port
             await database.transactions.listByUserId(portfolio.userId, {}, 'asc')
           ).value.accountAssetHoldings[assetAccumulationPlan.assetAccount.id][asset.id]
           const cashAmount = availableAssetAmount.multipliedBy(closestQuote.close).decimalPlaces(2)
-          const transaction = await database.transactions.create({
+          await database.transactions.create({
             userId: portfolio.userId,
             date: dateFormat(date, 'yyyy-MM-dd'),
             time: '18:00:00',
@@ -228,53 +228,9 @@ export async function createPortolioTestData(database: Database, portfolio: Port
             reference: '',
             comment: '',
           })
-          const attachment = await database.attachments.createAndWrite(
-            portfolio.userId,
-            `${dateFormat(date, 'yyyy-MM-dd')}-buy.pdf`,
-            'application/pdf',
-            await generatePdf({
-              content: [
-                { text: 'Type: Sell' },
-                { text: `Date: ${transaction.date}` },
-                { text: `Time: ${transaction.time}` },
-                { text: `Asset: ${assetAccumulationPlan.assetTemplate.name}` },
-                { text: `Asset Account: ${assetAccumulationPlan.assetAccount.name}` },
-                {
-                  text: `Asset Amount: ${bigNumberFormat(availableAssetAmount, assetAccumulationPlan.assetTemplate.denomination)}`,
-                },
-                { text: `Cash Account: ${assetAccumulationPlan.cashAccount.name}` },
-                { text: `Cash Amount: ${bigNumberFormat(cashAmount, 2)} ${currency}` },
-              ],
-            })
-          )
-          await database.attachments.linkToTransaction(attachment.id, transaction.id)
         }
       }
     }
   }
-}
-
-async function run(): Promise<void> {
-  usingInstance(
-    async () => new Database(),
-    async database => {
-      await database.ready()
-      const userEmail = getEnvString('USER_EMAIL')
-      await database.init()
-      const user = await database.users.findByEmail(userEmail)
-      if (!user) {
-        throw new Error(`Unable to find user ${userEmail}`)
-      }
-      await database.users.clearData(user.id)
-      const portfolio = await database.portfolios.create({ userId: user.id, name: 'Test' })
-      await createPortolioTestData(database, portfolio)
-    }
-  )
-}
-
-if (require.main === module) {
-  run().catch(err => {
-    console.error(err)
-    process.exit(1)
-  })
+  return portfolio
 }

@@ -6,8 +6,6 @@ export interface WebConfig {
 
 export interface Config {
   httpPort: number
-  userEmail?: string
-  userPassword?: string
   userRegistrationEnabled: boolean
   publicDirectory: string
 }
@@ -15,8 +13,6 @@ export interface Config {
 export function createConfig(): Config {
   return {
     httpPort: getEnvNumber('HTTP_PORT', 3000),
-    userEmail: getEnvString('USER_EMAIL', '').trim() || undefined,
-    userPassword: getEnvString('USER_PASSWORD', '').trim() || undefined,
     userRegistrationEnabled: getEnvBoolean('USER_REGISTRATION_ENABLED', false),
     publicDirectory: path.resolve(__dirname, 'public'),
   }

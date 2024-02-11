@@ -3,45 +3,59 @@ import crypto from 'crypto'
 
 import { createConfig } from './config'
 import { Database } from './database'
+import { generateDemoPortfolio } from './demo'
 import { logger } from './logger'
 import { createServer, runServer } from './server'
 
 const program = new Command()
 program.name('myfolio')
 
-program.command('server').action(
-  longRunning(async () => {
+program //
+  .command('server')
+  .action(
+    longRunning(async () => {
+      const config = createConfig()
+      const database = new Database()
+      await database.init()
+      const server = await createServer(database, config)
+      const serverInstance = await runServer(server, config.httpPort)
+
+      return async () => {
+        await serverInstance.close()
+        await database.close()
+      }
+    })
+  )
+
+program //
+  .command('create-user')
+  .requiredOption('-e, --email <string>', 'user email')
+  .option('-p, --password <string>', 'user password')
+  .option('-d, --demo-portfolio')
+  .action(async (opts: { email: string; password?: string; demoPortfolio?: boolean }) => {
     const database = new Database()
     await database.init()
-
-    const config = createConfig()
-    if (config.userEmail) {
-      const userCount = await database.users.count()
-      if (userCount === 0) {
-        const password = config.userPassword || crypto.randomBytes(16).toString('hex')
-        await database.users.create({ email: config.userEmail }, password)
-        logger.info('Created user', {
-          email: config.userEmail,
-          password: config.userPassword ? '***' : password,
-        })
-      }
+    const email = opts.email
+    const password = opts.password || crypto.randomBytes(16).toString('hex')
+    const user = await database.users.create({ email }, password)
+    logger.info('Created user', {
+      email: email,
+      password: opts.password ? '***' : password,
+    })
+    if (opts.demoPortfolio) {
+      await generateDemoPortfolio(database, user.id)
     }
-    const server = await createServer(database, config)
-    const serverInstance = await runServer(server, config.httpPort)
-
-    return async () => {
-      await serverInstance.close()
-      await database.close()
-    }
+    await database.close()
   })
-)
 
-program.command('regenerate-attachment-derivations').action(async () => {
-  const database = new Database()
-  await database.init()
-  await database.attachments.regenerateAllDefaultDerivations()
-  await database.close()
-})
+program //
+  .command('regenerate-attachment-derivations')
+  .action(async () => {
+    const database = new Database()
+    await database.init()
+    await database.attachments.regenerateAllDefaultDerivations()
+    await database.close()
+  })
 
 program.parseAsync().catch(error => {
   logger.error('Failed to start', { error })

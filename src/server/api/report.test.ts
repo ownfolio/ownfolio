@@ -4,9 +4,9 @@ import path from 'path'
 import { afterAll, beforeAll, it } from 'vitest'
 
 import { applyAxiosMock, AxiosMock } from '../../../test/axiosMock'
-import { createPortolioTestData } from '../../../test/testdata'
 import { parseDataUrl } from '../../shared/utils/file'
 import { databaseTest } from '../database/databaseTest'
+import { generateDemoPortfolio } from '../demo'
 import { yahooFinanceAxios } from '../quotes/yahooFinance'
 import { createRpcV1Report } from './report'
 
@@ -15,8 +15,7 @@ it(
   databaseTest(async db => {
     await db.init()
     const u = await db.users.create({ email: 'user@domain.com' }, 'password')
-    const p = await db.portfolios.create({ userId: u.id, name: 'Portfolio' })
-    await createPortolioTestData(db, p)
+    await generateDemoPortfolio(db, u.id)
     const api = createRpcV1Report(db)
     const ctx = { user: u, sessionId: u.id, setSessionId: async () => {}, unsetSessionId: async () => {} }
     const outputPath = path.resolve(__dirname, '../../../temp')
