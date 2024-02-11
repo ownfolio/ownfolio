@@ -2,14 +2,16 @@ import postgres from 'postgres'
 
 import {
   Attachment,
-  AttachmentContent,
-  attachmentContentSchema,
   attachmentSchema,
   AttachmentSearch,
   AttachmentSearchResult,
   attachmentSearchResultSchema,
 } from '../../shared/models/Attachment'
-import { extractAttachmentContent } from './attachmentContentParsers'
+import { logger } from '../logger'
+import { pdfParse } from '../pdf/parse'
+import { pdfToConcatenatedPngs } from '../pdf/pdfToPngs'
+import { pdfToText } from '../pdf/pdfToText'
+import { createPromisePool } from '../promisePool'
 import { DatabaseEntity } from './DatabaseEntity'
 import { DatabaseError } from './DatabaseError'
 import { randomId } from './id'
@@ -60,13 +62,6 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
         CONSTRAINT "fk__attachment_content__attachmentId__attachment__id" FOREIGN KEY("attachmentId") REFERENCES "attachment"("id") ON DELETE CASCADE
       )
     `
-    const attachments = await sql<
-      { id: string; mimeType: string; bytes: Buffer }[]
-    >`SELECT a."id", a."mimeType", ab."bytes" FROM "attachment" a JOIN "attachment_bytes" ab ON ab."attachmentId" = a."id"`
-    for (let i = 0; i < attachments.length; i++) {
-      const content = await extractAttachmentContent(attachments[i].mimeType, attachments[i].bytes)
-      await sql`INSERT INTO "attachment_content" ${sql({ attachmentId: attachments[i].id, ...content })}`
-    }
   }
 
   public async addDerivationCacheTable(sql: postgres.Sql<{}>): Promise<void> {
@@ -80,6 +75,19 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
         CONSTRAINT "fk__attachment_bytes__attachmentId__attachment__id" FOREIGN KEY("attachmentId") REFERENCES "attachment"("id") ON DELETE CASCADE
       )
     `
+  }
+
+  public async dropContentTable(sql: postgres.Sql<{}>): Promise<void> {
+    await sql`DROP TABLE "attachment_content"`
+  }
+
+  public async addDerivationCacheMimeTypeColumn(sql: postgres.Sql<{}>): Promise<void> {
+    await sql`TRUNCATE TABLE "attachment_derivation_cache"`
+    await sql`ALTER TABLE "attachment_derivation_cache" ADD COLUMN "mimeType" VARCHAR(128) NOT NULL`
+  }
+
+  public async makeDerivationCacheExpiryOptional(sql: postgres.Sql<{}>): Promise<void> {
+    await sql`ALTER TABLE "attachment_derivation_cache" ALTER COLUMN "expiresAt" DROP NOT NULL`
   }
 
   public async listByUserId(
@@ -104,15 +112,6 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
     return rows.map(row => attachmentSearchResultSchema.parse({ ...row, transactionIds: row.transactionIds || [] }))
   }
 
-  public async listContentsByUserId(userId: string): Promise<AttachmentContent[]> {
-    const rows = await this.sql`
-      SELECT ac.* FROM ${this.sql('attachment_content')} ac
-      JOIN ${this.sql('attachment')} a ON a."id" = ac."attachmentId"
-      WHERE a."userId" = ${userId}
-    `
-    return rows.map(row => attachmentContentSchema.parse(row))
-  }
-
   public async linkToTransaction(id: string, transactionId: string): Promise<void> {
     await this.sql`INSERT INTO "attachment_transaction_link" ${this.sql({
       attachmentId: id,
@@ -133,22 +132,12 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
         mimeType,
         size: bytes.length,
       })
-      const content = await extractAttachmentContent(mimeType, bytes)
       await sql`INSERT INTO ${sql('attachment')} ${sql(attachment)}`
       await sql`INSERT INTO ${sql('attachment_bytes')} ${sql({ attachmentId: attachment.id, bytes })}`
-      if (content) {
-        await sql`INSERT INTO ${sql('attachment_content')} ${sql({ attachmentId: attachment.id, ...content })}`
-      }
       return attachment
     })
+    await this.regenerateDefaultDerivations(attachment)
     return attachment
-  }
-
-  public async overwriteContent(id: string, content: Omit<AttachmentContent, 'attachmentId'> | null): Promise<void> {
-    await this.sql`
-      INSERT INTO ${this.sql('attachment_content')} ${this.sql({ attachmentId: id, ...content })}
-      ON CONFLICT ON CONSTRAINT "attachment_content_pkey" DO UPDATE SET "text" = EXCLUDED."text", "parsed" = EXCLUDED."parsed"
-    `
   }
 
   public async read(id: string): Promise<Buffer> {
@@ -161,28 +150,109 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
   public async readDerivation(
     id: string,
     key: string,
-    ttl: number,
-    fn: (bytes: Buffer) => Promise<Buffer>
+    mimeType: string,
+    fn: (bytes: Buffer) => Promise<Buffer>,
+    ttl?: number,
+    refresh?: boolean
   ): Promise<Buffer> {
-    await this.sql`DELETE FROM ${this.sql('attachment_derivation_cache')} WHERE "expiresAt" < now()`
-    const existingDerivation = await this
-      .sql`SELECT * FROM ${this.sql('attachment_derivation_cache')} WHERE "attachmentId" = ${id} AND "key" = ${key}`
-    if (existingDerivation.length > 0) {
-      return existingDerivation[0].bytes
+    await this
+      .sql`DELETE FROM ${this.sql('attachment_derivation_cache')} WHERE "expiresAt" IS NOT NULL AND "expiresAt" < now()`
+    if (!refresh) {
+      const existingDerivation = await this
+        .sql`SELECT * FROM ${this.sql('attachment_derivation_cache')} WHERE "attachmentId" = ${id} AND "key" = ${key}`
+      if (existingDerivation.length > 0) {
+        return existingDerivation[0].bytes
+      }
     }
     const derivedBytes = await this.read(id).then(fn)
-    const expiresAt = new Date(Date.now() + ttl).toISOString()
+    const expiresAt = ttl ? new Date(Date.now() + ttl).toISOString() : null
     await this.sql`
       INSERT INTO ${this.sql('attachment_derivation_cache')}
-      ${this.sql({ attachmentId: id, key, expiresAt, bytes: derivedBytes })}
-      ON CONFLICT DO NOTHING
+      ${this.sql({ attachmentId: id, key, mimeType, bytes: derivedBytes, expiresAt })}
+      ON CONFLICT ON CONSTRAINT "attachment_derivation_cache_pkey" DO UPDATE SET "mimeType" = EXCLUDED."mimeType", "bytes" = EXCLUDED."bytes", "expiresAt" = EXCLUDED."expiresAt"
     `
     return derivedBytes
   }
 
-  public async content(id: string): Promise<AttachmentContent | null> {
-    const rows = await this.sql`SELECT * FROM ${this.sql('attachment_content')} WHERE "attachmentId" = ${id}`
-    return rows.length > 0 ? attachmentContentSchema.parse(rows[0]) : null
+  public async readDerivationIfExists(id: string, key: string): Promise<Buffer | undefined> {
+    await this
+      .sql`DELETE FROM ${this.sql('attachment_derivation_cache')} WHERE "expiresAt" IS NOT NULL AND "expiresAt" < now()`
+    const existingDerivation = await this
+      .sql`SELECT * FROM ${this.sql('attachment_derivation_cache')} WHERE "attachmentId" = ${id} AND "key" = ${key}`
+    return existingDerivation.length > 0 ? existingDerivation[0].bytes : undefined
+  }
+
+  public async listDerivations(ids: string[], key: string): Promise<[string, Buffer][]> {
+    const rows = await this
+      .sql`SELECT "attachmentId", "bytes" FROM ${this.sql('attachment_derivation_cache')} WHERE "attachmentId" = ANY(${ids}) AND "key" = ${key}`
+    return rows.map(row => [row.attachmentId, row.bytes])
+  }
+
+  public async regenerateDefaultDerivations(attachment: Attachment): Promise<void> {
+    await Promise.all(
+      this.defaultDerivations(attachment.mimeType).map(async ([key, mimeType, fn]) => {
+        await this.readDerivation(attachment.id, key, mimeType, fn, undefined, true).catch(error => {
+          logger.error(`Unable to create attachment derivation ${key}`, { error })
+        })
+      })
+    )
+  }
+
+  public async regenerateAllDefaultDerivations(): Promise<void> {
+    const attachments = await this.list()
+    const promisePool = createPromisePool(4)
+    await Promise.all(
+      attachments.map(attachment =>
+        promisePool(() => {
+          logger.info(`Regenerating default derivations for attachment ${attachment.id}`)
+          return this.regenerateDefaultDerivations(attachment)
+        })
+      )
+    )
+  }
+
+  private defaultDerivations(mimeType: string): [string, string, (buf: Buffer) => Promise<Buffer>][] {
+    switch (mimeType) {
+      case 'application/pdf':
+        return [
+          [
+            'pdfToConcatenatedPngs',
+            'image/png',
+            async (pdf: Buffer) => {
+              const pngs = pdfToConcatenatedPngs(pdf)
+              return pngs
+            },
+          ],
+          [
+            'pdfToTextRaw',
+            'text/plain',
+            async (pdf: Buffer) => {
+              const text = await pdfToText(pdf, 'raw')
+              return Buffer.from(text, 'utf-8')
+            },
+          ],
+          [
+            'pdfToTextLayout',
+            'text/plain',
+            async (pdf: Buffer) => {
+              const text = await pdfToText(pdf, 'layout')
+              return Buffer.from(text, 'utf-8')
+            },
+          ],
+          [
+            'pdfParse',
+            'application/json',
+            async (pdf: Buffer) => {
+              const text = await pdfToText(pdf)
+              const parsed = pdfParse(text)
+              const json = JSON.stringify(parsed)
+              return Buffer.from(json, 'utf-8')
+            },
+          ],
+        ]
+      default:
+        return []
+    }
   }
 
   protected override prepare(template: Omit<Attachment, 'id' | 'createdAt'>): Attachment {

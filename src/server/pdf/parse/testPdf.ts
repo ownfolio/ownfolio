@@ -1,6 +1,6 @@
 import fs from 'fs/promises'
 
-import { pdfToText } from '../../pdf/pdfToText'
+import { pdfToText } from '../pdfToText'
 
 export async function testPdfText(pdfFile: string, textFile: string): Promise<string> {
   const pdf = await fs.readFile(pdfFile)

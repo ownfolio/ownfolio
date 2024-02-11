@@ -48,7 +48,7 @@ export async function renderScreenshots() {
     const assets = await database.assets.listByUserId(user.id)
     const bitcoinAsset = assets.find(a => a.name === 'Bitcoin')!
     const transactions = await database.transactions.listByUserId(user.id)
-    const firstAssetBuyTransaction = transactions.find(t => t.data.type === 'assetBuy')!
+    const firstAssetSellTransaction = transactions.find(t => t.data.type === 'assetSell')!
 
     await page.goto(baseUrl)
     await screenshot('dashboard')
@@ -80,7 +80,7 @@ export async function renderScreenshots() {
     await page.goto(baseUrl + '/transactions')
     await screenshot('transactions-list')
 
-    await page.goto(baseUrl + `/?dialog=transaction-edit-${firstAssetBuyTransaction.id}`)
+    await page.goto(baseUrl + `/?dialog=transaction-edit-${firstAssetSellTransaction.id}`)
     await page.waitForNetworkIdle()
     await page.waitForSelector('#root')
     await screenshot('transactions-edit')
