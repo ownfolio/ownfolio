@@ -4,13 +4,13 @@ import React from 'react'
 import { Attachment } from '../../../shared/models/Attachment'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
-import { DialogContentProps, DialogOpts } from '../../components/DialogsContext'
+import { DialogContentProps } from '../../components/DialogsContext'
 import { PdfPreview } from '../../components/PdfPreview'
 import { SelectAttachment } from '../../components/SelectAttachment'
 
 interface Props extends DialogContentProps<Attachment> {}
 
-export const AttachmentSelectionDialog: React.FC<Props> & DialogOpts = ({ closeDialog }) => {
+export const AttachmentSelectionDialog: React.FC<Props> = ({ closeDialog }) => {
   const [attachmentId, setAttachmentId] = React.useState<string | undefined>(undefined)
   return (
     <div className={stylesRoot}>

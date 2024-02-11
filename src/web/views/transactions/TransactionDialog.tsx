@@ -15,7 +15,7 @@ import {
 import { sleep } from '../../../shared/utils/promise'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
-import { DialogContentProps, DialogOpts, useDialogs } from '../../components/DialogsContext'
+import { DialogContentProps, useDialogs } from '../../components/DialogsContext'
 import { Form } from '../../components/Form'
 import { IconLink } from '../../components/IconLink'
 import { Input } from '../../components/Input'
@@ -46,7 +46,7 @@ interface Props extends DialogContentProps<Transaction> {
   next?: boolean
 }
 
-export const TransactionDialog: React.FC<Props> & DialogOpts = ({
+export const TransactionDialog: React.FC<Props> = ({
   mode,
   bulk,
   next: initialNext = false,
@@ -293,8 +293,6 @@ export const TransactionDialog: React.FC<Props> & DialogOpts = ({
     </Form>
   )
 }
-
-TransactionDialog.requireExplicitClose = true
 
 const stylesRoot = css`
   display: grid;

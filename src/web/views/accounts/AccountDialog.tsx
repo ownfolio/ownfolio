@@ -4,7 +4,7 @@ import React from 'react'
 import { Account, createEmptyAccount } from '../../../shared/models/Account'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
-import { DialogContentProps, DialogOpts } from '../../components/DialogsContext'
+import { DialogContentProps } from '../../components/DialogsContext'
 import { Form } from '../../components/Form'
 import { Input } from '../../components/Input'
 import { Label } from '../../components/Label'
@@ -20,7 +20,7 @@ interface Props extends DialogContentProps<Account> {
   mode: Mode
 }
 
-export const AccountDialog: React.FC<Props> & DialogOpts = ({ mode, closeDialog }) => {
+export const AccountDialog: React.FC<Props> = ({ mode, closeDialog }) => {
   const queryClient = useQueryClient()
   const [account, setAccount] = React.useState<Account | undefined>(undefined)
   const [state, setState] = React.useState<'busy' | 'done' | undefined>(undefined)
@@ -108,5 +108,3 @@ export const AccountDialog: React.FC<Props> & DialogOpts = ({ mode, closeDialog 
     </Form>
   )
 }
-
-AccountDialog.requireExplicitClose = true

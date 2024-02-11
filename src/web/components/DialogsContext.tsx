@@ -20,12 +20,8 @@ interface DialogInstance<P> {
   urlId?: string
   open: boolean
   closeDialog: (value: DialogContentReturnType<P> | undefined) => void
-  component: React.FC<P> & DialogOpts
+  component: React.FC<P>
   props: DialogContentOwnProps<P>
-}
-
-export interface DialogOpts {
-  requireExplicitClose?: boolean
 }
 
 type DialogContentReturnType<P> = P extends DialogContentProps<infer T> ? T : never
@@ -33,7 +29,7 @@ type DialogContentOwnProps<P> = P extends DialogContentProps<infer T> ? Omit<P, 
 
 interface ContextValue {
   openDialog: <P>(
-    component: React.ComponentType<P> & DialogOpts,
+    component: React.ComponentType<P>,
     props: DialogContentOwnProps<P>,
     parentId?: number
   ) => Promise<DialogContentReturnType<P> | undefined>
@@ -126,14 +122,7 @@ export const DialogsContext: React.FC<DialogsContextProps> = ({ children }) => {
       return dialogs
         .filter(d => d.parentId === parentId)
         .map(({ id, open, closeDialog, component: Component, props }) => (
-          <Dialog
-            key={id}
-            show={open}
-            onClose={() => closeDialog(undefined)}
-            opts={{
-              requireExplicitClose: Component.requireExplicitClose,
-            }}
-          >
+          <Dialog key={id} show={open} onClose={() => closeDialog(undefined)}>
             <Component dialogId={id} closeDialog={closeDialog} {...props} />
             {renderDialogs(id)}
           </Dialog>

@@ -4,7 +4,7 @@ import React from 'react'
 import { Asset, AssetQuoteProvider, createEmptyAsset } from '../../../shared/models/Asset'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
-import { DialogContentProps, DialogOpts } from '../../components/DialogsContext'
+import { DialogContentProps } from '../../components/DialogsContext'
 import { Form } from '../../components/Form'
 import { Input } from '../../components/Input'
 import { Label } from '../../components/Label'
@@ -18,7 +18,7 @@ interface Props extends DialogContentProps<Asset> {
   mode: Mode
 }
 
-export const AssetDialog: React.FC<Props> & DialogOpts = ({ mode, closeDialog }) => {
+export const AssetDialog: React.FC<Props> = ({ mode, closeDialog }) => {
   const queryClient = useQueryClient()
   const [asset, setAsset] = React.useState<Asset | undefined>(undefined)
   const [state, setState] = React.useState<'busy' | 'done' | undefined>(undefined)
@@ -123,8 +123,6 @@ export const AssetDialog: React.FC<Props> & DialogOpts = ({ mode, closeDialog })
     </Form>
   )
 }
-
-AssetDialog.requireExplicitClose = true
 
 const AssetQuoteProviderFields: React.FC<{
   quoteProvider: AssetQuoteProvider | null

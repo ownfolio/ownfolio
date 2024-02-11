@@ -8,7 +8,7 @@ import { renderTransactionAsString } from '../../../shared/models/Transaction'
 import { fileDownload } from '../../../shared/utils/file'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
-import { DialogContentProps, DialogOpts, useDialogs } from '../../components/DialogsContext'
+import { DialogContentProps, useDialogs } from '../../components/DialogsContext'
 import { IconLink } from '../../components/IconLink'
 import { PdfPreview } from '../../components/PdfPreview'
 import { LoadingView } from '../loading/LoadingView'
@@ -19,7 +19,7 @@ interface Props extends DialogContentProps<void> {
   attachmentId: string
 }
 
-export const AttachmentDialog: React.FC<Props> & DialogOpts = ({ attachmentId, dialogId, closeDialog }) => {
+export const AttachmentDialog: React.FC<Props> = ({ attachmentId, dialogId, closeDialog }) => {
   const { openDialog } = useDialogs()
   const queryClient = useQueryClient()
   const [attachment, setAttachment] = React.useState<Attachment | undefined>(undefined)

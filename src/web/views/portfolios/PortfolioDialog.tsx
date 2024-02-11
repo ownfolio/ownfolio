@@ -4,7 +4,7 @@ import React from 'react'
 import { createEmptyPortfolio, Portfolio } from '../../../shared/models/Portfolio'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
-import { DialogContentProps, DialogOpts } from '../../components/DialogsContext'
+import { DialogContentProps } from '../../components/DialogsContext'
 import { Form } from '../../components/Form'
 import { Input } from '../../components/Input'
 import { Label } from '../../components/Label'
@@ -18,7 +18,7 @@ interface Props extends DialogContentProps<Portfolio> {
   mode: Mode
 }
 
-export const PortfolioDialog: React.FC<Props> & DialogOpts = ({ mode, closeDialog }) => {
+export const PortfolioDialog: React.FC<Props> = ({ mode, closeDialog }) => {
   const queryClient = useQueryClient()
   const [portfolio, setPortfolio] = React.useState<Portfolio | undefined>(undefined)
   const [state, setState] = React.useState<'busy' | 'done' | undefined>(undefined)
@@ -81,5 +81,3 @@ export const PortfolioDialog: React.FC<Props> & DialogOpts = ({ mode, closeDialo
     </Form>
   )
 }
-
-PortfolioDialog.requireExplicitClose = true

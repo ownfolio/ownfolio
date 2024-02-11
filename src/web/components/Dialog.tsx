@@ -3,24 +3,17 @@ import { css } from '@linaria/core'
 import React from 'react'
 
 import { LoadingView } from '../views/loading/LoadingView'
-import { DialogOpts } from './DialogsContext'
 
 interface Props {
   show: boolean
   onClose: () => void
   children: React.ReactNode
-  opts: DialogOpts
 }
 
-export const Dialog: React.FC<Props> = ({ show, onClose, opts, children }) => {
-  const onClose2 = React.useCallback(() => {
-    if (!opts.requireExplicitClose) {
-      onClose()
-    }
-  }, [])
+export const Dialog: React.FC<Props> = ({ show, onClose, children }) => {
   return (
     <Transition show={show} as={React.Fragment}>
-      <HeadlessUIDialog onClose={onClose2} className={stylesRoot}>
+      <HeadlessUIDialog onClose={onClose} className={stylesRoot}>
         <Transition.Child
           enter={stylesBackdropEnter}
           enterFrom={stylesBackdropEnterFrom}

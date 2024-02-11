@@ -4,12 +4,12 @@ import React from 'react'
 import { Transaction } from '../../../shared/models/Transaction'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
-import { DialogContentProps, DialogOpts } from '../../components/DialogsContext'
+import { DialogContentProps } from '../../components/DialogsContext'
 import { SelectTransaction } from '../../components/SelectTransaction'
 
 interface Props extends DialogContentProps<Transaction> {}
 
-export const TransactionSelectionDialog: React.FC<Props> & DialogOpts = ({ closeDialog }) => {
+export const TransactionSelectionDialog: React.FC<Props> = ({ closeDialog }) => {
   const [transactionId, setTransactionId] = React.useState<string | undefined>(undefined)
   return (
     <div className={stylesRoot}>
