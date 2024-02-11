@@ -3,11 +3,13 @@ import BigNumber from 'bignumber.js'
 import { getEnvString } from '../src/server/config'
 import { Database } from '../src/server/database'
 import { evaluateAll } from '../src/server/evaluations/evaluateAll'
+import { generatePdf } from '../src/server/pdf/generatePdf'
 import { updateAssetQuotes } from '../src/server/quotes'
 import { Account } from '../src/shared/models/Account'
 import { Asset } from '../src/shared/models/Asset'
 import { Portfolio } from '../src/shared/models/Portfolio'
 import { findClosest } from '../src/shared/utils/array'
+import { bigNumberFormat } from '../src/shared/utils/bignumber'
 import { dateEndOf, dateFormat, dateList, dateParse, DateUnit } from '../src/shared/utils/date'
 import { usingInstance } from './utils'
 
@@ -209,7 +211,7 @@ export async function createPortolioTestData(database: Database, portfolio: Port
             await database.transactions.listByUserId(portfolio.userId, {}, 'asc')
           ).value.accountAssetHoldings[assetAccumulationPlan.assetAccount.id][asset.id]
           const cashAmount = availableAssetAmount.multipliedBy(closestQuote.close).decimalPlaces(2)
-          await database.transactions.create({
+          const transaction = await database.transactions.create({
             userId: portfolio.userId,
             date: dateFormat(date, 'yyyy-MM-dd'),
             time: '18:00:00',
@@ -226,6 +228,26 @@ export async function createPortolioTestData(database: Database, portfolio: Port
             reference: '',
             comment: '',
           })
+          const attachment = await database.attachments.createAndWrite(
+            portfolio.userId,
+            `${dateFormat(date, 'yyyy-MM-dd')}-buy.pdf`,
+            'application/pdf',
+            await generatePdf({
+              content: [
+                { text: 'Type: Sell' },
+                { text: `Date: ${transaction.date}` },
+                { text: `Time: ${transaction.time}` },
+                { text: `Asset: ${assetAccumulationPlan.assetTemplate.name}` },
+                { text: `Asset Account: ${assetAccumulationPlan.assetAccount.name}` },
+                {
+                  text: `Asset Amount: ${bigNumberFormat(availableAssetAmount, assetAccumulationPlan.assetTemplate.denomination)}`,
+                },
+                { text: `Cash Account: ${assetAccumulationPlan.cashAccount.name}` },
+                { text: `Cash Amount: ${bigNumberFormat(cashAmount, 2)} ${currency}` },
+              ],
+            })
+          )
+          await database.attachments.linkToTransaction(attachment.id, transaction.id)
         }
       }
     }

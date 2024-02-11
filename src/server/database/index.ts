@@ -76,6 +76,13 @@ export class Database {
     await this.migrate('attachments.init', sql => this.attachments.init(sql))
     await this.migrate('attachments.addContentTable', sql => this.attachments.addContentTable(sql))
     await this.migrate('attachments.addDerivationCacheTable', sql => this.attachments.addDerivationCacheTable(sql))
+    await this.migrate('attachments.dropContentTable', sql => this.attachments.dropContentTable(sql))
+    await this.migrate('attachments.addDerivationCacheMimeTypeColumn', sql =>
+      this.attachments.addDerivationCacheMimeTypeColumn(sql)
+    )
+    await this.migrate('attachments.makeDerivationCacheExpiryOptional', sql =>
+      this.attachments.makeDerivationCacheExpiryOptional(sql)
+    )
     logger.info(`Finished database migrations`)
   }
 

@@ -118,29 +118,39 @@ it(
     }
     expect([doubleCount, tripleCount]).toEqual([0, 0])
     await expect(
-      db.attachments.readDerivation(a1.id, 'double', 60 * 1000, async b => doubleBuffer(b))
+      db.attachments.readDerivation(a1.id, 'double', 'text/plain', async b => doubleBuffer(b), 60 * 1000)
     ).resolves.toEqual(doubleBuffer(a1b, true))
     expect([doubleCount, tripleCount]).toEqual([1, 0])
     await expect(
-      db.attachments.readDerivation(a1.id, 'double', 60 * 1000, async b => doubleBuffer(b))
+      db.attachments.readDerivation(a1.id, 'double', 'text/plain', async b => doubleBuffer(b), 60 * 1000)
     ).resolves.toEqual(doubleBuffer(a1b, true))
     expect([doubleCount, tripleCount]).toEqual([1, 0])
     await expect(
-      db.attachments.readDerivation(a1.id, 'triple', 60 * 1000, async b => tripleBuffer(b))
+      db.attachments.readDerivation(a1.id, 'triple', 'text/plain', async b => tripleBuffer(b), 60 * 1000)
     ).resolves.toEqual(tripleBuffer(a1b, true))
     expect([doubleCount, tripleCount]).toEqual([1, 1])
     await expect(
-      db.attachments.readDerivation(a1.id, 'triple', 60 * 1000, async b => tripleBuffer(b))
+      db.attachments.readDerivation(a1.id, 'triple', 'text/plain', async b => tripleBuffer(b), 60 * 1000)
     ).resolves.toEqual(tripleBuffer(a1b, true))
     expect([doubleCount, tripleCount]).toEqual([1, 1])
     await expect(
-      db.attachments.readDerivation(a2.id, 'double', 60 * 1000, async b => doubleBuffer(b))
+      db.attachments.readDerivation(a2.id, 'double', 'text/plain', async b => doubleBuffer(b), 60 * 1000)
     ).resolves.toEqual(doubleBuffer(a2b, true))
     expect([doubleCount, tripleCount]).toEqual([2, 1])
     await expect(
-      db.attachments.readDerivation(a2.id, 'double', 60 * 1000, async b => doubleBuffer(b))
+      db.attachments.readDerivation(a2.id, 'double', 'text/plain', async b => doubleBuffer(b), 60 * 1000)
     ).resolves.toEqual(doubleBuffer(a2b, true))
     expect([doubleCount, tripleCount]).toEqual([2, 1])
+    await expect(db.attachments.listDerivations([a1.id, a2.id], 'unknown')).resolves.toEqual([])
+    await expect(db.attachments.listDerivations([], 'double')).resolves.toEqual([])
+    await expect(db.attachments.listDerivations([a1.id], 'double')).resolves.toEqual([[a1.id, doubleBuffer(a1b, true)]])
+    await expect(db.attachments.listDerivations([a1.id, a2.id], 'double')).resolves.toEqual([
+      [a1.id, doubleBuffer(a1b, true)],
+      [a2.id, doubleBuffer(a2b, true)],
+    ])
+    await expect(db.attachments.listDerivations([a1.id, a2.id], 'triple')).resolves.toEqual([
+      [a1.id, tripleBuffer(a1b, true)],
+    ])
   }),
   {
     timeout: 60000,

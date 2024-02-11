@@ -1,3 +1,4 @@
+import { RpcBrowserClientError } from '@choffmeister/rpc-browser'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import React from 'react'
 import { BrowserRouter } from 'react-router-dom'
@@ -16,8 +17,13 @@ export const App: React.FC = () => {
           suspense: true,
           refetchIntervalInBackground: false,
           refetchInterval: 60000,
-          retry: 1,
           retryDelay: 1000,
+          retry: (failureCount, error: unknown) => {
+            if (error instanceof RpcBrowserClientError) {
+              return false
+            }
+            return failureCount < 3
+          },
           cacheTime: 120000,
           structuralSharing: true,
           keepPreviousData: true,
