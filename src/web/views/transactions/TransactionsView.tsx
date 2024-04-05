@@ -100,7 +100,7 @@ export const TransactionsView: React.FC = () => {
               )}
             </>
           ),
-          data: <TransactionData data={tx.data} />,
+          data: <TransactionDataText data={tx.data} />,
           reference: tx.reference,
           comment: tx.comment,
           links: tx.attachmentIds.length.toString(),
@@ -184,7 +184,7 @@ const AccountLink: React.FC<{ account?: Account }> = ({ account }) => {
   )
 }
 
-const TransactionData: React.FC<{ data: TransactionData }> = ({ data }): React.ReactElement => {
+const TransactionDataText: React.FC<{ data: TransactionData }> = ({ data }): React.ReactElement => {
   const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
   const assets = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data!
 
