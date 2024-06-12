@@ -1,3 +1,5 @@
+import 'normalize.css'
+
 import { css } from '@linaria/core'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
@@ -15,7 +17,6 @@ const root = ReactDOM.createRoot(document.getElementById('root')!)
 root.render(<App />)
 
 css`
-  @import url(../node_modules/normalize.css/normalize.css);
   :global() {
     html {
       margin: 0;
