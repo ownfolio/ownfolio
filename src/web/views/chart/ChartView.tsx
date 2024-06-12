@@ -16,7 +16,7 @@ import { chartViewSeries, ChartViewSeriesConfig, isChartViewSeriesPrivate } from
 import { chartViewTool, ChartViewToolConfig } from './tools'
 import { isSimpleMovingAverageToolConfig } from './tools/simpleMovingAverage'
 
-type ChartParams = { type: 'total'; id?: string } | { type: 'asset'; id: string }
+type ChartParams = { type: 'total'; id?: string } | { type: 'profit'; id?: string } | { type: 'asset'; id: string }
 
 export const ChartView: React.FC = () => {
   const params = useParams() as ChartParams
@@ -25,8 +25,12 @@ export const ChartView: React.FC = () => {
       switch (params.type) {
         case 'total':
           return { type: 'total', portfolioId: params.id }
+        case 'profit':
+          return { type: 'profit', portfolioId: params.id }
         case 'asset':
           return { type: 'asset', assetId: params.id }
+        default:
+          throw new Error('Unsupported chart type')
       }
     })()
   )
@@ -51,7 +55,6 @@ export const ChartView: React.FC = () => {
               return s.points.map(p => p.timestamp)
             case 'line':
               return s.points.map(p => p.timestamp)
-              throw new Error()
             case 'candle':
               return s.points.map(p => p.openTimestamp)
           }

@@ -221,8 +221,12 @@ export const TotalTable: React.FC<{ timetravel?: string }> = ({ timetravel }) =>
             },
             menuItems: [
               {
-                label: 'Show chart',
+                label: 'Show total chart',
                 onClick: () => navigate(`/chart/total/${portfolio.id}`),
+              },
+              {
+                label: 'Show profit chart',
+                onClick: () => navigate(`/chart/profit/${portfolio.id}`),
               },
               null,
               {
@@ -236,8 +240,12 @@ export const TotalTable: React.FC<{ timetravel?: string }> = ({ timetravel }) =>
         }),
         menuItems: [
           {
-            label: 'Show chart',
+            label: 'Show total chart',
             onClick: () => navigate('/chart/total'),
+          },
+          {
+            label: 'Show profit chart',
+            onClick: () => navigate('/chart/profit'),
           },
         ],
       },
