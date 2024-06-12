@@ -32,101 +32,106 @@ export interface TableDefinitionRow {
   menuItems?: React.ComponentProps<typeof Menu>['items']
 }
 
+export type TableExpansionState = { [id: string | number]: boolean | undefined }
+
 export interface TableDefinition {
   columns: TableDefinitionColumn[]
   rows: TableDefinitionRow[]
+  expansion?: [TableExpansionState, React.Dispatch<React.SetStateAction<TableExpansionState>>]
 }
 
 type Props = React.DetailedHTMLProps<React.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement> & TableDefinition
 
-export const CardTable = React.forwardRef<HTMLTableElement, Props>(({ columns, rows, className, ...other }, ref) => {
-  const widthRef = React.useRef<HTMLTableElement>(null)
-  const width = useElementDimensions(w => Math.floor(w / 25) * 25, 0, widthRef)
-  const visible = React.useMemo(() => {
-    return selectionSortBy(columns, (a, b) => (a.priority || 0) - (b.priority || 0)).reduce<{
-      consumedWidth: number
-      columnIds: string[]
-    }>(
-      (acc, c) => {
-        const columnPriority = c.priority || 0
-        const columnWidth = c.width || c.minWidth || 200
-        if (columnPriority === 0 || acc.consumedWidth + columnWidth <= width) {
-          return {
-            consumedWidth: acc.consumedWidth + columnWidth,
-            columnIds: [...acc.columnIds, c.id],
+export const CardTable = React.forwardRef<HTMLTableElement, Props>(
+  ({ columns, rows, className, expansion, ...other }, ref) => {
+    const widthRef = React.useRef<HTMLTableElement>(null)
+    const width = useElementDimensions(w => Math.floor(w / 25) * 25, 0, widthRef)
+    const visible = React.useMemo(() => {
+      return selectionSortBy(columns, (a, b) => (a.priority || 0) - (b.priority || 0)).reduce<{
+        consumedWidth: number
+        columnIds: string[]
+      }>(
+        (acc, c) => {
+          const columnPriority = c.priority || 0
+          const columnWidth = c.width || c.minWidth || 200
+          if (columnPriority === 0 || acc.consumedWidth + columnWidth <= width) {
+            return {
+              consumedWidth: acc.consumedWidth + columnWidth,
+              columnIds: [...acc.columnIds, c.id],
+            }
+          } else {
+            return {
+              consumedWidth: acc.consumedWidth + columnWidth,
+              columnIds: acc.columnIds,
+            }
           }
-        } else {
-          return {
-            consumedWidth: acc.consumedWidth + columnWidth,
-            columnIds: acc.columnIds,
-          }
-        }
-      },
-      { consumedWidth: 0, columnIds: [] }
-    ).columnIds
-  }, [columns, width])
-  const showSubRows = React.useMemo(() => !!rows.find(r => r.subRows && r.subRows.length > 0), [rows])
-  const showMenuItems = React.useMemo(
-    () =>
-      !!rows.find(
-        r =>
-          (r.menuItems && r.menuItems.length > 0) ||
-          (r.subRows && r.subRows.find(sr => sr.menuItems && sr.menuItems.length > 0))
-      ),
-    [rows]
-  )
-  const [expanded, setExpanded] = React.useState<{ [id: string | number]: boolean | undefined }>({})
-  const isColumnVisible = React.useCallback((id: string) => visible.includes(id), [visible])
-  const isRowExpanded = React.useCallback((id: string | number) => expanded[id] === true, [expanded])
-  const toggleRowExpanded = React.useCallback(
-    (id: string | number) => setExpanded(expanded => ({ ...expanded, [id]: !expanded[id] })),
-    []
-  )
-  return (
-    <Card ref={widthRef}>
-      <table ref={ref} {...other} className={clsx(stylesRoot, className)}>
-        <thead>
-          <tr>
-            {showSubRows && <th className={stylesColumnExpandCollapse} />}
-            {columns.flatMap(column => {
-              if (!visible.includes(column.id)) return []
-              const align = column.align || 'left'
-              return [
-                <th
-                  key={column.id}
-                  className={clsx(
-                    align === 'left' && stylesColumnLeft,
-                    align === 'center' && stylesColumnCenter,
-                    align === 'right' && stylesColumnRight,
-                    column.className
-                  )}
-                  style={{ width: column.width }}
-                >
-                  {column.title}
-                </th>,
-              ]
-            })}
-            {showMenuItems && <th className={stylesColumnMenu} />}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map(row => (
-            <CardTableRow
-              key={row.id}
-              columns={columns}
-              row={row}
-              showSubRows={showSubRows}
-              showMenuItems={showMenuItems}
-              isColumnVisible={isColumnVisible}
-              isRowExpanded={isRowExpanded}
-              toggleRowExpanded={toggleRowExpanded}
-            />
-          ))}
-        </tbody>
-      </table>
-    </Card>
-  )
-})
+        },
+        { consumedWidth: 0, columnIds: [] }
+      ).columnIds
+    }, [columns, width])
+    const showSubRows = React.useMemo(() => !!rows.find(r => r.subRows && r.subRows.length > 0), [rows])
+    const showMenuItems = React.useMemo(
+      () =>
+        !!rows.find(
+          r =>
+            (r.menuItems && r.menuItems.length > 0) ||
+            (r.subRows && r.subRows.find(sr => sr.menuItems && sr.menuItems.length > 0))
+        ),
+      [rows]
+    )
+    const [expanded, setExpanded] = expansion || React.useState<TableExpansionState>({})
+    const isColumnVisible = React.useCallback((id: string) => visible.includes(id), [visible])
+    const isRowExpanded = React.useCallback((id: string | number) => expanded[id] === true, [expanded])
+    const toggleRowExpanded = React.useCallback(
+      (id: string | number) => setExpanded(expanded => ({ ...expanded, [id]: !expanded[id] })),
+      []
+    )
+    return (
+      <Card ref={widthRef}>
+        <table ref={ref} {...other} className={clsx(stylesRoot, className)}>
+          <thead>
+            <tr>
+              {showSubRows && <th className={stylesColumnExpandCollapse} />}
+              {columns.flatMap(column => {
+                if (!visible.includes(column.id)) return []
+                const align = column.align || 'left'
+                return [
+                  <th
+                    key={column.id}
+                    className={clsx(
+                      align === 'left' && stylesColumnLeft,
+                      align === 'center' && stylesColumnCenter,
+                      align === 'right' && stylesColumnRight,
+                      column.className
+                    )}
+                    style={{ width: column.width }}
+                  >
+                    {column.title}
+                  </th>,
+                ]
+              })}
+              {showMenuItems && <th className={stylesColumnMenu} />}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(row => (
+              <CardTableRow
+                key={row.id}
+                columns={columns}
+                row={row}
+                showSubRows={showSubRows}
+                showMenuItems={showMenuItems}
+                isColumnVisible={isColumnVisible}
+                isRowExpanded={isRowExpanded}
+                toggleRowExpanded={toggleRowExpanded}
+              />
+            ))}
+          </tbody>
+        </table>
+      </Card>
+    )
+  }
+)
 
 interface RowProps {
   columns: TableDefinitionColumn[]

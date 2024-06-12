@@ -2,19 +2,20 @@ import { useQuery } from '@tanstack/react-query'
 import BigNumber from 'bignumber.js'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { z } from 'zod'
 
 import { allCurrencies } from '../../../shared/models/Currency'
 import { filterNotFalse } from '../../../shared/utils/array'
 import { rpcClient } from '../../api'
 import { Amount } from '../../components/Amount'
-import { CardTable, TableDefinitionColumn, TableDefinitionRow } from '../../components/CardTable'
+import { CardTable, TableDefinitionColumn, TableDefinitionRow, TableExpansionState } from '../../components/CardTable'
 import { useDialogs } from '../../components/DialogsContext'
 import { Percentage } from '../../components/Percentage'
 import { SubText } from '../../components/SubText'
+import { usePersistentState } from '../../hooks/usePersistentState'
 import { AccountDialog } from '../accounts/AccountDialog'
 import { AssetDialog } from '../assets/AssetDialog'
 import { TransactionDialog } from '../transactions/TransactionDialog'
-
 export const AssetOpenPositionsTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => {
   const navigate = useNavigate()
   const { openDialog } = useDialogs()
@@ -209,5 +210,10 @@ export const AssetOpenPositionsTable: React.FC<{ timetravel?: string }> = ({ tim
       })
   }, [allCurrencies, portfolios, accounts, assets, evaluations])
 
-  return <CardTable columns={columns} rows={rows} />
+  const expansion = usePersistentState<TableExpansionState>(
+    'dashboard.assetOpenPositionsTable.expansion',
+    z.record(z.union([z.string(), z.number()]), z.boolean()),
+    {}
+  )
+  return <CardTable columns={columns} rows={rows} expansion={expansion} />
 }
