@@ -2,15 +2,17 @@ import { useQuery } from '@tanstack/react-query'
 import BigNumber from 'bignumber.js'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
+import { z } from 'zod'
 
 import { rootCurrency } from '../../../shared/models/Currency'
 import { dateFormat, dateMinus, dateParse, dateStartOf } from '../../../shared/utils/date'
 import { recordMap } from '../../../shared/utils/record'
 import { rpcClient } from '../../api'
 import { Amount } from '../../components/Amount'
-import { CardTable, TableDefinitionColumn, TableDefinitionRow } from '../../components/CardTable'
+import { CardTable, TableDefinitionColumn, TableDefinitionRow, TableExpansionState } from '../../components/CardTable'
 import { useDialogs } from '../../components/DialogsContext'
 import { Percentage } from '../../components/Percentage'
+import { usePersistentState } from '../../hooks/usePersistentState'
 import { PortfolioDialog } from '../portfolios/PortfolioDialog'
 
 export const TotalTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => {
@@ -252,5 +254,10 @@ export const TotalTable: React.FC<{ timetravel?: string }> = ({ timetravel }) =>
     ]
   }, [evaluations])
 
-  return <CardTable columns={columns} rows={rows} />
+  const expansion = usePersistentState<TableExpansionState>(
+    'dashboard.totalTable.expansion',
+    z.record(z.union([z.string(), z.number()]), z.boolean()),
+    {}
+  )
+  return <CardTable columns={columns} rows={rows} expansion={expansion} />
 }
