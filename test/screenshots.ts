@@ -9,6 +9,7 @@ import { generateDemoPortfolio } from '../src/server/demo'
 import { createServer, runServer } from '../src/server/server'
 import { Portfolio } from '../src/shared/models/Portfolio'
 import { User } from '../src/shared/models/User'
+import { sleep } from '../src/shared/utils/promise'
 import { usingInstance } from './utils'
 
 const isDebug = process.env.DEBUG === '1'
@@ -112,7 +113,7 @@ async function prepare(
       () => runServer(server, port),
       async () => {
         await usingInstance(
-          () => puppeteer.launch({ headless: !isDebug ? 'new' : false }),
+          () => puppeteer.launch({ headless: !isDebug }),
           async browser => {
             const page = await browser.newPage()
             await page.setCookie({ name: 'myfolio-session', value: session, path: '/', domain: `localhost:${port}` })
@@ -141,7 +142,7 @@ async function prepare(
                   height: device.height,
                   deviceScaleFactor: 2,
                 })
-                await page.waitForTimeout(1000)
+                await sleep(1000)
                 await page.screenshot({ path: fileName(device.id) })
                 const screenshotBuffer = await fs.readFile(fileName(device.id))
                 const frameSvg = await fs.readFile(frameFile, 'utf8')
