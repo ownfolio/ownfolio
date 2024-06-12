@@ -14,11 +14,19 @@ export function usePersistentState<T extends PersistentStateValueType>(
   key: string,
   schema: z.ZodType<T>,
   initialValue: T
-): [T, (state: T) => void] {
+): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [state, _setState] = React.useState(read<T>(key, schema, initialValue))
-  const setState = (state: T) => {
-    write(key, schema, state)
-    _setState(state)
+  const setState = (state: React.SetStateAction<T>): void => {
+    if (typeof state === 'function') {
+      _setState(prev => {
+        const next = state(prev)
+        write(key, schema, next)
+        return next
+      })
+    } else {
+      write(key, schema, state)
+      _setState(state)
+    }
   }
   return React.useMemo(() => [state, setState], [state, setState])
 }
