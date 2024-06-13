@@ -13,8 +13,7 @@ import { StockChart, StockChartSeries, StockChartViewport } from '../../componen
 import { usePersistentState } from '../../hooks/usePersistentState'
 import { usePrivacy } from '../../privacy'
 import { chartViewSeries, ChartViewSeriesConfig, isChartViewSeriesPrivate } from './series'
-import { chartViewTool, ChartViewToolConfig } from './tools'
-import { isSimpleMovingAverageToolConfig } from './tools/simpleMovingAverage'
+import { chartViewTool } from './tools'
 
 type ChartParams = { type: 'total'; id?: string } | { type: 'profit'; id?: string } | { type: 'asset'; id: string }
 
@@ -34,18 +33,19 @@ export const ChartView: React.FC = () => {
       }
     })()
   )
-  const [tools, setTools] = React.useState<ChartViewToolConfig[]>([{ type: 'simpleMovingAverage', range: 30 }])
   const [resolution, setResolution] = usePersistentState<DateUnit>('chartView.resolution', dateUnitSchema, 'week')
-  const { privacy } = usePrivacy()
-
-  const mainSeries = useQuery<StockChartSeries[]>(['chartView', JSON.stringify(config), resolution], async () => {
+  const baseSeries = useQuery<StockChartSeries[]>(['chartView', JSON.stringify(config), resolution], async () => {
     return await chartViewSeries(resolution, config)
   }).data!
-  const toolSeries = React.useMemo<StockChartSeries[]>(() => {
-    return mainSeries.length > 0 ? tools.map(toolConfig => chartViewTool(mainSeries[0], toolConfig)) : []
-  }, [mainSeries, tools])
-  const series = React.useMemo<StockChartSeries[]>(() => [...mainSeries, ...toolSeries], [mainSeries, toolSeries])
-
+  const series = React.useMemo<StockChartSeries[]>(() => {
+    return baseSeries.flatMap(series => {
+      if (['line', 'candle'].includes(series.type)) {
+        return [series, ...[30, 60, 90].map(range => chartViewTool(series, { type: 'simpleMovingAverage', range }))]
+      } else {
+        return [series]
+      }
+    })
+  }, [baseSeries])
   const seriesTimestampMin = React.useMemo(
     () =>
       minBy<number>(
@@ -64,6 +64,8 @@ export const ChartView: React.FC = () => {
     [series]
   )
 
+  const { privacy } = usePrivacy()
+  const [enabledSeries, setEnabledSeries] = React.useState<string[]>(series.length > 0 ? [series[0].id] : [])
   const defaultViewPort = (dateUnit: DateUnit): StockChartViewport => {
     const now = new Date()
     const from = new Date(maxBy([dateMinus(now, dateUnit, 300), seriesTimestampMin], d => d.valueOf()) || Date.now())
@@ -90,7 +92,7 @@ export const ChartView: React.FC = () => {
               enableMouseOver
               enablePanAndZoom
               privacy={privacy && isChartViewSeriesPrivate(config)}
-              series={series}
+              series={series.filter(s => enabledSeries.includes(s.id))}
               viewport={viewport}
               onChangeViewport={setViewport}
             />
@@ -98,104 +100,143 @@ export const ChartView: React.FC = () => {
         </AutoSizer>
       </div>
       <BottomBar className={stylesToolbar}>
-        <Menu
-          items={[
-            {
-              label: '1 month',
-              onClick: () => {
-                setViewport(viewport => ({
-                  ...viewport,
-                  xAxisMinMax: [
-                    dateStartOf(dateMinus(new Date(), 'month', 1), resolution).valueOf(),
-                    dateEndOf(new Date(), resolution).valueOf(),
-                  ],
-                  yAxisMinMax: undefined,
-                }))
-              },
-            },
-            {
-              label: '1 year',
-              onClick: () => {
-                setViewport(viewport => ({
-                  ...viewport,
-                  xAxisMinMax: [
-                    dateStartOf(dateMinus(new Date(), 'year', 1), resolution).valueOf(),
-                    dateEndOf(new Date(), resolution).valueOf(),
-                  ],
-                  yAxisMinMax: undefined,
-                }))
-              },
-            },
-            {
-              label: '2 years',
-              onClick: () => {
-                setViewport(viewport => ({
-                  ...viewport,
-                  xAxisMinMax: [
-                    dateStartOf(dateMinus(new Date(), 'year', 2), resolution).valueOf(),
-                    dateEndOf(new Date(), resolution).valueOf(),
-                  ],
-                  yAxisMinMax: undefined,
-                }))
-              },
-            },
-            {
-              label: '3 years',
-              onClick: () => {
-                setViewport(viewport => ({
-                  ...viewport,
-                  xAxisMinMax: [
-                    dateStartOf(dateMinus(new Date(), 'year', 3), resolution).valueOf(),
-                    dateEndOf(new Date(), resolution).valueOf(),
-                  ],
-                  yAxisMinMax: undefined,
-                }))
-              },
-            },
-            {
-              label: '5 years',
-              onClick: () => {
-                setViewport(viewport => ({
-                  ...viewport,
-                  xAxisMinMax: [
-                    dateStartOf(dateMinus(new Date(), 'year', 5), resolution).valueOf(),
-                    dateEndOf(new Date(), resolution).valueOf(),
-                  ],
-                  yAxisMinMax: undefined,
-                }))
-              },
-            },
-            {
-              label: 'all',
-              onClick: () => {
-                setViewport(viewport => ({
-                  ...viewport,
-                  xAxisMinMax: [
-                    dateStartOf(new Date(seriesTimestampMin), resolution).valueOf(),
-                    dateEndOf(new Date(), resolution).valueOf(),
-                  ],
-                  yAxisMinMax: undefined,
-                }))
-              },
-            },
-          ]}
-          verticalAlignment="top"
-        >
-          <a href="#" className={stylesTool}>
-            Range
-          </a>
-        </Menu>
+        <SeriesMenu series={series} enabledSeries={enabledSeries} setEnabledSeries={setEnabledSeries} />
+        <RangeMenu setViewport={setViewport} resolution={resolution} seriesTimestampMin={seriesTimestampMin} />
         <ResolutionMenu resolution={resolution} setResolution={setResolution} />
-        <ToolMenu tools={tools} setTools={setTools} />
       </BottomBar>
     </div>
   )
 }
 
-const ResolutionMenu: React.FC<{ resolution: DateUnit; setResolution: (tools: DateUnit) => void }> = ({
-  resolution,
-  setResolution,
-}) => {
+const SeriesMenu: React.FC<{
+  series: StockChartSeries[]
+  enabledSeries: string[]
+  setEnabledSeries: React.Dispatch<React.SetStateAction<string[]>>
+}> = ({ series, enabledSeries, setEnabledSeries }) => {
+  return (
+    <Menu
+      items={series.map(series => {
+        return {
+          label: series.label,
+          icon: enabledSeries.includes(series.id) ? <FaCheck /> : <div />,
+          onClick: () => {
+            setEnabledSeries(enabledSeries => {
+              return !enabledSeries.includes(series.id)
+                ? [...enabledSeries, series.id]
+                : enabledSeries.filter(id => id !== series.id)
+            })
+          },
+        }
+      })}
+      verticalAlignment="top"
+    >
+      <a href="#" className={stylesTool}>
+        Series
+      </a>
+    </Menu>
+  )
+}
+
+const RangeMenu: React.FC<{
+  setViewport: React.Dispatch<React.SetStateAction<StockChartViewport>>
+  resolution: DateUnit
+  seriesTimestampMin: number
+}> = ({ setViewport, resolution, seriesTimestampMin }) => {
+  return (
+    <Menu
+      items={[
+        {
+          label: '1 month',
+          onClick: () => {
+            setViewport(viewport => ({
+              ...viewport,
+              xAxisMinMax: [
+                dateStartOf(dateMinus(new Date(), 'month', 1), resolution).valueOf(),
+                dateEndOf(new Date(), resolution).valueOf(),
+              ],
+              yAxisMinMax: undefined,
+            }))
+          },
+        },
+        {
+          label: '1 year',
+          onClick: () => {
+            setViewport(viewport => ({
+              ...viewport,
+              xAxisMinMax: [
+                dateStartOf(dateMinus(new Date(), 'year', 1), resolution).valueOf(),
+                dateEndOf(new Date(), resolution).valueOf(),
+              ],
+              yAxisMinMax: undefined,
+            }))
+          },
+        },
+        {
+          label: '2 years',
+          onClick: () => {
+            setViewport(viewport => ({
+              ...viewport,
+              xAxisMinMax: [
+                dateStartOf(dateMinus(new Date(), 'year', 2), resolution).valueOf(),
+                dateEndOf(new Date(), resolution).valueOf(),
+              ],
+              yAxisMinMax: undefined,
+            }))
+          },
+        },
+        {
+          label: '3 years',
+          onClick: () => {
+            setViewport(viewport => ({
+              ...viewport,
+              xAxisMinMax: [
+                dateStartOf(dateMinus(new Date(), 'year', 3), resolution).valueOf(),
+                dateEndOf(new Date(), resolution).valueOf(),
+              ],
+              yAxisMinMax: undefined,
+            }))
+          },
+        },
+        {
+          label: '5 years',
+          onClick: () => {
+            setViewport(viewport => ({
+              ...viewport,
+              xAxisMinMax: [
+                dateStartOf(dateMinus(new Date(), 'year', 5), resolution).valueOf(),
+                dateEndOf(new Date(), resolution).valueOf(),
+              ],
+              yAxisMinMax: undefined,
+            }))
+          },
+        },
+        {
+          label: 'all',
+          onClick: () => {
+            setViewport(viewport => ({
+              ...viewport,
+              xAxisMinMax: [
+                dateStartOf(new Date(seriesTimestampMin), resolution).valueOf(),
+                dateEndOf(new Date(), resolution).valueOf(),
+              ],
+              yAxisMinMax: undefined,
+            }))
+          },
+        },
+      ]}
+      verticalAlignment="top"
+    >
+      <a href="#" className={stylesTool}>
+        Range
+      </a>
+    </Menu>
+  )
+}
+
+const ResolutionMenu: React.FC<{
+  resolution: DateUnit
+  setResolution: React.Dispatch<React.SetStateAction<DateUnit>>
+}> = ({ resolution, setResolution }) => {
   return (
     <Menu
       items={[
@@ -224,34 +265,6 @@ const ResolutionMenu: React.FC<{ resolution: DateUnit; setResolution: (tools: Da
     >
       <a href="#" className={stylesTool}>
         Resolution
-      </a>
-    </Menu>
-  )
-}
-
-const ToolMenu: React.FC<{ tools: ChartViewToolConfig[]; setTools: (tools: ChartViewToolConfig[]) => void }> = ({
-  tools,
-  setTools,
-}) => {
-  return (
-    <Menu
-      items={[
-        ...[30, 60, 90].map(range => ({
-          label: `SMA ${range}`,
-          icon: tools.find(c => isSimpleMovingAverageToolConfig(c, range)) ? <FaCheck /> : <div />,
-          onClick: () => {
-            if (!tools.find(c => isSimpleMovingAverageToolConfig(c, range))) {
-              setTools([...tools, { type: 'simpleMovingAverage', range: range }])
-            } else {
-              setTools(tools.filter(c => !isSimpleMovingAverageToolConfig(c, range)))
-            }
-          },
-        })),
-      ]}
-      verticalAlignment="top"
-    >
-      <a href="#" className={stylesTool}>
-        Tools
       </a>
     </Menu>
   )

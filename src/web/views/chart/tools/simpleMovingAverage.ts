@@ -16,6 +16,7 @@ export const simpleMovingAverageTool: ChartViewTool<SimpleMovingAverageToolConfi
   { range }: SimpleMovingAverageToolConfig
 ): StockChartLineSeries => {
   return {
+    id: `${from.id}-sma-${range}`,
     label: `${from.label} (SMA ${range})`,
     type: 'line',
     color: 'blue',

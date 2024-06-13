@@ -18,6 +18,7 @@ export const assetSeries: ChartViewSeries<AssetSeriesConfig> = async (
   const quotes = await rpcClient.listQuotesForAsset({ id: config.assetId }).then(r => r.data)
   return [
     {
+      id: `asset-${asset.symbol}`,
       type: 'candle',
       label: `${asset.symbol}/${asset.currency}`,
       points: groupBy(quotes, q => dateStartOf(dateParse(q.date), resolution).valueOf().toString()).map(quotes => {

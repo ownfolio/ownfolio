@@ -32,6 +32,7 @@ export interface StockChartSeriesOHLCPoint {
 }
 
 export interface StockChartSeriesBase {
+  id: string
   label: string
   priority?: number
 }
