@@ -18,6 +18,7 @@ export const assetTransactionsSeries: ChartViewSeries<AssetTransactionsSeriesCon
   const transactions = await rpcClient.listTransactions({}).then(r => r.data)
   return [
     {
+      id: `asset-transactions-${asset.symbol}`,
       type: 'point',
       label: `${asset.symbol}/${asset.currency} Buy/Sell`,
       points: transactions.flatMap(tx => {

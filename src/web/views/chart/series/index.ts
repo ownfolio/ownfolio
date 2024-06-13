@@ -3,6 +3,7 @@ import { StockChartSeries } from '../../../components/StockChart'
 import { assetSeries, AssetSeriesConfig } from './asset'
 import { assetTransactionsSeries, AssetTransactionsSeriesConfig } from './assetTransactions'
 import { profitSeries, ProfitSeriesConfig } from './profit'
+import { profitRelativeSeries, ProfitRelativeSeriesConfig } from './profitRelative'
 import { totalSeries, TotalSeriesConfig } from './total'
 import { totalDepositSeries, TotalDepositSeriesConfig } from './totalDeposit'
 
@@ -12,6 +13,7 @@ export type ChartViewSeriesConfig =
   | TotalSeriesConfig
   | TotalDepositSeriesConfig
   | ProfitSeriesConfig
+  | ProfitRelativeSeriesConfig
   | AssetSeriesConfig
   | AssetTransactionsSeriesConfig
 
@@ -26,6 +28,8 @@ export async function chartViewSeries(
       return totalDepositSeries(resolution, config)
     case 'profit':
       return profitSeries(resolution, config)
+    case 'profitRelative':
+      return profitRelativeSeries(resolution, config)
     case 'asset':
       return assetSeries(resolution, config)
     case 'assetTransactions':
@@ -41,6 +45,8 @@ export function isChartViewSeriesPrivate(config: ChartViewSeriesConfig): boolean
       return true
     case 'profit':
       return true
+    case 'profitRelative':
+      return false
     case 'asset':
       return false
     case 'assetTransactions':

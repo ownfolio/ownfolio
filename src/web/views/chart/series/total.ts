@@ -25,6 +25,7 @@ export const totalSeries: ChartViewSeries<TotalSeriesConfig> = async (
     .then(r => r.data)
   return [
     {
+      id: `total-${key}`,
       type: 'line',
       label: 'Total',
       color: 'black',

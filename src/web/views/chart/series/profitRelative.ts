@@ -5,36 +5,36 @@ import { rpcClient } from '../../../api'
 import { StockChartSeries } from '../../../components/StockChart'
 import type { ChartViewSeries } from './index'
 
-export interface TotalDepositSeriesConfig {
-  type: 'totalDeposit'
+export interface ProfitRelativeSeriesConfig {
+  type: 'profitRelative'
   portfolioId?: string
 }
 
-export const totalDepositSeries: ChartViewSeries<TotalDepositSeriesConfig> = async (
+export const profitRelativeSeries: ChartViewSeries<ProfitRelativeSeriesConfig> = async (
   resolution: DateUnit,
-  config: TotalDepositSeriesConfig
+  config: ProfitRelativeSeriesConfig
 ): Promise<StockChartSeries[]> => {
   const key = !config.portfolioId ? 'all' : config.portfolioId
   const data = await rpcClient
     .evaluateSummary({
       when: { type: 'historical', resolution },
       buckets: [!config.portfolioId ? { type: 'all' } : { type: 'portfolio', portfolioId: config.portfolioId }],
-      values: ['deposit'],
+      values: ['total', 'deposit'],
     })
     .then(r => r.data)
   return [
     {
-      id: `total-deposit-${key}`,
+      id: `profit-relative-${key}`,
       type: 'line',
-      label: 'Total Deposit',
-      priority: -1,
-      color: 'silver',
-      filled: true,
-      staircase: true,
-      lineWidth: 1,
-      points: data.value[key].map(([date, deposit]) => ({
+      label: 'Profit (%)',
+      color: 'black',
+      filled: false,
+      staircase: false,
+      points: data.value[key].map(([date, total, deposit]) => ({
         timestamp: dateEndOf(dateParse(date), 'day').valueOf(),
-        value: BigNumber(deposit).toNumber(),
+        value: BigNumber(deposit).isPositive()
+          ? BigNumber(total).dividedBy(deposit).minus(1).multipliedBy(100).toNumber()
+          : 0,
       })),
     },
   ]

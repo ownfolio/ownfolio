@@ -4,6 +4,7 @@ import { dateEndOf, dateParse, DateUnit } from '../../../../shared/utils/date'
 import { rpcClient } from '../../../api'
 import { StockChartSeries } from '../../../components/StockChart'
 import type { ChartViewSeries } from './index'
+import { profitRelativeSeries } from './profitRelative'
 
 export interface ProfitSeriesConfig {
   type: 'profit'
@@ -24,6 +25,7 @@ export const profitSeries: ChartViewSeries<ProfitSeriesConfig> = async (
     .then(r => r.data)
   return [
     {
+      id: `profit-${key}`,
       type: 'line',
       label: 'Profit',
       color: 'black',
@@ -34,5 +36,6 @@ export const profitSeries: ChartViewSeries<ProfitSeriesConfig> = async (
         value: BigNumber(total).minus(deposit).toNumber(),
       })),
     },
+    ...(await profitRelativeSeries(resolution, { type: 'profitRelative', portfolioId: config.portfolioId })),
   ]
 }
