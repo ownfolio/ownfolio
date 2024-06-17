@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import React from 'react'
 import { FaCheck } from 'react-icons/fa6'
 import { useParams } from 'react-router-dom'
+import { z } from 'zod'
 
 import { maxBy, minBy } from '../../../shared/utils/array'
 import { dateEndOf, dateMinus, datePlus, dateStartOf, DateUnit, dateUnitSchema } from '../../../shared/utils/date'
@@ -19,20 +20,18 @@ type ChartParams = { type: 'total'; id?: string } | { type: 'profit'; id?: strin
 
 export const ChartView: React.FC = () => {
   const params = useParams() as ChartParams
-  const [config] = React.useState<ChartViewSeriesConfig>(
-    ((): ChartViewSeriesConfig => {
-      switch (params.type) {
-        case 'total':
-          return { type: 'total', portfolioId: params.id }
-        case 'profit':
-          return { type: 'profit', portfolioId: params.id }
-        case 'asset':
-          return { type: 'asset', assetId: params.id }
-        default:
-          throw new Error('Unsupported chart type')
-      }
-    })()
-  )
+  const [key, config] = React.useMemo<[string, ChartViewSeriesConfig]>(() => {
+    switch (params.type) {
+      case 'total':
+        return [`total-${params.id || 'all'}`, { type: 'total', portfolioId: params.id }]
+      case 'profit':
+        return [`profit-${params.id || 'all'}`, { type: 'profit', portfolioId: params.id }]
+      case 'asset':
+        return [`asset-${params.id}`, { type: 'asset', assetId: params.id }]
+      default:
+        throw new Error('Unsupported chart type')
+    }
+  }, [params])
   const [resolution, setResolution] = usePersistentState<DateUnit>('chartView.resolution', dateUnitSchema, 'week')
   const baseSeries = useQuery<StockChartSeries[]>(['chartView', JSON.stringify(config), resolution], async () => {
     return await chartViewSeries(resolution, config)
@@ -65,7 +64,11 @@ export const ChartView: React.FC = () => {
   )
 
   const { privacy } = usePrivacy()
-  const [enabledSeries, setEnabledSeries] = React.useState<string[]>(series.length > 0 ? [series[0].id] : [])
+  const [enabledSeries, setEnabledSeries] = usePersistentState<string[]>(
+    `chartView.${key}.series`,
+    z.array(z.string()),
+    series.length > 0 ? [series[0].id] : []
+  )
   const defaultViewPort = (dateUnit: DateUnit): StockChartViewport => {
     const now = new Date()
     const from = new Date(maxBy([dateMinus(now, dateUnit, 300), seriesTimestampMin], d => d.valueOf()) || Date.now())
