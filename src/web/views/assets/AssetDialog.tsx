@@ -106,7 +106,7 @@ export const AssetDialog: React.FC<Props> = ({ mode, closeDialog }) => {
         <SelectCurrency
           id="currency"
           value={asset.currency}
-          onChange={event => setAsset(asset => ({ ...asset!, currency: event.target.value }))}
+          onChange={event => setAsset(asset => ({ ...asset!, currency: event.target.value as 'EUR' }))}
           required
         />
       </Label>
