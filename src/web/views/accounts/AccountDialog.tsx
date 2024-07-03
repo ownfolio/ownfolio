@@ -95,7 +95,7 @@ export const AccountDialog: React.FC<Props> = ({ mode, closeDialog }) => {
         <SelectCurrency
           id="currency"
           value={account.currency}
-          onChange={event => setAccount(account => ({ ...account!, currency: event.target.value }))}
+          onChange={event => setAccount(account => ({ ...account!, currency: event.target.value as 'EUR' }))}
           required
         />
       </Label>

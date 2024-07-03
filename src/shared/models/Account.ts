@@ -30,7 +30,7 @@ export function createEmptyAccount(): Account {
     portfolioId: '',
     name: '',
     number: '',
-    currency: '',
+    currency: 'EUR',
     status: 'active',
     createdAt: '',
   }
