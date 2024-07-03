@@ -3,7 +3,6 @@ require('ts-node').register()
 const fs = require('fs/promises')
 const path = require('path')
 const markdownIt = require('markdown-it')
-const conventionalChangeLog = require('conventional-changelog')
 
 const build = benchmark('build', async () => {
   await clear()
@@ -12,6 +11,7 @@ const build = benchmark('build', async () => {
 })
 
 const buildChangelog = benchmark('buildChangelog', async () => {
+  const conventionalChangeLog = await import('conventional-changelog').then(mod => mod.default)
   const markdown = await new Promise((resolve, reject) => {
     const stream = conventionalChangeLog(
       {
