@@ -67,7 +67,7 @@ export const ChartView: React.FC = () => {
   const [enabledSeries, setEnabledSeries] = usePersistentState<string[]>(
     `chartView.${key}.series`,
     z.array(z.string()),
-    series.length > 0 ? [series[0].id] : []
+    baseSeries.map(s => s.id)
   )
   const defaultViewPort = (dateUnit: DateUnit): StockChartViewport => {
     const now = new Date()
