@@ -57,7 +57,11 @@ const buildPages = benchmark('buildHtml', async () => {
 const markdownToHtml = benchmark('markdownToHtml', async (input, output) => {
   const template = await fs.readFile(path.resolve(__dirname, 'index.tmpl.html'), 'utf-8')
   const markdown = await fs.readFile(input, 'utf-8')
-  const html = markdownIt().render(markdown)
+  const html = markdownIt({
+    html: true,
+    linkify: true,
+    typographer: true,
+  }).render(markdown)
   const fullHtml = template.replaceAll('{{body}}', html)
   await fs.writeFile(output, fullHtml, 'utf-8')
 })
