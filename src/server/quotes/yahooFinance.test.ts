@@ -9,7 +9,7 @@ it(
   'fetchYahooFinanceQuotes',
   async () => {
     const quotes = await fetchYahooFinanceQuotes('EUNL.DE')
-    expect(quotes['2024-01-02']!.close).toEqual(BigNumber('82.216003'))
+    expect(quotes['2024-01-02']!.close).toEqual(BigNumber('82.21600341796875'))
   },
   {
     timeout: 10000,
