@@ -42,7 +42,7 @@ async function buildToolsDockerImage() {
     return
   }
 
-  const dockerfile = `FROM alpine:3.19.1
+  const dockerfile = `FROM alpine:3.21.2
 RUN apk add --no-cache nodejs
 COPY --from=ghcr.io/choffmeister/pdfmake-cli:0.1.0 /usr/lib/pdfmake-cli /usr/lib/pdfmake-cli
 RUN ln -s /usr/lib/pdfmake-cli/pdfmake-cli /usr/local/bin/pdfmake-cli
