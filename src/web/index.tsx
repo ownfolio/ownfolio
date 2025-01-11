@@ -16,6 +16,7 @@ window.__RPC_CLIENT__ = rpcClient
 const root = ReactDOM.createRoot(document.getElementById('root')!)
 root.render(<App />)
 
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 css`
   :global() {
     html {
