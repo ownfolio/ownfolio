@@ -39,7 +39,7 @@ export async function fetchYahooFinanceQuotes(symbol: string): Promise<YahooFina
   const result: YahooFinanceResult = {}
   resJson.data.chart.result[0].timestamp.forEach((ts, idx) => {
     const date = new Date(ts * 1000).toISOString().substring(0, 10)
-    result[date] = {
+    const resultLine = {
       open: BigNumber(
         resJson.data.chart.result[0].indicators.quote[0].open[idx] ||
           resJson.data.chart.result[0].indicators.quote[0].close[idx]
@@ -53,6 +53,18 @@ export async function fetchYahooFinanceQuotes(symbol: string): Promise<YahooFina
           resJson.data.chart.result[0].indicators.quote[0].close[idx]
       ),
       close: BigNumber(resJson.data.chart.result[0].indicators.quote[0].close[idx]),
+    }
+    if (
+      BigNumber.isBigNumber(resultLine.open) &&
+      resultLine.open.isFinite() &&
+      BigNumber.isBigNumber(resultLine.high) &&
+      resultLine.high.isFinite() &&
+      BigNumber.isBigNumber(resultLine.low) &&
+      resultLine.low.isFinite() &&
+      BigNumber.isBigNumber(resultLine.close) &&
+      resultLine.close.isFinite()
+    ) {
+      result[date] = resultLine
     }
   })
   return result
