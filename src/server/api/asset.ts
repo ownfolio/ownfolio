@@ -67,10 +67,6 @@ export function createRpcV1Asset(database: Database) {
       if (transactionCount > 0) {
         throw RpcError.badRequest('Assets with at least one transaction cannot be deleted')
       }
-      const quoteCount = await database.quotes.countForAssetId(input.id)
-      if (quoteCount > 0) {
-        throw RpcError.badRequest('Assets with at least one quote cannot be deleted')
-      }
       await database.assets.delete(input.id)
       return {}
     }),
