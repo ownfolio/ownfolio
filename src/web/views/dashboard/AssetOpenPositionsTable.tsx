@@ -32,9 +32,9 @@ export const AssetOpenPositionsTable: React.FC<{ timetravel?: string }> = ({ tim
     () => [
       { id: 'asset', title: 'Asset', minWidth: 150 },
       { id: 'openDate', title: 'Open Date', align: 'right', width: 125, priority: 3 },
-      { id: 'amount', title: 'Amount', align: 'right', width: 225, priority: 2 },
-      { id: 'profit', title: 'Profit', align: 'right', width: 225, priority: 1 },
-      { id: 'currentPrice', title: 'Current Price', align: 'right', width: 225 },
+      { id: 'amount', title: 'Amount', align: 'right', width: 200, priority: 2 },
+      { id: 'profit', title: 'Profit', align: 'right', width: 200, priority: 1 },
+      { id: 'currentPrice', title: 'Current Price', align: 'right', width: 200 },
     ],
     []
   )

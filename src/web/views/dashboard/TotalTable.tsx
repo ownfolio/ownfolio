@@ -60,10 +60,10 @@ export const TotalTable: React.FC<{ timetravel?: string }> = ({ timetravel }) =>
       { id: 'change30d', title: 'Change (30d)', align: 'right', width: 140, priority: 4 },
       { id: 'change7d', title: 'Change (7d)', align: 'right', width: 140, priority: 3 },
       { id: 'change1d', title: 'Change (1d)', align: 'right', width: 140, priority: 2 },
-      { id: 'profit', title: 'Profit', align: 'right', width: 225, priority: 1 },
-      { id: 'cash', title: 'Cash', align: 'right', width: 225, priority: 5 },
-      { id: 'assets', title: 'Assets', align: 'right', width: 225, priority: 5 },
-      { id: 'total', title: 'Total', align: 'right', width: 225 },
+      { id: 'profit', title: 'Profit', align: 'right', width: 200, priority: 1 },
+      { id: 'cash', title: 'Cash', align: 'right', width: 200, priority: 5 },
+      { id: 'assets', title: 'Assets', align: 'right', width: 200, priority: 5 },
+      { id: 'total', title: 'Total', align: 'right', width: 200 },
     ],
     []
   )

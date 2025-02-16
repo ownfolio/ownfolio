@@ -32,9 +32,9 @@ export const AssetClosedPositionsTable: React.FC<{ timetravel?: string }> = ({ t
     () => [
       { id: 'asset', title: 'Asset', minWidth: 150 },
       { id: 'date', title: 'Date', align: 'right', width: 125, priority: 3 },
-      { id: 'amount', title: 'Amount', align: 'right', width: 225, priority: 2 },
-      { id: 'profit', title: 'Profit', align: 'right', width: 225, priority: 1 },
-      { id: 'sellPrice', title: 'Sell Price', align: 'right', width: 225 },
+      { id: 'amount', title: 'Amount', align: 'right', width: 200, priority: 2 },
+      { id: 'profit', title: 'Profit', align: 'right', width: 200, priority: 1 },
+      { id: 'sellPrice', title: 'Sell Price', align: 'right', width: 200 },
     ],
     []
   )

@@ -38,7 +38,7 @@ export const CashTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => 
   const columns = React.useMemo<TableDefinitionColumn[]>(
     () => [
       { id: 'account', title: 'Account', minWidth: 150 },
-      { id: 'value', title: 'Value', align: 'right', width: 225 },
+      { id: 'value', title: 'Value', align: 'right', width: 200 },
     ],
     []
   )

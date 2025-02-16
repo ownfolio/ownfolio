@@ -4,7 +4,6 @@ import React from 'react'
 import { BsThreeDotsVertical } from 'react-icons/bs'
 
 import { selectionSortBy } from '../../shared/utils/array'
-import { useElementDimensions } from '../hooks/useElementDimensions'
 import { Card } from './Card'
 import { ExpandCollapse } from './ExpandCollapse'
 import { Menu } from './Menu'
@@ -44,31 +43,23 @@ type Props = React.DetailedHTMLProps<React.TableHTMLAttributes<HTMLTableElement>
 
 export const CardTable = React.forwardRef<HTMLTableElement, Props>(
   ({ columns, rows, className, expansion, ...other }, ref) => {
-    const widthRef = React.useRef<HTMLTableElement>(null)
-    const width = useElementDimensions(w => Math.floor(w / 25) * 25, 0, widthRef)
-    const visible = React.useMemo(() => {
+    const columnWidths = React.useMemo(() => {
       return selectionSortBy(columns, (a, b) => (a.priority || 0) - (b.priority || 0)).reduce<{
         consumedWidth: number
-        columnIds: string[]
+        widths: { [columnId: string]: number }
       }>(
         (acc, c) => {
           const columnPriority = c.priority || 0
           const columnWidth = c.width || c.minWidth || 200
-          if (columnPriority === 0 || acc.consumedWidth + columnWidth <= width) {
-            return {
-              consumedWidth: acc.consumedWidth + columnWidth,
-              columnIds: [...acc.columnIds, c.id],
-            }
-          } else {
-            return {
-              consumedWidth: acc.consumedWidth + columnWidth,
-              columnIds: acc.columnIds,
-            }
+          return {
+            consumedWidth: acc.consumedWidth + columnWidth + 2 * 4,
+            widths: { ...acc.widths, [c.id]: columnPriority > 0 ? acc.consumedWidth + columnWidth + 2 * 8 : 0 },
           }
         },
-        { consumedWidth: 0, columnIds: [] }
-      ).columnIds
-    }, [columns, width])
+        { consumedWidth: 2 * 24, widths: {} }
+      ).widths
+    }, [columns])
+    console.log(columnWidths)
     const showSubRows = React.useMemo(() => !!rows.find(r => r.subRows && r.subRows.length > 0), [rows])
     const showMenuItems = React.useMemo(
       () =>
@@ -80,35 +71,35 @@ export const CardTable = React.forwardRef<HTMLTableElement, Props>(
       [rows]
     )
     const [expanded, setExpanded] = expansion || React.useState<TableExpansionState>({})
-    const isColumnVisible = React.useCallback((id: string) => visible.includes(id), [visible])
     const isRowExpanded = React.useCallback((id: string | number) => expanded[id] === true, [expanded])
     const toggleRowExpanded = React.useCallback(
       (id: string | number) => setExpanded(expanded => ({ ...expanded, [id]: !expanded[id] })),
       []
     )
     return (
-      <Card ref={widthRef}>
+      <Card>
         <table ref={ref} {...other} className={clsx(stylesRoot, className)}>
           <thead>
             <tr>
               {showSubRows && <th className={stylesColumnExpandCollapse} />}
-              {columns.flatMap(column => {
-                if (!visible.includes(column.id)) return []
+              {columns.map(column => {
                 const align = column.align || 'left'
-                return [
+                return (
                   <th
                     key={column.id}
                     className={clsx(
                       align === 'left' && stylesColumnLeft,
                       align === 'center' && stylesColumnCenter,
                       align === 'right' && stylesColumnRight,
+                      stylesColumnHidden(columnWidths[column.id]),
                       column.className
                     )}
+                    data-hidden="1000"
                     style={{ width: column.width }}
                   >
                     {column.title}
-                  </th>,
-                ]
+                  </th>
+                )
               })}
               {showMenuItems && <th className={stylesColumnMenu} />}
             </tr>
@@ -118,10 +109,10 @@ export const CardTable = React.forwardRef<HTMLTableElement, Props>(
               <CardTableRow
                 key={row.id}
                 columns={columns}
+                columnWidths={columnWidths}
                 row={row}
                 showSubRows={showSubRows}
                 showMenuItems={showMenuItems}
-                isColumnVisible={isColumnVisible}
                 isRowExpanded={isRowExpanded}
                 toggleRowExpanded={toggleRowExpanded}
               />
@@ -135,20 +126,20 @@ export const CardTable = React.forwardRef<HTMLTableElement, Props>(
 
 interface RowProps {
   columns: TableDefinitionColumn[]
+  columnWidths: { [columnId: string]: number }
   row: TableDefinitionRow
   showSubRows: boolean
   showMenuItems: boolean
-  isColumnVisible: (id: string) => boolean
   isRowExpanded: (id: string | number) => boolean
   toggleRowExpanded: (id: string | number) => void
 }
 
 export const CardTableRow: React.FC<RowProps> = ({
   columns,
+  columnWidths,
   row,
   showSubRows,
   showMenuItems,
-  isColumnVisible,
   isRowExpanded,
   toggleRowExpanded: _toggleRowExpanded,
 }) => {
@@ -163,23 +154,23 @@ export const CardTableRow: React.FC<RowProps> = ({
             )}
           </td>
         )}
-        {columns.flatMap(column => {
-          if (!isColumnVisible(column.id)) return []
+        {columns.map(column => {
           const align = column.align || 'left'
-          return [
+          return (
             <td
               key={column.id}
               className={clsx(
                 align === 'left' && stylesColumnLeft,
                 align === 'center' && stylesColumnCenter,
                 align === 'right' && stylesColumnRight,
+                stylesColumnHidden(columnWidths[column.id]),
                 column.className
               )}
               style={{ width: column.width }}
             >
               {row.columns[column.id] || ''}
-            </td>,
-          ]
+            </td>
+          )
         })}
         {showMenuItems && (
           <td className={stylesColumnMenu}>
@@ -200,9 +191,9 @@ export const CardTableRow: React.FC<RowProps> = ({
           <CardTableSubRow
             key={subRow.id}
             columns={columns}
+            columnWidths={columnWidths}
             subRow={subRow}
             showMenuItems={showMenuItems}
-            isColumnVisible={isColumnVisible}
           />
         ))}
     </React.Fragment>
@@ -211,32 +202,32 @@ export const CardTableRow: React.FC<RowProps> = ({
 
 interface SubRowProps {
   columns: TableDefinitionColumn[]
+  columnWidths: { [columnId: string]: number }
   subRow: TableDefinitionSubRow
   showMenuItems: boolean
-  isColumnVisible: (id: string) => boolean
 }
 
-export const CardTableSubRow: React.FC<SubRowProps> = ({ columns, subRow, showMenuItems, isColumnVisible }) => {
+export const CardTableSubRow: React.FC<SubRowProps> = ({ columns, columnWidths, subRow, showMenuItems }) => {
   return (
     <tr>
       <td className={stylesColumnExpandCollapse} />
-      {columns.flatMap(column => {
-        if (!isColumnVisible(column.id)) return []
+      {columns.map(column => {
         const align = column.align || 'left'
-        return [
+        return (
           <td
             key={column.id}
             className={clsx(
               align === 'left' && stylesColumnLeft,
               align === 'center' && stylesColumnCenter,
               align === 'right' && stylesColumnRight,
+              stylesColumnHidden(columnWidths[column.id]),
               column.className
             )}
             style={{ width: column.width }}
           >
             {subRow.columns[column.id] || ''}
-          </td>,
-        ]
+          </td>
+        )
       })}
       {showMenuItems && (
         <td className={stylesColumnMenu}>
@@ -307,6 +298,175 @@ const stylesColumnMenu = css`
   width: 16px;
   text-align: right;
 `
+
+const stylesColumnHidden = (width: number) => {
+  if (width === 0) return undefined
+  const options = [
+    {
+      width: 0,
+      style: css`
+        @media only screen and (max-width: 99px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 100,
+      style: css`
+        @media only screen and (max-width: 199px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 200,
+      style: css`
+        @media only screen and (max-width: 299px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 300,
+      style: css`
+        @media only screen and (max-width: 399px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 400,
+      style: css`
+        @media only screen and (max-width: 499px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 500,
+      style: css`
+        @media only screen and (max-width: 599px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 600,
+      style: css`
+        @media only screen and (max-width: 699px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 700,
+      style: css`
+        @media only screen and (max-width: 799px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 800,
+      style: css`
+        @media only screen and (max-width: 899px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 900,
+      style: css`
+        @media only screen and (max-width: 999px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 1000,
+      style: css`
+        @media only screen and (max-width: 1099px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 1100,
+      style: css`
+        @media only screen and (max-width: 1199px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 1200,
+      style: css`
+        @media only screen and (max-width: 1299px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 1300,
+      style: css`
+        @media only screen and (max-width: 1399px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 1400,
+      style: css`
+        @media only screen and (max-width: 1499px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 1500,
+      style: css`
+        @media only screen and (max-width: 1599px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 1600,
+      style: css`
+        @media only screen and (max-width: 1699px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 1700,
+      style: css`
+        @media only screen and (max-width: 1799px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 1800,
+      style: css`
+        @media only screen and (max-width: 1899px) {
+          display: none;
+        }
+      `,
+    },
+    {
+      width: 1900,
+      style: css`
+        @media only screen and (max-width: 1999px) {
+          display: none;
+        }
+      `,
+    },
+  ] as const
+  return options
+    .filter(o => o.width < width)
+    .reduce((closest, option) => (width - option.width < width - closest.width ? option : closest), options[0]).style
+}
 
 const stylesColumnLeft = css`
   text-align: left;
