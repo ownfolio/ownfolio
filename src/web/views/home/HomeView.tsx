@@ -27,6 +27,7 @@ import { LoadingView } from '../loading/LoadingView'
 import { PlausibilityView } from '../plausibility/PlausibilityView'
 import { PortfolioDialog } from '../portfolios/PortfolioDialog'
 import { PortfoliosView } from '../portfolios/PortfoliosView'
+import { QuotesView } from '../quotes/QuotesView'
 import { TestView } from '../test/TestView'
 import { TransactionDialog } from '../transactions/TransactionDialog'
 import { TransactionsView } from '../transactions/TransactionsView'
@@ -186,6 +187,7 @@ export const HomeView: React.FC = () => {
                   <Route path="portfolios" element={<PortfoliosView />} />
                   <Route path="accounts" element={<AccountsView />} />
                   <Route path="assets" element={<AssetsView />} />
+                  <Route path="quotes/:assetId" element={<QuotesView />} />
                   <Route path="transactions" element={<TransactionsView />} />
                   <Route path="attachments" element={<AttachmentsView />} />
                   <Route path="plausibility" element={<PlausibilityView />} />

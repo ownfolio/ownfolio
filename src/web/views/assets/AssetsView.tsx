@@ -198,6 +198,10 @@ export const AssetsView: React.FC = () => {
                   await openDialog(AssetDialog, { mode: { type: 'edit', assetId: asset.id } })
                 },
               },
+              {
+                label: 'Edit quotes',
+                onClick: () => navigate(`/quotes/${asset.id}`),
+              },
               null,
               asset.status === 'active' && {
                 label: 'Deactivate',

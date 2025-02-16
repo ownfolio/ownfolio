@@ -40,6 +40,24 @@ export function createRpcV1Quote(database: Database) {
         return { data: quotes.reverse().find(quote => quote.date <= input.date) || null }
       }
     ),
+    updateQuoteForAsset: createRpcCall(quoteSchema, z.void(), async (ctx: RpcCtx, input) => {
+      if (!ctx.user) throw RpcError.unauthorized()
+      const asset = await database.assets.find(input.assetId)
+      if (!asset || (!!asset.userId && asset.userId !== ctx.user.id))
+        throw RpcError.badRequest(`Unknown asset ${input}`)
+      await database.quotes.createOrUpdate(input)
+    }),
+    deleteQuoteForAsset: createRpcCall(
+      byIdSchema.extend({ date: z.string().regex(/^(\d{4}-\d{2}-\d{2})$/) }),
+      z.void(),
+      async (ctx: RpcCtx, input) => {
+        if (!ctx.user) throw RpcError.unauthorized()
+        const asset = await database.assets.find(input.id)
+        if (!asset || (!!asset.userId && asset.userId !== ctx.user.id))
+          throw RpcError.badRequest(`Unknown asset ${input}`)
+        await database.quotes.delete(input.id, input.date)
+      }
+    ),
     updateQuotes: createRpcCall(
       z.void(),
       responseSchema(z.object({ assetQuotesUpdates: z.array(z.string()) })),

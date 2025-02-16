@@ -31,6 +31,10 @@ export class DatabaseQuotes extends DatabaseTable {
     return quotes2
   }
 
+  async delete(assetId: string, date: string): Promise<void> {
+    await this.sql`DELETE FROM "quote" WHERE "assetId" = ${assetId} AND "date" = ${date}`
+  }
+
   async listByAssetId(assetId: string): Promise<Quote[]> {
     const rows = await this.sql`SELECT * FROM "quote" WHERE "assetId" = ${assetId} ORDER BY "date"`
     return rows.map(row => this.schema.parse(row))
