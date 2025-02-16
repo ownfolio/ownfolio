@@ -389,9 +389,9 @@ const AssetDepositTransactionDataFields: React.FC<{
       >
         <Input
           id="cashAmount"
-          type="text"
-          value={data.cashAmount}
-          onChange={event => setData({ ...data, cashAmount: event.target.value })}
+          type="decimal"
+          className={stylesNumberField}
+          {...calculatorInputProps(data.cashAmount, value => setData({ ...data, cashAmount: value }))}
           required
         />
       </Label>
@@ -460,9 +460,9 @@ const AssetWithdrawalTransactionDataFields: React.FC<{
       >
         <Input
           id="cashAmount"
-          type="text"
-          value={data.cashAmount}
-          onChange={event => setData({ ...data, cashAmount: event.target.value })}
+          type="decimal"
+          className={stylesNumberField}
+          {...calculatorInputProps(data.cashAmount, value => setData({ ...data, cashAmount: value }))}
           required
         />
       </Label>
