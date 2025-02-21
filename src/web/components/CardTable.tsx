@@ -59,7 +59,6 @@ export const CardTable = React.forwardRef<HTMLTableElement, Props>(
         { consumedWidth: 2 * 24, widths: {} }
       ).widths
     }, [columns])
-    console.log(columnWidths)
     const showSubRows = React.useMemo(() => !!rows.find(r => r.subRows && r.subRows.length > 0), [rows])
     const showMenuItems = React.useMemo(
       () =>

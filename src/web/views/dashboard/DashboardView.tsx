@@ -6,7 +6,8 @@ import { ViewContainer } from '../../components/ViewContainer'
 import { AssetClosedPositionsTable } from './AssetClosedPositionsTable'
 import { AssetOpenPositionsTable } from './AssetOpenPositionsTable'
 import { CashTable } from './CashTable'
-import { TotalTable } from './TotalTable'
+import { PortfoliosTable } from './PortfoliosTable'
+import { StatCards } from './StatCards'
 
 export const DashboardView: React.FC = () => {
   const [timetravel, setTimetravel] = React.useState<string | undefined>(undefined)
@@ -20,7 +21,9 @@ export const DashboardView: React.FC = () => {
           onChange={event => setTimetravel(event.target.value || undefined)}
         />
       </div>
-      <TotalTable timetravel={timetravel} />
+      <StatCards timetravel={timetravel} />
+      <h2>Portfolios</h2>
+      <PortfoliosTable timetravel={timetravel} />
       <h2>Cash</h2>
       <CashTable timetravel={timetravel} />
       <h2>Assets</h2>
