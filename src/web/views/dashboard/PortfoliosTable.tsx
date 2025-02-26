@@ -26,10 +26,11 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
         when: {
           type: 'dates',
           dates: [
-            dateStartOf(now, 'year'),
-            dateMinus(dateStartOf(now, 'day'), 'day', 30),
+            dateMinus(dateStartOf(now, 'year'), 'day', 1),
+            dateMinus(dateStartOf(now, 'month'), 'day', 1),
+            dateMinus(dateStartOf(now, 'week'), 'day', 1),
             dateMinus(dateStartOf(now, 'day'), 'day', 1),
-            dateMinus(dateStartOf(now, 'day'), 'day', 0),
+            dateStartOf(now, 'day'),
           ].map(str => dateFormat(str, 'yyyy-MM-dd')),
         },
         buckets: [{ type: 'all' }, ...portfolios.map(p => ({ type: 'portfolio' as const, portfolioId: p.id }))],
@@ -58,8 +59,9 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
     () => [
       { id: 'portfolio', title: 'Portfolio', minWidth: 225 },
       { id: 'changeYtd', title: 'Change (YTD)', align: 'right', width: 200, priority: 5 },
-      { id: 'change30d', title: 'Change (30d)', align: 'right', width: 200, priority: 4 },
-      { id: 'change1d', title: 'Change (1d)', align: 'right', width: 200, priority: 2 },
+      { id: 'changeMtd', title: 'Change (MTD)', align: 'right', width: 200, priority: 4 },
+      { id: 'changeWtd', title: 'Change (WTD)', align: 'right', width: 200, priority: 3 },
+      { id: 'changeToday', title: 'Change (Today)', align: 'right', width: 200, priority: 2 },
       { id: 'profit', title: 'Profit', align: 'right', width: 200, priority: 1 },
       { id: 'cash', title: 'Cash', align: 'right', width: 200, priority: 5 },
       { id: 'assets', title: 'Assets', align: 'right', width: 200, priority: 5 },
@@ -72,15 +74,18 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
     return [
       (() => {
         const { total: totalYtd, deposit: depositYtd } = evaluations.value['all'][0]
-        const { total: total30d, deposit: deposit30d } = evaluations.value['all'][1]
-        const { total: total1d, deposit: deposit1d } = evaluations.value['all'][2]
-        const { cash, assetsCurrentPrice, total, deposit } = evaluations.value['all'][3]
+        const { total: totalMtd, deposit: depositMtd } = evaluations.value['all'][1]
+        const { total: totalWtd, deposit: depositWtd } = evaluations.value['all'][2]
+        const { total: totalToday, deposit: depositToday } = evaluations.value['all'][3]
+        const { cash, assetsCurrentPrice, total, deposit } = evaluations.value['all'][4]
         const changeYtd = total.minus(deposit).minus(totalYtd.minus(depositYtd))
         const changeYtdPercentage = changeYtd.dividedBy(totalYtd).multipliedBy(100)
-        const change30d = total.minus(deposit).minus(total30d.minus(deposit30d))
-        const change30dPercentage = change30d.dividedBy(total30d).multipliedBy(100)
-        const change1d = total.minus(deposit).minus(total1d.minus(deposit1d))
-        const change1dPercentage = change1d.dividedBy(total1d).multipliedBy(100)
+        const changeMtd = total.minus(deposit).minus(totalMtd.minus(depositMtd))
+        const changeMtdPercentage = changeMtd.dividedBy(totalMtd).multipliedBy(100)
+        const changeWtd = total.minus(deposit).minus(totalWtd.minus(depositWtd))
+        const changeWtdPercentage = changeWtd.dividedBy(totalWtd).multipliedBy(100)
+        const changeToday = total.minus(deposit).minus(totalToday.minus(depositToday))
+        const changeTodayPercentage = changeToday.dividedBy(totalToday).multipliedBy(100)
         const profit = total.minus(deposit)
         const profitPercentage = profit.dividedBy(deposit).multipliedBy(100)
         return {
@@ -105,11 +110,11 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
                 </div>
               </>
             ),
-            change30d: (
+            changeMtd: (
               <>
                 <div>
                   <Amount
-                    amount={change30d}
+                    amount={changeMtd}
                     denomination={rootCurrency.denomination}
                     symbol={rootCurrency.symbol}
                     abbreviate
@@ -119,15 +124,15 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
                   />
                 </div>
                 <div>
-                  <Percentage percentage={change30dPercentage} decimals={2} signChar signColor signIcon />
+                  <Percentage percentage={changeMtdPercentage} decimals={2} signChar signColor signIcon />
                 </div>
               </>
             ),
-            change1d: (
+            changeWtd: (
               <>
                 <div>
                   <Amount
-                    amount={change1d}
+                    amount={changeWtd}
                     denomination={rootCurrency.denomination}
                     symbol={rootCurrency.symbol}
                     abbreviate
@@ -137,7 +142,25 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
                   />
                 </div>
                 <div>
-                  <Percentage percentage={change1dPercentage} decimals={2} signChar signColor signIcon />
+                  <Percentage percentage={changeWtdPercentage} decimals={2} signChar signColor signIcon />
+                </div>
+              </>
+            ),
+            changeToday: (
+              <>
+                <div>
+                  <Amount
+                    amount={changeToday}
+                    denomination={rootCurrency.denomination}
+                    symbol={rootCurrency.symbol}
+                    abbreviate
+                    signColor
+                    signChar
+                    signIcon
+                  />
+                </div>
+                <div>
+                  <Percentage percentage={changeTodayPercentage} decimals={2} signChar signColor signIcon />
                 </div>
               </>
             ),
@@ -188,15 +211,18 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
       })(),
       ...portfolios.map(portfolio => {
         const { total: totalYtd, deposit: depositYtd } = evaluations.value[portfolio.id][0]
-        const { total: total30d, deposit: deposit30d } = evaluations.value[portfolio.id][1]
-        const { total: total1d, deposit: deposit1d } = evaluations.value[portfolio.id][2]
-        const { cash, assetsCurrentPrice, total, deposit } = evaluations.value[portfolio.id][3]
+        const { total: totalMtd, deposit: depositMtd } = evaluations.value[portfolio.id][1]
+        const { total: totalWtd, deposit: depositWtd } = evaluations.value['all'][2]
+        const { total: totalToday, deposit: depositToday } = evaluations.value[portfolio.id][3]
+        const { cash, assetsCurrentPrice, total, deposit } = evaluations.value[portfolio.id][4]
         const changeYtd = total.minus(deposit).minus(totalYtd.minus(depositYtd))
         const changeYtdPercentage = changeYtd.dividedBy(totalYtd).multipliedBy(100)
-        const change30d = total.minus(deposit).minus(total30d.minus(deposit30d))
-        const change30dPercentage = change30d.dividedBy(total30d).multipliedBy(100)
-        const change1d = total.minus(deposit).minus(total1d.minus(deposit1d))
-        const change1dPercentage = change1d.dividedBy(total1d).multipliedBy(100)
+        const changeMtd = total.minus(deposit).minus(totalMtd.minus(depositMtd))
+        const changeMtdPercentage = changeMtd.dividedBy(totalMtd).multipliedBy(100)
+        const changeWtd = total.minus(deposit).minus(totalWtd.minus(depositWtd))
+        const changeWtdPercentage = changeWtd.dividedBy(totalWtd).multipliedBy(100)
+        const changeToday = total.minus(deposit).minus(totalToday.minus(depositToday))
+        const changeTodayPercentage = changeToday.dividedBy(totalToday).multipliedBy(100)
         const profit = total.minus(deposit)
         const profitPercentage = profit.dividedBy(deposit).multipliedBy(100)
         return {
@@ -221,11 +247,11 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
                 </div>
               </>
             ),
-            change30d: (
+            changeMtd: (
               <>
                 <div>
                   <Amount
-                    amount={change30d}
+                    amount={changeMtd}
                     denomination={rootCurrency.denomination}
                     symbol={rootCurrency.symbol}
                     abbreviate
@@ -235,15 +261,15 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
                   />
                 </div>
                 <div>
-                  <Percentage percentage={change30dPercentage} decimals={2} signChar signColor signIcon />
+                  <Percentage percentage={changeMtdPercentage} decimals={2} signChar signColor signIcon />
                 </div>
               </>
             ),
-            change1d: (
+            changeWtd: (
               <>
                 <div>
                   <Amount
-                    amount={change1d}
+                    amount={changeWtd}
                     denomination={rootCurrency.denomination}
                     symbol={rootCurrency.symbol}
                     abbreviate
@@ -253,7 +279,25 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
                   />
                 </div>
                 <div>
-                  <Percentage percentage={change1dPercentage} decimals={2} signChar signColor signIcon />
+                  <Percentage percentage={changeWtdPercentage} decimals={2} signChar signColor signIcon />
+                </div>
+              </>
+            ),
+            changeToday: (
+              <>
+                <div>
+                  <Amount
+                    amount={changeToday}
+                    denomination={rootCurrency.denomination}
+                    symbol={rootCurrency.symbol}
+                    abbreviate
+                    signColor
+                    signChar
+                    signIcon
+                  />
+                </div>
+                <div>
+                  <Percentage percentage={changeTodayPercentage} decimals={2} signChar signColor signIcon />
                 </div>
               </>
             ),
