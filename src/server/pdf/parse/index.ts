@@ -1,10 +1,11 @@
 import { logger } from '../../logger'
 import { dkbPdfParser } from './dkb'
+import { flatexPdfParser } from './flatex'
 import { ingDiBaPdfParser } from './ingDiBa'
 
 export type PdfParser = (text: string) => PdfParserResult | null
 
-const allPdfParsers: PdfParser[] = [ingDiBaPdfParser, dkbPdfParser]
+const allPdfParsers: PdfParser[] = [dkbPdfParser, flatexPdfParser, ingDiBaPdfParser]
 
 export type PdfParserResult =
   | {

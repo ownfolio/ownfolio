@@ -1,0 +1,73 @@
+0113202270000102
+2000004691424170
+flatexDEGIRO Bank AG
+Postfach 100551
+41405 Neuss
+USt-IdNr.: DE 246 786 363
+Kundenservice:
+Tel.: +49 9221 7035898
+E-Mail: info@flatex.de
+flatexDEGIRO Bank AG - Hammfelddamm 4 - 41460 Neuss, Deutschland
+0202272000004691424170
+Frankfurt, 24.03.2025
+Auftragsdatum 24.03.2025
+Handelstag 24.03.2025
+Ausführungszeit 07:38 Uhr
+Valuta 26.03.2025
+Auftragsnummer 111111111/1
+Ausf.platz/-art Tradegate
+MyCompany UG
+c/o John Doe
+22419 Hamburg
+Wertpapierabrechnung Kauf Fonds/Zertifikate
+Ihre Depotnummer: 1234567890
+Depotinhaber: MyCompany UG
+Nr.111111111/1 Kauf ISHARES CORE MSCI WORLD E (IE00B4L5Y983/A0RPWH)
+Ausgeführt : 10 St. Kurswert : 998,98 EUR
+Kurs : 99,898000 EUR Provision : 5,90 EUR
+Devisenkurs : 1,000000 Eigene Spesen : 0,00 EUR
+*Fremde Spesen : 2,00 EUR
+Verwahrart : Wertpapierrechnung
+Lagerstelle : Clearstream Lux.
+Lagerland : Irland Bemessungs-
+grundlage : 0,00 EUR
+Gewinn/Verlust: 0,00 EUR **Einbeh. Steuer: 0,00 EUR
+Endbetrag : -1.006,88 EUR
+* Enthalten sind folgende Gebühren Courtage : 0,00 EUR
+Tradinggebühr : 0,00 EUR
+Regulierung : 2,00 EUR
+Schlussnoten : 0,00 EUR
+LS-Umlegung : 0,00 EUR
+Finanztransaktionssteuer : 0,00 EUR
+Sonstige : 0,00 EUR
+** Enthalten sind folgende Steuern (negative Werte bedeuten Steuererstattung)
+Kapitalertragsteuer : 0,00 EUR
+Solidaritätszuschlag : 0,00 EUR
+Kirchensteuer : 0,00 EUR
+Evtl. Details dazu finden Sie im Steuerreport unter der Transaktion-Nr.:
+4193659499.
+Die Verrechnung der Endbeträge erfolgt über Ihr Konto Nr.: 0987654321
+Die Wertpapiere sowie den Gegenwert werden wir entsprechend der Abrechnung mit
+______________________________________________________________________________
+Seite 1/2
+BLZ 101 308 00 / BIC: BIWBDE33XXX - Aktiengesellschaft, Sitz Frankfurt - Amtsgericht Frankfurt am Main (HRB 105687)
+Vorsitzender des Aufsichtsrats: Martin Korbmacher - Vorstand: Oliver Behrens (Vorsitzender), Dr. Benon Janos (stellv. Vorsitzender),
+Stephan Simmang, Dr. Matthias Heinrich, Steffen Jentsch, Jens Möbitz
+0113202270000202
+2000004691424170
+dem angegebenen Valutatag buchen. Bitte prüfen Sie diese Abrechnung auf
+Richtigkeit und Vollständigkeit. Etwaige Einwendungen gegen diese Abrechnung
+müssen unverzüglich nach Zugang bei der Bank erhoben werden. Die
+Unterlassung rechtzeitiger Einwendung gilt als Genehmigung. Bitte beachten
+Sie mögliche Hinweise des Emittenten hinsichtlich vorzeitiger Fälligstellung,
+beispielsweise wegen Knock-Out, in den jeweiligen Optionsscheinbedingungen und
+informieren Sie sich rechtzeitig, welche spezielle Fälligkeitsregelung auf die
+von Ihnen gehaltenen Wertpapiere zutreffen. Kapitalerträge sind ESt-pflichtig.
+Diese Mitteilung ist maschinell erstellt und wird nicht unterschrieben.
+Für weitergehende Fragen wenden Sie sich bitte an Ihr flatex-Service-Team.
+______________________________________________________________________________
+Seite 2/2
+BLZ 101 308 00 / BIC: BIWBDE33XXX - Aktiengesellschaft, Sitz Frankfurt - Amtsgericht Frankfurt am Main (HRB 105687)
+Vorsitzender des Aufsichtsrats: Martin Korbmacher - Vorstand: Oliver Behrens (Vorsitzender), Dr. Benon Janos (stellv. Vorsitzender),
+Stephan Simmang, Dr. Matthias Heinrich, Steffen Jentsch, Jens Möbitz
+
