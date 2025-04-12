@@ -24,7 +24,6 @@ export const CashTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => 
   })
   const { data: evaluations } = useSuspenseQuery({
     queryKey: ['cashTable', 'data', timetravel, accounts.map(a => a.id).join(',')],
-
     queryFn: async () => {
       const raw = await rpcClient
         .evaluateSummary({

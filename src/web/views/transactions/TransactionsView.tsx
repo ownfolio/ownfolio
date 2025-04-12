@@ -31,7 +31,6 @@ export const TransactionsView: React.FC = () => {
   const [top, setTop] = React.useState(100)
   const { data: transactions } = useSuspenseQuery({
     queryKey: ['transactions', search, 0, top],
-
     queryFn: () => rpcClient.listTransactions({ ...search, skip: 0, top }).then(r => r.data),
   })
 

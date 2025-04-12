@@ -27,7 +27,6 @@ export const AssetsView: React.FC = () => {
   })
   const { data: lastYearQuotes } = useSuspenseQuery({
     queryKey: ['lastYearQuotes'],
-
     queryFn: () =>
       rpcClient
         .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'year', 1), 'yyyy-MM-dd') })
@@ -35,7 +34,6 @@ export const AssetsView: React.FC = () => {
   })
   const { data: lastMonthQuotes } = useSuspenseQuery({
     queryKey: ['lastMonthQuotes'],
-
     queryFn: () =>
       rpcClient
         .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'month', 1), 'yyyy-MM-dd') })
@@ -43,7 +41,6 @@ export const AssetsView: React.FC = () => {
   })
   const { data: lastWeekQuotes } = useSuspenseQuery({
     queryKey: ['lastWeekQuotes'],
-
     queryFn: () =>
       rpcClient
         .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'week', 1), 'yyyy-MM-dd') })
@@ -51,7 +48,6 @@ export const AssetsView: React.FC = () => {
   })
   const { data: yesterdayQuotes } = useSuspenseQuery({
     queryKey: ['yesterdayQuotes'],
-
     queryFn: () =>
       rpcClient
         .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'day', 1), 'yyyy-MM-dd') })

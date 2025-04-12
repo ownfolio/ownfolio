@@ -33,7 +33,6 @@ export const AssetOpenPositionsTable: React.FC<{ timetravel?: string }> = ({ tim
   })
   const { data: evaluations } = useSuspenseQuery({
     queryKey: ['evaluatePositions', timetravel],
-
     queryFn: () =>
       rpcClient
         .evaluatePositions({ when: !timetravel ? { type: 'now' } : { type: 'date', date: timetravel } })

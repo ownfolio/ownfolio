@@ -21,13 +21,11 @@ export const QuotesView: React.FC = () => {
   const { openDialog } = useDialogs()
   const { data: asset } = useSuspenseQuery({
     queryKey: ['assets', params.assetId],
-
     queryFn: () => rpcClient.retrieveAsset({ id: params.assetId }).then(r => r.data),
   })
   const assetCurrency = allCurrencies.find(c => c.symbol === asset.currency)
   const { data: quotes } = useSuspenseQuery({
     queryKey: ['assets', params.assetId, 'quotes'],
-
     queryFn: () => rpcClient.listQuotesForAsset({ id: params.assetId }).then(r => r.data),
   })
 

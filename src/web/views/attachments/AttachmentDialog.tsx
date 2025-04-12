@@ -33,7 +33,6 @@ export const AttachmentDialog: React.FC<Props> = ({ attachmentId, dialogId, clos
   })
   const { data: transactions } = useSuspenseQuery({
     queryKey: ['attachments', attachmentId, 'transactions'],
-
     queryFn: () => {
       return rpcClient.listTransactions({ attachmentId }).then(r => r.data)
     },

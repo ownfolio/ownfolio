@@ -24,7 +24,6 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
   })
   const { data: evaluations } = useSuspenseQuery({
     queryKey: ['portfoliosTabls', timetravel, portfolios.map(p => p.id).join(',')],
-
     queryFn: async () => {
       const now = !timetravel ? new Date() : dateParse(timetravel)
       const raw = await rpcClient

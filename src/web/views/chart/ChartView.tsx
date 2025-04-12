@@ -35,7 +35,6 @@ export const ChartView: React.FC = () => {
   const [resolution, setResolution] = usePersistentState<DateUnit>('chartView.resolution', dateUnitSchema, 'week')
   const { data: baseSeries } = useSuspenseQuery({
     queryKey: ['chartView', JSON.stringify(config), resolution],
-
     queryFn: async () => {
       return await chartViewSeries(resolution, config)
     },

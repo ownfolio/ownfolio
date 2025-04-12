@@ -58,7 +58,6 @@ export const TransactionDialog: React.FC<Props> = ({
   const [transaction, setTransaction] = React.useState<Transaction | undefined>(undefined)
   const { data: attachments } = useSuspenseQuery({
     queryKey: ['transactions', transaction?.id, 'attachments'],
-
     queryFn: () => {
       return transaction?.id ? rpcClient.listAttachments({ transactionId: transaction?.id }).then(r => r.data) : []
     },

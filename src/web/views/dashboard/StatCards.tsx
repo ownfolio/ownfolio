@@ -14,7 +14,6 @@ import { Percentage } from '../../components/Percentage'
 export const StatCards: React.FC<{ timetravel?: string }> = ({ timetravel }) => {
   const { data: evaluations } = useSuspenseQuery({
     queryKey: ['statCards', timetravel],
-
     queryFn: async () => {
       const now = !timetravel ? new Date() : dateParse(timetravel)
       const raw = await rpcClient
