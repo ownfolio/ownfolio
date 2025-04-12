@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import BigNumber from 'bignumber.js'
 import React from 'react'
 import { useParams } from 'react-router-dom'
@@ -19,13 +19,17 @@ export const QuotesView: React.FC = () => {
   const params = useParams() as { assetId: string }
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
-  const asset = useQuery(['assets', params.assetId], () =>
-    rpcClient.retrieveAsset({ id: params.assetId }).then(r => r.data)
-  ).data!
+  const { data: asset } = useSuspenseQuery({
+    queryKey: ['assets', params.assetId],
+
+    queryFn: () => rpcClient.retrieveAsset({ id: params.assetId }).then(r => r.data),
+  })
   const assetCurrency = allCurrencies.find(c => c.symbol === asset.currency)
-  const quotes = useQuery(['assets', params.assetId, 'quotes'], () =>
-    rpcClient.listQuotesForAsset({ id: params.assetId }).then(r => r.data)
-  ).data!
+  const { data: quotes } = useSuspenseQuery({
+    queryKey: ['assets', params.assetId, 'quotes'],
+
+    queryFn: () => rpcClient.listQuotesForAsset({ id: params.assetId }).then(r => r.data),
+  })
 
   const columns = React.useMemo<TableDefinitionColumn[]>(
     () => [

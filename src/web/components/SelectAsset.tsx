@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
 import { rpcClient } from '../api'
@@ -12,7 +12,10 @@ type Props = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElemen
 
 export const SelectAsset = React.forwardRef<HTMLSelectElement, Props>(
   ({ value, onChange, emptyLabel = '-', clearable, showInactiveAndHidden = false, className, ...other }, ref: any) => {
-    const options = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data || []
+    const { data: options } = useSuspenseQuery({
+      queryKey: ['assets'],
+      queryFn: () => rpcClient.listAssets({}).then(r => r.data),
+    })
     const selectProps = React.useMemo(() => {
       return {
         optionGroups: [

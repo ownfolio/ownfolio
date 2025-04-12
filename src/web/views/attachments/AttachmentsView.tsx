@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
 import { filterNotFalse } from '../../../shared/utils/array'
@@ -15,7 +15,10 @@ import { AttachmentDialog } from './AttachmentDialog'
 export const AttachmentsView: React.FC = () => {
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
-  const attachments = useQuery(['attachments'], () => rpcClient.listAttachments({}).then(r => r.data)).data!
+  const { data: attachments } = useSuspenseQuery({
+    queryKey: ['attachments'],
+    queryFn: () => rpcClient.listAttachments({}).then(r => r.data),
+  })
 
   const columns = React.useMemo<TableDefinitionColumn[]>(
     () => [

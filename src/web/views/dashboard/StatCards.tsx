@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import BigNumber from 'bignumber.js'
 import React from 'react'
 
@@ -12,41 +12,45 @@ import { Card } from '../../components/Card'
 import { Percentage } from '../../components/Percentage'
 
 export const StatCards: React.FC<{ timetravel?: string }> = ({ timetravel }) => {
-  const evaluations = useQuery(['statCards', timetravel], async () => {
-    const now = !timetravel ? new Date() : dateParse(timetravel)
-    const raw = await rpcClient
-      .evaluateSummary({
-        when: {
-          type: 'dates',
-          dates: [
-            dateMinus(dateStartOf(now, 'year'), 'day', 1),
-            dateMinus(dateStartOf(now, 'month'), 'day', 1),
-            dateMinus(dateStartOf(now, 'week'), 'day', 1),
-            dateMinus(dateStartOf(now, 'day'), 'day', 1),
-            dateStartOf(now, 'day'),
-          ].map(str => dateFormat(str, 'yyyy-MM-dd')),
-        },
-        buckets: [{ type: 'all' }],
-        values: ['cash', 'assetsOpenPrice', 'assetsCurrentPrice', 'realizedProfits', 'total', 'deposit'],
-      })
-      .then(r => r.data)
-    return {
-      ...raw,
-      value: recordMap(raw.value, items => {
-        return items.map(([date, cash, assetsOpenPrice, assetsCurrentPrice, realizedProfits, total, deposit]) => {
-          return {
-            date: date,
-            cash: BigNumber(cash),
-            assetsOpenPrice: BigNumber(assetsOpenPrice),
-            assetsCurrentPrice: BigNumber(assetsCurrentPrice),
-            realizedProfits: BigNumber(realizedProfits),
-            total: BigNumber(total),
-            deposit: BigNumber(deposit),
-          }
+  const { data: evaluations } = useSuspenseQuery({
+    queryKey: ['statCards', timetravel],
+
+    queryFn: async () => {
+      const now = !timetravel ? new Date() : dateParse(timetravel)
+      const raw = await rpcClient
+        .evaluateSummary({
+          when: {
+            type: 'dates',
+            dates: [
+              dateMinus(dateStartOf(now, 'year'), 'day', 1),
+              dateMinus(dateStartOf(now, 'month'), 'day', 1),
+              dateMinus(dateStartOf(now, 'week'), 'day', 1),
+              dateMinus(dateStartOf(now, 'day'), 'day', 1),
+              dateStartOf(now, 'day'),
+            ].map(str => dateFormat(str, 'yyyy-MM-dd')),
+          },
+          buckets: [{ type: 'all' }],
+          values: ['cash', 'assetsOpenPrice', 'assetsCurrentPrice', 'realizedProfits', 'total', 'deposit'],
         })
-      }),
-    }
-  }).data!
+        .then(r => r.data)
+      return {
+        ...raw,
+        value: recordMap(raw.value, items => {
+          return items.map(([date, cash, assetsOpenPrice, assetsCurrentPrice, realizedProfits, total, deposit]) => {
+            return {
+              date: date,
+              cash: BigNumber(cash),
+              assetsOpenPrice: BigNumber(assetsOpenPrice),
+              assetsCurrentPrice: BigNumber(assetsCurrentPrice),
+              realizedProfits: BigNumber(realizedProfits),
+              total: BigNumber(total),
+              deposit: BigNumber(deposit),
+            }
+          })
+        }),
+      }
+    },
+  })
 
   const { total: totalYtd, deposit: depositYtd } = evaluations.value['all'][0]
   const { total: totalMtd, deposit: depositMtd } = evaluations.value['all'][1]

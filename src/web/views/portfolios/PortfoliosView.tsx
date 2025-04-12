@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
 import { rpcClient } from '../../api'
@@ -13,7 +13,10 @@ import { PortfolioDialog } from './PortfolioDialog'
 export const PortfoliosView: React.FC = () => {
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
-  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({}).then(r => r.data)).data!
+  const { data: portfolios } = useSuspenseQuery({
+    queryKey: ['portfolios'],
+    queryFn: () => rpcClient.listPortfolios({}).then(r => r.data),
+  })
 
   const columns = React.useMemo<TableDefinitionColumn[]>(() => [{ id: 'name', title: 'Name', minWidth: 200 }], [])
 

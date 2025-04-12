@@ -14,7 +14,6 @@ export const App: React.FC = () => {
     new QueryClient({
       defaultOptions: {
         queries: {
-          suspense: true,
           refetchIntervalInBackground: false,
           refetchInterval: 60000,
           retryDelay: 1000,
@@ -24,9 +23,8 @@ export const App: React.FC = () => {
             }
             return failureCount < 3
           },
-          cacheTime: 120000,
+          gcTime: 120000,
           structuralSharing: true,
-          keepPreviousData: true,
           refetchOnWindowFocus: false,
           refetchOnReconnect: false,
         },

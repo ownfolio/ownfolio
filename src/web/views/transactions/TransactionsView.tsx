@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
 import { Account } from '../../../shared/models/Account'
@@ -29,9 +29,11 @@ export const TransactionsView: React.FC = () => {
   const { openDialog } = useDialogs()
   const [search, setSearch] = React.useState<TransactionSearch>({})
   const [top, setTop] = React.useState(100)
-  const transactions = useQuery(['transactions', search, 0, top], () =>
-    rpcClient.listTransactions({ ...search, skip: 0, top }).then(r => r.data)
-  ).data!
+  const { data: transactions } = useSuspenseQuery({
+    queryKey: ['transactions', search, 0, top],
+
+    queryFn: () => rpcClient.listTransactions({ ...search, skip: 0, top }).then(r => r.data),
+  })
 
   const columns = React.useMemo<TableDefinitionColumn[]>(
     () => [
@@ -185,8 +187,14 @@ const AccountLink: React.FC<{ account?: Account }> = ({ account }) => {
 }
 
 const TransactionDataText: React.FC<{ data: TransactionData }> = ({ data }): React.ReactElement => {
-  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
-  const assets = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data!
+  const { data: accounts } = useSuspenseQuery({
+    queryKey: ['accounts'],
+    queryFn: () => rpcClient.listAccounts({}).then(r => r.data),
+  })
+  const { data: assets } = useSuspenseQuery({
+    queryKey: ['assets'],
+    queryFn: () => rpcClient.listAssets({}).then(r => r.data),
+  })
 
   switch (data.type) {
     case 'cashDeposit': {

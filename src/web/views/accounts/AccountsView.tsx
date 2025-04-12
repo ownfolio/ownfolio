@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
 import { filterNotFalse } from '../../../shared/utils/array'
@@ -14,8 +14,14 @@ import { AccountDialog } from './AccountDialog'
 export const AccountsView: React.FC = () => {
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
-  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({}).then(r => r.data)).data!
-  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
+  const { data: portfolios } = useSuspenseQuery({
+    queryKey: ['portfolios'],
+    queryFn: () => rpcClient.listPortfolios({}).then(r => r.data),
+  })
+  const { data: accounts } = useSuspenseQuery({
+    queryKey: ['accounts'],
+    queryFn: () => rpcClient.listAccounts({}).then(r => r.data),
+  })
   const [showHidden, setShowHidden] = React.useState(false)
 
   const columns = React.useMemo<TableDefinitionColumn[]>(

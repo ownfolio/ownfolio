@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import React from 'react'
 import { FaDeleteLeft, FaMagnifyingGlass } from 'react-icons/fa6'
@@ -56,9 +56,13 @@ export const TransactionDialog: React.FC<Props> = ({
   const { openDialog } = useDialogs()
   const queryClient = useQueryClient()
   const [transaction, setTransaction] = React.useState<Transaction | undefined>(undefined)
-  const attachments = useQuery(['transactions', transaction?.id, 'attachments'], () => {
-    return transaction?.id ? rpcClient.listAttachments({ transactionId: transaction?.id }).then(r => r.data) : []
-  }).data!
+  const { data: attachments } = useSuspenseQuery({
+    queryKey: ['transactions', transaction?.id, 'attachments'],
+
+    queryFn: () => {
+      return transaction?.id ? rpcClient.listAttachments({ transactionId: transaction?.id }).then(r => r.data) : []
+    },
+  })
   const [next, setNext] = React.useState(initialNext)
   const [state, setState] = React.useState<'busy' | 'done' | undefined>(undefined)
   const [unlinkedAttachments, setUnlinkedAttachments] = React.useState<string[]>([])

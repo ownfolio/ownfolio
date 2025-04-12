@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import BigNumber from 'bignumber.js'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -19,14 +19,26 @@ import { TransactionDialog } from '../transactions/TransactionDialog'
 export const AssetOpenPositionsTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => {
   const navigate = useNavigate()
   const { openDialog } = useDialogs()
-  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({}).then(r => r.data)).data!
-  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
-  const assets = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data!
-  const evaluations = useQuery(['evaluatePositions', timetravel], () =>
-    rpcClient
-      .evaluatePositions({ when: !timetravel ? { type: 'now' } : { type: 'date', date: timetravel } })
-      .then(r => r.data)
-  ).data!
+  const { data: portfolios } = useSuspenseQuery({
+    queryKey: ['portfolios'],
+    queryFn: () => rpcClient.listPortfolios({}).then(r => r.data),
+  })
+  const { data: accounts } = useSuspenseQuery({
+    queryKey: ['accounts'],
+    queryFn: () => rpcClient.listAccounts({}).then(r => r.data),
+  })
+  const { data: assets } = useSuspenseQuery({
+    queryKey: ['assets'],
+    queryFn: () => rpcClient.listAssets({}).then(r => r.data),
+  })
+  const { data: evaluations } = useSuspenseQuery({
+    queryKey: ['evaluatePositions', timetravel],
+
+    queryFn: () =>
+      rpcClient
+        .evaluatePositions({ when: !timetravel ? { type: 'now' } : { type: 'date', date: timetravel } })
+        .then(r => r.data),
+  })
 
   const columns = React.useMemo<TableDefinitionColumn[]>(
     () => [

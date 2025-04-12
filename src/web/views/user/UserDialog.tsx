@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
 import { fileAsDataUrl, fileDownload } from '../../../shared/utils/file'
@@ -16,7 +16,10 @@ import { useMultiState } from '../../hooks/useMultiState'
 import { AttachmentDialog } from '../attachments/AttachmentDialog'
 
 export const UserDialog: React.FC<DialogContentProps<void>> = ({ closeDialog }) => {
-  const me = useQuery(['me'], () => rpcClient.me().then(r => r.data)).data!
+  const { data: me } = useSuspenseQuery({
+    queryKey: ['me'],
+    queryFn: () => rpcClient.me().then(r => r.data),
+  })
   return (
     <div className={stylesRoot}>
       <EmailForm email={me.email} />

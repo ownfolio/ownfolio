@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
 import { rpcClient } from '../api'
@@ -11,7 +11,10 @@ type Props = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElemen
 
 export const SelectPortfolio = React.forwardRef<HTMLSelectElement, Props>(
   ({ value, onChange, emptyLabel = '-', clearable, className, ...other }, ref: any) => {
-    const options = useQuery(['portfolios'], () => rpcClient.listPortfolios({}).then(r => r.data)).data || []
+    const { data: options } = useSuspenseQuery({
+      queryKey: ['portfolios'],
+      queryFn: () => rpcClient.listPortfolios({}).then(r => r.data),
+    })
     const selectProps = React.useMemo(() => {
       return {
         optionGroups: [{ id: 'all', label: 'Portfolio', options: options.map(o => ({ value: o.id, label: o.name })) }],

@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import React from 'react'
 import { BiSolidCommentError, BiSolidError, BiSolidErrorAlt } from 'react-icons/bi'
@@ -17,11 +17,28 @@ import { TransactionDialog } from '../transactions/TransactionDialog'
 export const PlausibilityView: React.FC = () => {
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
-  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
-  const assets = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data!
-  const transactions = useQuery(['transactions'], () => rpcClient.listTransactions({}).then(r => r.data)).data!
-  const attachments = useQuery(['attachments'], () => rpcClient.listAttachments({}).then(r => r.data)).data!
-  const plausibility = useQuery(['evaluatePlausibility'], () => rpcClient.evaluatePlausibility()).data!.data
+  const { data: accounts } = useSuspenseQuery({
+    queryKey: ['accounts'],
+    queryFn: () => rpcClient.listAccounts({}).then(r => r.data),
+  })
+  const { data: assets } = useSuspenseQuery({
+    queryKey: ['assets'],
+    queryFn: () => rpcClient.listAssets({}).then(r => r.data),
+  })
+  const { data: transactions } = useSuspenseQuery({
+    queryKey: ['transactions'],
+    queryFn: () => rpcClient.listTransactions({}).then(r => r.data),
+  })
+  const { data: attachments } = useSuspenseQuery({
+    queryKey: ['attachments'],
+    queryFn: () => rpcClient.listAttachments({}).then(r => r.data),
+  })
+  const {
+    data: { data: plausibility },
+  } = useSuspenseQuery({
+    queryKey: ['evaluatePlausibility'],
+    queryFn: () => rpcClient.evaluatePlausibility(),
+  })
   const [showInfoLevel, setShowInfoLevel] = React.useState(false)
 
   const columns = React.useMemo<TableDefinitionColumn[]>(

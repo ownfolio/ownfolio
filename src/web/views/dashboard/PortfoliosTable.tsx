@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import BigNumber from 'bignumber.js'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -18,42 +18,49 @@ import { PortfolioDialog } from '../portfolios/PortfolioDialog'
 export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => {
   const navigate = useNavigate()
   const { openDialog } = useDialogs()
-  const portfolios = useQuery(['portfolios'], () => rpcClient.listPortfolios({}).then(r => r.data)).data!
-  const evaluations = useQuery(['portfoliosTabls', timetravel, portfolios.map(p => p.id).join(',')], async () => {
-    const now = !timetravel ? new Date() : dateParse(timetravel)
-    const raw = await rpcClient
-      .evaluateSummary({
-        when: {
-          type: 'dates',
-          dates: [
-            dateMinus(dateStartOf(now, 'year'), 'day', 1),
-            dateMinus(dateStartOf(now, 'month'), 'day', 1),
-            dateMinus(dateStartOf(now, 'week'), 'day', 1),
-            dateMinus(dateStartOf(now, 'day'), 'day', 1),
-            dateStartOf(now, 'day'),
-          ].map(str => dateFormat(str, 'yyyy-MM-dd')),
-        },
-        buckets: [{ type: 'all' }, ...portfolios.map(p => ({ type: 'portfolio' as const, portfolioId: p.id }))],
-        values: ['cash', 'assetsOpenPrice', 'assetsCurrentPrice', 'realizedProfits', 'total', 'deposit'],
-      })
-      .then(r => r.data)
-    return {
-      ...raw,
-      value: recordMap(raw.value, items => {
-        return items.map(([date, cash, assetsOpenPrice, assetsCurrentPrice, realizedProfits, total, deposit]) => {
-          return {
-            date: date,
-            cash: BigNumber(cash),
-            assetsOpenPrice: BigNumber(assetsOpenPrice),
-            assetsCurrentPrice: BigNumber(assetsCurrentPrice),
-            realizedProfits: BigNumber(realizedProfits),
-            total: BigNumber(total),
-            deposit: BigNumber(deposit),
-          }
+  const { data: portfolios } = useSuspenseQuery({
+    queryKey: ['portfolios'],
+    queryFn: () => rpcClient.listPortfolios({}).then(r => r.data),
+  })
+  const { data: evaluations } = useSuspenseQuery({
+    queryKey: ['portfoliosTabls', timetravel, portfolios.map(p => p.id).join(',')],
+
+    queryFn: async () => {
+      const now = !timetravel ? new Date() : dateParse(timetravel)
+      const raw = await rpcClient
+        .evaluateSummary({
+          when: {
+            type: 'dates',
+            dates: [
+              dateMinus(dateStartOf(now, 'year'), 'day', 1),
+              dateMinus(dateStartOf(now, 'month'), 'day', 1),
+              dateMinus(dateStartOf(now, 'week'), 'day', 1),
+              dateMinus(dateStartOf(now, 'day'), 'day', 1),
+              dateStartOf(now, 'day'),
+            ].map(str => dateFormat(str, 'yyyy-MM-dd')),
+          },
+          buckets: [{ type: 'all' }, ...portfolios.map(p => ({ type: 'portfolio' as const, portfolioId: p.id }))],
+          values: ['cash', 'assetsOpenPrice', 'assetsCurrentPrice', 'realizedProfits', 'total', 'deposit'],
         })
-      }),
-    }
-  }).data!
+        .then(r => r.data)
+      return {
+        ...raw,
+        value: recordMap(raw.value, items => {
+          return items.map(([date, cash, assetsOpenPrice, assetsCurrentPrice, realizedProfits, total, deposit]) => {
+            return {
+              date: date,
+              cash: BigNumber(cash),
+              assetsOpenPrice: BigNumber(assetsOpenPrice),
+              assetsCurrentPrice: BigNumber(assetsCurrentPrice),
+              realizedProfits: BigNumber(realizedProfits),
+              total: BigNumber(total),
+              deposit: BigNumber(deposit),
+            }
+          })
+        }),
+      }
+    },
+  })
 
   const columns = React.useMemo<TableDefinitionColumn[]>(
     () => [

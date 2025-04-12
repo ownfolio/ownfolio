@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import BigNumber from 'bignumber.js'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -21,28 +21,46 @@ export const AssetsView: React.FC = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
-  const assets = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data!
-  const lastYearQuotes = useQuery(['lastYearQuotes'], () =>
-    rpcClient
-      .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'year', 1), 'yyyy-MM-dd') })
-      .then(r => r.data)
-  ).data!
-  const lastMonthQuotes = useQuery(['lastMonthQuotes'], () =>
-    rpcClient
-      .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'month', 1), 'yyyy-MM-dd') })
-      .then(r => r.data)
-  ).data!
-  const lastWeekQuotes = useQuery(['lastWeekQuotes'], () =>
-    rpcClient
-      .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'week', 1), 'yyyy-MM-dd') })
-      .then(r => r.data)
-  ).data!
-  const yesterdayQuotes = useQuery(['yesterdayQuotes'], () =>
-    rpcClient
-      .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'day', 1), 'yyyy-MM-dd') })
-      .then(r => r.data)
-  ).data!
-  const latestQuotes = useQuery(['latestQuotes'], () => rpcClient.listLatestQuotes({}).then(r => r.data)).data!
+  const { data: assets } = useSuspenseQuery({
+    queryKey: ['assets'],
+    queryFn: () => rpcClient.listAssets({}).then(r => r.data),
+  })
+  const { data: lastYearQuotes } = useSuspenseQuery({
+    queryKey: ['lastYearQuotes'],
+
+    queryFn: () =>
+      rpcClient
+        .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'year', 1), 'yyyy-MM-dd') })
+        .then(r => r.data),
+  })
+  const { data: lastMonthQuotes } = useSuspenseQuery({
+    queryKey: ['lastMonthQuotes'],
+
+    queryFn: () =>
+      rpcClient
+        .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'month', 1), 'yyyy-MM-dd') })
+        .then(r => r.data),
+  })
+  const { data: lastWeekQuotes } = useSuspenseQuery({
+    queryKey: ['lastWeekQuotes'],
+
+    queryFn: () =>
+      rpcClient
+        .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'week', 1), 'yyyy-MM-dd') })
+        .then(r => r.data),
+  })
+  const { data: yesterdayQuotes } = useSuspenseQuery({
+    queryKey: ['yesterdayQuotes'],
+
+    queryFn: () =>
+      rpcClient
+        .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'day', 1), 'yyyy-MM-dd') })
+        .then(r => r.data),
+  })
+  const { data: latestQuotes } = useSuspenseQuery({
+    queryKey: ['latestQuotes'],
+    queryFn: () => rpcClient.listLatestQuotes({}).then(r => r.data),
+  })
   const [showHidden, setShowHidden] = React.useState(false)
 
   const columns = React.useMemo<TableDefinitionColumn[]>(

@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
 import { rpcClient } from '../api'
@@ -11,7 +11,10 @@ type Props = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElemen
 
 export const SelectAttachment = React.forwardRef<HTMLSelectElement, Props>(
   ({ value, onChange, emptyLabel = '-', clearable = false, className, ...other }, ref: any) => {
-    const options = useQuery(['attachments'], () => rpcClient.listAttachments({}).then(r => r.data)).data!
+    const { data: options } = useSuspenseQuery({
+      queryKey: ['attachments'],
+      queryFn: () => rpcClient.listAttachments({}).then(r => r.data),
+    })
     const selectProps = React.useMemo(() => {
       return {
         optionGroups: [

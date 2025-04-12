@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 import { FaDeleteLeft, FaMagnifyingGlass } from 'react-icons/fa6'
 
@@ -23,11 +23,21 @@ export const AttachmentDialog: React.FC<Props> = ({ attachmentId, dialogId, clos
   const { openDialog } = useDialogs()
   const queryClient = useQueryClient()
   const [attachment, setAttachment] = React.useState<Attachment | undefined>(undefined)
-  const accounts = useQuery(['accounts'], () => rpcClient.listAccounts({}).then(r => r.data)).data!
-  const assets = useQuery(['assets'], () => rpcClient.listAssets({}).then(r => r.data)).data!
-  const transactions = useQuery(['attachments', attachmentId, 'transactions'], () => {
-    return rpcClient.listTransactions({ attachmentId }).then(r => r.data)
-  }).data!
+  const { data: accounts } = useSuspenseQuery({
+    queryKey: ['accounts'],
+    queryFn: () => rpcClient.listAccounts({}).then(r => r.data),
+  })
+  const { data: assets } = useSuspenseQuery({
+    queryKey: ['assets'],
+    queryFn: () => rpcClient.listAssets({}).then(r => r.data),
+  })
+  const { data: transactions } = useSuspenseQuery({
+    queryKey: ['attachments', attachmentId, 'transactions'],
+
+    queryFn: () => {
+      return rpcClient.listTransactions({ attachmentId }).then(r => r.data)
+    },
+  })
   React.useEffect(() => {
     rpcClient
       .retrieveAttachment({ id: attachmentId })

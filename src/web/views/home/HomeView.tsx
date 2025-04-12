@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import React from 'react'
 import { CgProfile } from 'react-icons/cg'
@@ -38,7 +38,10 @@ import { useQuoteUpdate } from './useQuoteUpdate'
 export const HomeView: React.FC = () => {
   const navigate = useNavigate()
   const { openDialog } = useDialogs()
-  const me = useQuery(['me'], () => rpcClient.me().then(r => r.data)).data
+  const { data: me } = useSuspenseQuery({
+    queryKey: ['me'],
+    queryFn: () => rpcClient.me().then(r => r.data),
+  })
   const [updatingQuotes, updateQuotes] = useQuoteUpdate(5 * 60 * 1000)
   const { privacy, setPrivacy } = usePrivacy()
 

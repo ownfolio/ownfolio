@@ -1,5 +1,5 @@
 import { css } from '@linaria/core'
-import { useQuery } from '@tanstack/react-query'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 import { FaCheck } from 'react-icons/fa6'
 import { useParams } from 'react-router-dom'
@@ -33,9 +33,13 @@ export const ChartView: React.FC = () => {
     }
   }, [params])
   const [resolution, setResolution] = usePersistentState<DateUnit>('chartView.resolution', dateUnitSchema, 'week')
-  const baseSeries = useQuery<StockChartSeries[]>(['chartView', JSON.stringify(config), resolution], async () => {
-    return await chartViewSeries(resolution, config)
-  }).data!
+  const { data: baseSeries } = useSuspenseQuery({
+    queryKey: ['chartView', JSON.stringify(config), resolution],
+
+    queryFn: async () => {
+      return await chartViewSeries(resolution, config)
+    },
+  })
   const series = React.useMemo<StockChartSeries[]>(() => {
     return baseSeries.flatMap(series => {
       if (['line', 'candle'].includes(series.type)) {
