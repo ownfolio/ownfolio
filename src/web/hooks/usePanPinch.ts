@@ -39,7 +39,7 @@ export type PanPinchEvent<T> =
   | { type: 'stop'; data: T }
 
 export function usePanPinch<T = unknown>(
-  ref: React.RefObject<HTMLElement>,
+  ref: React.RefObject<HTMLElement | null>,
   createDataOnStart: () => T,
   updateDataOnSecondStop: ((data: T, first: PanPinchEventFirst, second: PanPinchEventSecond) => T) | undefined,
   handler: (event: PanPinchEvent<T>) => void,

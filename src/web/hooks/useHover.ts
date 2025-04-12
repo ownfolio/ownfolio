@@ -8,7 +8,11 @@ export interface HoverEvent {
   positionY: number
 }
 
-export function useHover(ref: React.RefObject<HTMLElement>, handler: (event: HoverEvent) => void, disabled?: boolean) {
+export function useHover(
+  ref: React.RefObject<HTMLElement | null>,
+  handler: (event: HoverEvent) => void,
+  disabled?: boolean
+) {
   React.useEffect(() => {
     if (!ref.current || disabled) {
       return () => {}
