@@ -1,0 +1,19 @@
+import { z } from 'zod'
+
+import { dateUnitSchema } from '../utils/date'
+
+export const dashboardCardSchema = z.discriminatedUnion('type', [
+  z.object({
+    type: z.literal('total'),
+  }),
+  z.object({
+    type: z.literal('change'),
+    since: z.discriminatedUnion('type', [z.object({ type: z.literal('toDate'), interval: dateUnitSchema })]),
+  }),
+  z.object({
+    type: z.literal('chart'),
+    config: z.discriminatedUnion('type', [z.object({ type: z.literal('total') })]),
+  }),
+])
+
+export type DashboardCard = z.infer<typeof dashboardCardSchema>
