@@ -7,7 +7,7 @@ it(
   'portfolios',
   databaseTest(async db => {
     await db.init()
-    expect(db.portfolios.create({ userId: 'user_unknown', name: 'Portfolio 1' })).rejects.toThrow()
+    await expect(db.portfolios.create({ userId: 'user_unknown', name: 'Portfolio 1' })).rejects.toThrow()
     const u = await db.users.create({ email: 'user@domain.com' }, 'password')
     const p1 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 1' })
     const p2 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 2' })
