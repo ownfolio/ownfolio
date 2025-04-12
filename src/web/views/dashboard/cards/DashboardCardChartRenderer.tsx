@@ -4,7 +4,7 @@ import React from 'react'
 
 import { DashboardCard } from '../../../../shared/models/DashboardCard'
 import { maxBy, minBy } from '../../../../shared/utils/array'
-import { dateMinus, datePlus, dateStartOf, DateUnit } from '../../../../shared/utils/date'
+import { dateMinus, dateParse, datePlus, dateStartOf, DateUnit } from '../../../../shared/utils/date'
 import { AutoSizer } from '../../../components/AutoSizer'
 import { StockChart, StockChartViewport } from '../../../components/StockChart'
 import { usePrivacy } from '../../../privacy'
@@ -43,15 +43,14 @@ export const DashboardCardChartRenderer: React.FC<{
 
   const { privacy } = usePrivacy()
   const defaultViewPort = (dateUnit: DateUnit): StockChartViewport => {
-    const now = new Date()
+    const now = timetravel ? dateParse(timetravel) : new Date()
     const from = new Date(maxBy([dateMinus(now, dateUnit, 300), seriesTimestampMin], d => d.valueOf()) || Date.now())
     return {
       scaleMode: 'linear',
       xAxisMinMax: [dateStartOf(from, dateUnit).valueOf(), datePlus(dateStartOf(now, dateUnit), dateUnit, 2).valueOf()],
     }
   }
-
-  const [viewport, setViewport] = React.useState<StockChartViewport>(defaultViewPort(resolution))
+  const viewport = defaultViewPort(resolution)
 
   return (
     <div className={stylesChartWrapper}>
@@ -65,7 +64,6 @@ export const DashboardCardChartRenderer: React.FC<{
             privacy={privacy && isChartViewSeriesPrivate(config)}
             series={series}
             viewport={viewport}
-            onChangeViewport={setViewport}
           />
         )}
       </AutoSizer>

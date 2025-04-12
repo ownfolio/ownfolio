@@ -75,7 +75,7 @@ export interface StockChartProps {
   privacy: boolean
   series: StockChartSeries[]
   viewport: StockChartViewport
-  onChangeViewport: (viewport: StockChartViewport) => void
+  onChangeViewport?: (viewport: StockChartViewport) => void
 }
 
 export const StockChart: React.FC<StockChartProps> = ({
@@ -158,7 +158,7 @@ export const StockChart: React.FC<StockChartProps> = ({
           }
         }
       } else if (enablePanAndZoom && event.type === 'stop') {
-        onChangeViewport(viewport.current)
+        onChangeViewport?.(viewport.current)
       }
     },
     !enablePanAndZoom
