@@ -33,7 +33,5 @@ it(
     const p1b = await db.portfolios.update({ ...p1, name: 'Portfolio 1 - updated' })
     await expect(db.portfolios.retrieve(p1.id)).resolves.toEqual(p1b)
   }),
-  {
-    timeout: 60000,
-  }
+  60000
 )

@@ -85,9 +85,7 @@ it(
     await db.attachments.linkToTransaction(a1.id, t1.id)
     await db.attachments.unlinkFromTransaction(a1.id, t1.id)
   }),
-  {
-    timeout: 60000,
-  }
+  60000
 )
 
 it(
@@ -152,7 +150,5 @@ it(
       [a1.id, tripleBuffer(a1b, true)],
     ])
   }),
-  {
-    timeout: 60000,
-  }
+  60000
 )

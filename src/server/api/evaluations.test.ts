@@ -94,9 +94,7 @@ describe('evaluatePlausibility', () => {
         await api.evaluatePlausibility.handler(ctx).then(r => findingsForType(r, 'transactionHasNoAttachment'))
       ).toEqual<FindingsForType>([])
     }),
-    {
-      timeout: 60000,
-    }
+    60000
   )
 
   it(
@@ -227,9 +225,7 @@ describe('evaluatePlausibility', () => {
         },
       ])
     }),
-    {
-      timeout: 60000,
-    }
+    60000
   )
 
   it(
@@ -339,8 +335,6 @@ describe('evaluatePlausibility', () => {
           .then(r => findingsForType(r, 'transactionConsumesMoreAssetAmountThanAvailable'))
       ).toEqual<FindingsForType>([])
     }),
-    {
-      timeout: 60000,
-    }
+    60000
   )
 })

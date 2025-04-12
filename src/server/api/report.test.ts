@@ -26,9 +26,7 @@ it(
       Buffer.from(parseDataUrl(report.dataUrl)[1], 'base64')
     )
   }),
-  {
-    timeout: 60000,
-  }
+  60000
 )
 
 let yahooFinanceAxiosMock: AxiosMock | undefined

@@ -15,7 +15,5 @@ it(
     await expect(db.accounts.listByUserId(u.id)).resolves.toHaveLength(2)
     await expect(db.accounts.listByUserId('user_???')).resolves.toHaveLength(0)
   }),
-  {
-    timeout: 60000,
-  }
+  60000
 )

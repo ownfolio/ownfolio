@@ -5,18 +5,12 @@ import { expect, it } from 'vitest'
 
 import { pdfToPngs } from './pdfToPngs'
 
-it(
-  'pdfToPngs',
-  async () => {
-    const pdf = await fs.readFile(path.join(__dirname, './test.pdf'))
-    const pngs = await pdfToPngs(pdf)
-    expect(pngs).toHaveLength(3)
-    await fs.mkdir(path.join(__dirname, '../../../temp'), { recursive: true })
-    await Promise.all(
-      pngs.map((png, idx) => fs.writeFile(path.join(__dirname, `../../../temp/pdfToPng-${idx + 1}.png`), png))
-    )
-  },
-  {
-    timeout: 60000,
-  }
-)
+it('pdfToPngs', async () => {
+  const pdf = await fs.readFile(path.join(__dirname, './test.pdf'))
+  const pngs = await pdfToPngs(pdf)
+  expect(pngs).toHaveLength(3)
+  await fs.mkdir(path.join(__dirname, '../../../temp'), { recursive: true })
+  await Promise.all(
+    pngs.map((png, idx) => fs.writeFile(path.join(__dirname, `../../../temp/pdfToPng-${idx + 1}.png`), png))
+  )
+}, 60000)

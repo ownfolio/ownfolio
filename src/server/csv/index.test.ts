@@ -61,9 +61,7 @@ it(
       transactions1.map(transactionSanitizer).map(transactionDataSanitizer)
     )
   }),
-  {
-    timeout: 60000,
-  }
+  60000
 )
 
 async function prepareTransactions(db: Database, u: User): Promise<User> {

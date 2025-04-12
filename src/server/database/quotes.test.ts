@@ -125,7 +125,5 @@ it(
     await expect(db.quotes.countForAssetId(s2.id)).resolves.toBe(1)
     await expect(db.quotes.countForAssetId('ast_???')).resolves.toBe(0)
   }),
-  {
-    timeout: 60000,
-  }
+  60000
 )

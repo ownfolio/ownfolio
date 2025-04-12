@@ -50,7 +50,5 @@ it(
     })
     await expect(db.assets.retrieve(a3.id).then(a => a.quoteProvider)).resolves.not.toBe(null)
   }),
-  {
-    timeout: 60000,
-  }
+  60000
 )

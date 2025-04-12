@@ -121,7 +121,5 @@ it(
     await expect(db.transactions.countForAssetId(s1.id)).resolves.toBe(1)
     await expect(db.transactions.countForAssetId('ast_???')).resolves.toBe(0)
   }),
-  {
-    timeout: 60000,
-  }
+  60000
 )

@@ -39,7 +39,5 @@ it(
     await expect(db.users.findByEmail(u1.email)).resolves.toBeUndefined()
     await expect(db.users.findByEmail(u2.email)).resolves.toBeUndefined()
   }),
-  {
-    timeout: 60000,
-  }
+  60000
 )
