@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   pages:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Pages
     steps:
       - uses: actions/checkout@v4
