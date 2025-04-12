@@ -3,6 +3,7 @@ import React from 'react'
 
 import { DashboardCard } from '../../../shared/models/DashboardCard'
 import { Input } from '../../components/Input'
+import { LoadingCardSuspense } from '../../components/LoadingCardSuspense'
 import { ViewContainer } from '../../components/ViewContainer'
 import { AssetClosedPositionsTable } from './AssetClosedPositionsTable'
 import { AssetOpenPositionsTable } from './AssetOpenPositionsTable'
@@ -32,13 +33,21 @@ export const DashboardView: React.FC = () => {
       </div>
       <DashboardCardsGrid cards={cards} timetravel={timetravel} />
       <h2>Portfolios</h2>
-      <PortfoliosTable timetravel={timetravel} />
+      <LoadingCardSuspense>
+        <PortfoliosTable timetravel={timetravel} />
+      </LoadingCardSuspense>
       <h2>Cash</h2>
-      <CashTable timetravel={timetravel} />
+      <LoadingCardSuspense>
+        <CashTable timetravel={timetravel} />
+      </LoadingCardSuspense>
       <h2>Assets</h2>
-      <AssetOpenPositionsTable timetravel={timetravel} />
+      <LoadingCardSuspense>
+        <AssetOpenPositionsTable timetravel={timetravel} />
+      </LoadingCardSuspense>
       <h2>Realized Profits</h2>
-      <AssetClosedPositionsTable timetravel={timetravel} />
+      <LoadingCardSuspense>
+        <AssetClosedPositionsTable timetravel={timetravel} />
+      </LoadingCardSuspense>
     </ViewContainer>
   )
 }

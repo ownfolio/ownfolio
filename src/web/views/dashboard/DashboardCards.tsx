@@ -3,7 +3,7 @@ import React from 'react'
 
 import { DashboardCard } from '../../../shared/models/DashboardCard'
 import { Card } from '../../components/Card'
-import { Loading } from '../../components/Loading'
+import { LoadingCardSuspense } from '../../components/LoadingCardSuspense'
 import { DashboardCardChangeRenderer } from './cards/DashboardCardChangeRenderer'
 import { DashboardCardChartRenderer } from './cards/DashboardCardChartRenderer'
 import { DashboardCardTotalRenderer } from './cards/DashboardCardTotalRenderer'
@@ -15,17 +15,11 @@ export const DashboardCardsGrid: React.FC<{ cards: DashboardCard[]; timetravel?:
   return (
     <div className={stylesGrid}>
       {cards.map((card, index) => (
-        <Card key={index} className={stylesCard}>
-          <React.Suspense
-            fallback={
-              <div className={stylesCardContent}>
-                <Loading />
-              </div>
-            }
-          >
+        <LoadingCardSuspense key={index}>
+          <Card className={stylesCard}>
             <DashboardCardRenderer card={card} timetravel={timetravel} />
-          </React.Suspense>
-        </Card>
+          </Card>
+        </LoadingCardSuspense>
       ))}
     </div>
   )
