@@ -54,10 +54,22 @@ export const DashboardCardChangeRenderer: React.FC<{
   const { total, deposit } = evaluations.value['all'][1]
   const change = total.minus(deposit).minus(totalToday.minus(depositToday))
   const changePercentage = change.dividedBy(totalToday).multipliedBy(100)
+  const title = (() => {
+    switch (card.since.interval) {
+      case 'day':
+        return 'Today'
+      case 'week':
+        return 'WTD'
+      case 'month':
+        return 'MTD'
+      case 'year':
+        return 'YTD'
+    }
+  })()
 
   return (
     <div className={stylesCardContent}>
-      <div className={stylesCardTitle}>Change (Today)</div>
+      <div className={stylesCardTitle}>{`Change (${title})`}</div>
       <div>
         <Amount
           amount={change}

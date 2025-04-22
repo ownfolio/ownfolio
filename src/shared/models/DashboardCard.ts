@@ -12,7 +12,10 @@ export const dashboardCardSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('chart'),
-    config: z.discriminatedUnion('type', [z.object({ type: z.literal('total') })]),
+    config: z.discriminatedUnion('type', [
+      z.object({ type: z.literal('total') }),
+      z.object({ type: z.literal('profit') }),
+    ]),
   }),
 ])
 

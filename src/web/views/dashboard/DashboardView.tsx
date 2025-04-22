@@ -15,7 +15,7 @@ export const DashboardView: React.FC = () => {
   const [timetravel, setTimetravel] = React.useState<string | undefined>(undefined)
   const cards: DashboardCard[] = [
     { type: 'total' },
-    { type: 'chart', config: { type: 'total' } },
+    { type: 'chart', config: { type: 'profit' } },
     { type: 'change', since: { type: 'toDate', interval: 'day' } },
     { type: 'change', since: { type: 'toDate', interval: 'week' } },
     { type: 'change', since: { type: 'toDate', interval: 'month' } },

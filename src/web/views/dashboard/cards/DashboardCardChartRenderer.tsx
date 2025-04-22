@@ -15,7 +15,7 @@ export const DashboardCardChartRenderer: React.FC<{
   timetravel?: string
 }> = ({ card, timetravel }) => {
   const resolution: DateUnit = 'day'
-  const config: ChartViewSeriesConfig = { type: 'total' }
+  const config: ChartViewSeriesConfig = { type: card.config.type }
   const { data: baseSeries } = useSuspenseQuery({
     queryKey: ['dashboardCardChard', JSON.stringify(card), timetravel, resolution],
     queryFn: async () => {
