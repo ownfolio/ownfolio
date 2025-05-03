@@ -39,13 +39,6 @@ export const AssetsView: React.FC = () => {
         .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'month', 1), 'yyyy-MM-dd') })
         .then(r => r.data),
   })
-  const { data: lastWeekQuotes } = useSuspenseQuery({
-    queryKey: ['lastWeekQuotes'],
-    queryFn: () =>
-      rpcClient
-        .listLatestQuotes({ date: dateFormat(dateMinus(dateEndOf(new Date(), 'day'), 'week', 1), 'yyyy-MM-dd') })
-        .then(r => r.data),
-  })
   const { data: yesterdayQuotes } = useSuspenseQuery({
     queryKey: ['yesterdayQuotes'],
     queryFn: () =>
@@ -64,9 +57,8 @@ export const AssetsView: React.FC = () => {
       { id: 'name', title: 'Name', minWidth: 250 },
       { id: 'number', title: 'Number', width: 200, priority: 5, className: stylesNumberColumn },
       { id: 'symbol', title: 'Symbol', width: 100, priority: 6 },
-      { id: 'lastYearQuote', title: '1Y', align: 'right', width: 150, priority: 6 },
-      { id: 'lastMonthQuote', title: '1M', align: 'right', width: 150, priority: 5 },
-      { id: 'lastWeekQuote', title: '1W', align: 'right', width: 150, priority: 4 },
+      { id: 'lastYearQuote', title: '1Y', align: 'right', width: 150, priority: 5 },
+      { id: 'lastMonthQuote', title: '1M', align: 'right', width: 150, priority: 4 },
       { id: 'yesterdayQuote', title: '1D', align: 'right', width: 150, priority: 3 },
       { id: 'latestQuote', title: 'Now', align: 'right', width: 150, priority: 1 },
     ],
@@ -81,7 +73,6 @@ export const AssetsView: React.FC = () => {
           const assetCurrency = allCurrencies.find(c => c.symbol === asset?.currency)
           const lastYearQuote = lastYearQuotes.find(q => q.assetId === asset.id)
           const lastMonthQuote = lastMonthQuotes.find(q => q.assetId === asset.id)
-          const lastWeekQuote = lastWeekQuotes.find(q => q.assetId === asset.id)
           const yesterdayQuote = yesterdayQuotes.find(q => q.assetId === asset.id)
           const latestQuote = latestQuotes.find(q => q.assetId === asset.id)
 
@@ -130,30 +121,6 @@ export const AssetsView: React.FC = () => {
                       <Percentage
                         percentage={BigNumber(latestQuote.close)
                           .dividedBy(lastMonthQuote.close)
-                          .multipliedBy(100)
-                          .minus(100)}
-                        decimals={2}
-                        signColor
-                        signIcon
-                        signChar
-                      />
-                    </div>
-                  )}
-                </div>
-              ),
-              lastWeekQuote: lastWeekQuote && (
-                <div>
-                  <Amount
-                    amount={BigNumber(lastWeekQuote.close)}
-                    denomination={assetCurrency?.denomination || 0}
-                    symbol={assetCurrency?.symbol || '???'}
-                    nonPrivate
-                  />
-                  {latestQuote && (
-                    <div>
-                      <Percentage
-                        percentage={BigNumber(latestQuote.close)
-                          .dividedBy(lastWeekQuote.close)
                           .multipliedBy(100)
                           .minus(100)}
                         decimals={2}
@@ -261,7 +228,7 @@ export const AssetsView: React.FC = () => {
             ]),
           }
         }),
-    [assets, lastYearQuotes, lastMonthQuotes, lastWeekQuotes, yesterdayQuotes, latestQuotes, showHidden]
+    [assets, lastYearQuotes, lastMonthQuotes, yesterdayQuotes, latestQuotes, showHidden]
   )
 
   return (

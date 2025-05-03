@@ -170,7 +170,7 @@ export function createRpcV1Evaluations(database: Database) {
               return [dateStartOf(now, 'day')]
             }
             case 'dates': {
-              return selectionSortBy(input.when.dates.map(dateParse), (a, b) => a.valueOf() - b.valueOf())
+              return input.when.dates.map(dateParse)
             }
             case 'historical': {
               const dates = transactions[0]

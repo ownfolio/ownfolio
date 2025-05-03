@@ -17,7 +17,6 @@ export const DashboardView: React.FC = () => {
     { type: 'total' },
     { type: 'chart', config: { type: 'profit', resolution: 'week', range: 'month', rangeAmount: 6 } },
     { type: 'change', since: { type: 'toDate', interval: 'day' } },
-    { type: 'change', since: { type: 'toDate', interval: 'week' } },
     { type: 'change', since: { type: 'toDate', interval: 'month' } },
     { type: 'change', since: { type: 'toDate', interval: 'year' } },
   ]
