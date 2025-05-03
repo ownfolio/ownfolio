@@ -8,18 +8,19 @@ import { dateMinus, dateParse, datePlus, dateStartOf, DateUnit } from '../../../
 import { AutoSizer } from '../../../components/AutoSizer'
 import { StockChart, StockChartViewport } from '../../../components/StockChart'
 import { usePrivacy } from '../../../privacy'
-import { chartViewSeries, ChartViewSeriesConfig, isChartViewSeriesPrivate } from '../../chart/series'
+import { chartSeriesAsCandle, chartViewSeries, ChartViewSeriesConfig } from '../../chart/series'
 
 export const DashboardCardChartRenderer: React.FC<{
   card: Extract<DashboardCard, { type: 'chart' }>
   timetravel?: string
 }> = ({ card, timetravel }) => {
-  const resolution: DateUnit = 'day'
   const config: ChartViewSeriesConfig = { type: card.config.type }
   const { data: baseSeries } = useSuspenseQuery({
-    queryKey: ['dashboardCardChard', JSON.stringify(card), timetravel, resolution],
+    queryKey: ['dashboardCardChard', JSON.stringify(card), timetravel],
     queryFn: async () => {
-      return await chartViewSeries(resolution, config)
+      return await chartViewSeries('day', config).then(ss =>
+        ss.map(s => chartSeriesAsCandle(s, card.config.resolution))
+      )
     },
   })
   const series = [baseSeries[0]]
@@ -42,15 +43,20 @@ export const DashboardCardChartRenderer: React.FC<{
   )
 
   const { privacy } = usePrivacy()
-  const defaultViewPort = (dateUnit: DateUnit): StockChartViewport => {
+  const defaultViewPort = (resolution: DateUnit, range: DateUnit, rangeAmount: number): StockChartViewport => {
     const now = timetravel ? dateParse(timetravel) : new Date()
-    const from = new Date(maxBy([dateMinus(now, dateUnit, 300), seriesTimestampMin], d => d.valueOf()) || Date.now())
+    const from = new Date(
+      maxBy([dateMinus(now, range, rangeAmount), seriesTimestampMin], d => d.valueOf()) || Date.now()
+    )
     return {
       scaleMode: 'linear',
-      xAxisMinMax: [dateStartOf(from, dateUnit).valueOf(), datePlus(dateStartOf(now, dateUnit), dateUnit, 2).valueOf()],
+      xAxisMinMax: [
+        dateStartOf(from, resolution).valueOf(),
+        datePlus(dateStartOf(now, resolution), resolution, 2).valueOf(),
+      ],
     }
   }
-  const viewport = defaultViewPort(resolution)
+  const viewport = defaultViewPort(card.config.resolution, card.config.range, card.config.rangeAmount)
 
   return (
     <div className={stylesChartWrapper}>
@@ -61,7 +67,8 @@ export const DashboardCardChartRenderer: React.FC<{
             height={height}
             showGrid
             enableMouseOver
-            privacy={privacy && isChartViewSeriesPrivate(config)}
+            showAxesInline
+            privacy={privacy}
             series={series}
             viewport={viewport}
           />

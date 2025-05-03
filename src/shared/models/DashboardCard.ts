@@ -13,8 +13,18 @@ export const dashboardCardSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('chart'),
     config: z.discriminatedUnion('type', [
-      z.object({ type: z.literal('total') }),
-      z.object({ type: z.literal('profit') }),
+      z.object({
+        type: z.literal('total'),
+        resolution: dateUnitSchema,
+        range: dateUnitSchema,
+        rangeAmount: z.number().min(1),
+      }),
+      z.object({
+        type: z.literal('profit'),
+        resolution: dateUnitSchema,
+        range: dateUnitSchema,
+        rangeAmount: z.number().min(1),
+      }),
     ]),
   }),
 ])

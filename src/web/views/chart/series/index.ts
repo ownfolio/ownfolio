@@ -1,4 +1,5 @@
-import { DateUnit } from '../../../../shared/utils/date'
+import { groupBy, maxBy, minBy } from '../../../../shared/utils/array'
+import { dateEndOf, dateStartOf, DateUnit } from '../../../../shared/utils/date'
 import { StockChartSeries } from '../../../components/StockChart'
 import { assetSeries, AssetSeriesConfig } from './asset'
 import { assetTransactionsSeries, AssetTransactionsSeriesConfig } from './assetTransactions'
@@ -37,19 +38,43 @@ export async function chartViewSeries(
   }
 }
 
-export function isChartViewSeriesPrivate(config: ChartViewSeriesConfig): boolean {
-  switch (config.type) {
-    case 'total':
-      return true
-    case 'totalDeposit':
-      return true
-    case 'profit':
-      return true
-    case 'profitRelative':
-      return false
-    case 'asset':
-      return false
-    case 'assetTransactions':
-      return false
+export function chartSeriesAsCandle(series: StockChartSeries, resolution: DateUnit): StockChartSeries {
+  if (series.type === 'candle') {
+    return {
+      type: 'candle',
+      id: `${series.id}-as-candle`,
+      label: series.label,
+      points: groupBy(series.points, p => dateStartOf(new Date(p.openTimestamp), resolution).valueOf().toString()).map(
+        ps => {
+          return {
+            openTimestamp: dateStartOf(new Date(ps[0].openTimestamp), 'day').valueOf(),
+            closeTimestamp: dateEndOf(new Date(ps[ps.length - 1].closeTimestamp), 'day').valueOf(),
+            open: ps[0].open!,
+            high: maxBy(ps, p => p.high)!.high,
+            low: minBy(ps, p => p.low)!.low,
+            close: ps[ps.length - 1].close!,
+          }
+        }
+      ),
+    }
+  } else {
+    return {
+      type: 'candle',
+      id: `${series.id}-as-candle`,
+      label: series.label,
+      points: groupBy(
+        series.points.filter(p => typeof p.value === 'number'),
+        p => dateStartOf(new Date(p.timestamp), resolution).valueOf().toString()
+      ).map(ps => {
+        return {
+          openTimestamp: dateStartOf(new Date(ps[0].timestamp), 'day').valueOf(),
+          closeTimestamp: dateEndOf(new Date(ps[ps.length - 1].timestamp), 'day').valueOf(),
+          open: ps[0].value!,
+          high: maxBy(ps, p => p.value!)!.value!,
+          low: minBy(ps, p => p.value!)!.value!,
+          close: ps[ps.length - 1].value!,
+        }
+      }),
+    }
   }
 }

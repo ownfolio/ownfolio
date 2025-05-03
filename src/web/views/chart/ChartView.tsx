@@ -13,7 +13,7 @@ import { Menu } from '../../components/Menu'
 import { StockChart, StockChartSeries, StockChartViewport } from '../../components/StockChart'
 import { usePersistentState } from '../../hooks/usePersistentState'
 import { usePrivacy } from '../../privacy'
-import { chartViewSeries, ChartViewSeriesConfig, isChartViewSeriesPrivate } from './series'
+import { chartViewSeries, ChartViewSeriesConfig } from './series'
 import { chartViewTool } from './tools'
 
 type ChartParams = { type: 'total'; id?: string } | { type: 'profit'; id?: string } | { type: 'asset'; id: string }
@@ -97,7 +97,7 @@ export const ChartView: React.FC = () => {
               showCurrentValues
               enableMouseOver
               enablePanAndZoom
-              privacy={privacy && isChartViewSeriesPrivate(config)}
+              privacy={privacy}
               series={series.filter(s => enabledSeries.includes(s.id))}
               viewport={viewport}
               onChangeViewport={setViewport}

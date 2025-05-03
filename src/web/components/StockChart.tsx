@@ -67,6 +67,7 @@ export interface StockChartProps {
   width: number
   height: number
   showAxes?: boolean
+  showAxesInline?: boolean
   showGrid?: boolean
   showLabels?: boolean
   showCurrentValues?: boolean
@@ -82,6 +83,7 @@ export const StockChart: React.FC<StockChartProps> = ({
   width,
   height,
   showAxes,
+  showAxesInline,
   showGrid,
   showLabels,
   showCurrentValues,
@@ -173,7 +175,15 @@ export const StockChart: React.FC<StockChartProps> = ({
       ref={canvasRef}
       width={width}
       height={height}
-      renderInputs={() => [showAxes, showGrid, showCurrentValues, series, viewport.current, mouse.current]}
+      renderInputs={() => [
+        showAxes,
+        showAxesInline,
+        showGrid,
+        showCurrentValues,
+        series,
+        viewport.current,
+        mouse.current,
+      ]}
       render={({ context: ctx }) => {
         ctx.clearRect(0, 0, width, height)
         ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue',
@@ -206,6 +216,10 @@ export const StockChart: React.FC<StockChartProps> = ({
           renderAxesCross(ctx, width, height, xAxis, yAxis)
           renderXAxis(ctx, height, xAxis)
           renderYAxis(ctx, width, yAxis, privacy)
+        }
+        if (showAxesInline) {
+          renderXAxisInline(ctx, height, xAxis)
+          renderYAxisInline(ctx, width, yAxis, privacy)
         }
         if (showGrid) {
           renderGrid(ctx, width, height, xAxis, yAxis)
@@ -385,6 +399,33 @@ function renderYAxis(ctx: CanvasRenderingContext2D, width: number, axis: Axis, p
     ctx.lineTo(width - axis.width + axis.padding / 2, Math.round(axis.scale(tick.value)) + 0.5)
     ctx.stroke()
     ctx.fillText(!privacy ? tick.label : '••••••••', width - axis.width + axis.padding, y)
+  })
+  ctx.restore()
+}
+
+function renderXAxisInline(ctx: CanvasRenderingContext2D, height: number, axis: Axis): void {
+  ctx.save()
+  const originalFont = ctx.font
+  const highlightedFont = 'bold ' + originalFont
+  ctx.fillStyle = '#888888'
+  ctx.textBaseline = 'bottom'
+  ctx.textAlign = 'left'
+  axis.ticks.forEach(tick => {
+    const x = Math.round(axis.scale(tick.value))
+    ctx.font = tick.highlighted ? highlightedFont : originalFont
+    ctx.fillText(tick.label, x + 2, height - axis.height / 2)
+  })
+  ctx.restore()
+}
+
+function renderYAxisInline(ctx: CanvasRenderingContext2D, width: number, axis: Axis, privacy: boolean): void {
+  ctx.save()
+  ctx.fillStyle = '#888888'
+  ctx.textBaseline = 'bottom'
+  ctx.textAlign = 'right'
+  axis.ticks.forEach(tick => {
+    const y = Math.round(axis.scale(tick.value))
+    ctx.fillText(!privacy ? tick.label : '••••••••', width - axis.width - 2, y)
   })
   ctx.restore()
 }
