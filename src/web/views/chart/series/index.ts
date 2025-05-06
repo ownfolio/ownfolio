@@ -47,8 +47,8 @@ export function chartSeriesAsCandle(series: StockChartSeries, resolution: DateUn
       points: groupBy(series.points, p => dateStartOf(new Date(p.openTimestamp), resolution).valueOf().toString()).map(
         ps => {
           return {
-            openTimestamp: dateStartOf(new Date(ps[0].openTimestamp), 'day').valueOf(),
-            closeTimestamp: dateEndOf(new Date(ps[ps.length - 1].closeTimestamp), 'day').valueOf(),
+            openTimestamp: dateStartOf(new Date(ps[0].openTimestamp), resolution).valueOf(),
+            closeTimestamp: dateEndOf(new Date(ps[ps.length - 1].closeTimestamp), resolution).valueOf(),
             open: ps[0].open!,
             high: maxBy(ps, p => p.high)!.high,
             low: minBy(ps, p => p.low)!.low,
@@ -67,8 +67,8 @@ export function chartSeriesAsCandle(series: StockChartSeries, resolution: DateUn
         p => dateStartOf(new Date(p.timestamp), resolution).valueOf().toString()
       ).map(ps => {
         return {
-          openTimestamp: dateStartOf(new Date(ps[0].timestamp), 'day').valueOf(),
-          closeTimestamp: dateEndOf(new Date(ps[ps.length - 1].timestamp), 'day').valueOf(),
+          openTimestamp: dateStartOf(new Date(ps[0].timestamp), resolution).valueOf(),
+          closeTimestamp: dateEndOf(new Date(ps[ps.length - 1].timestamp), resolution).valueOf(),
           open: ps[0].value!,
           high: maxBy(ps, p => p.value!)!.value!,
           low: minBy(ps, p => p.value!)!.value!,
