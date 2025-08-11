@@ -127,7 +127,7 @@ async function prepare(
               })
               console.log(`Screenshotting ${name}...`)
               const fileName = (deviceName?: string) =>
-                path.join(screenshotsPath, deviceName ? `${name}-${deviceName}.png` : `${name}.png`)
+                path.join(screenshotsPath, deviceName ? `${name}-${deviceName}.png` : `${name}.png`) as `${string}.png`
               await devices.reduce<Promise<void>>(async (accP, device) => {
                 await accP
                 const frameFile = path.join(__dirname, `screenshots-${device.id}.svg`)
