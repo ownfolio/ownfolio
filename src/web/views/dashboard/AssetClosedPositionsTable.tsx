@@ -60,9 +60,9 @@ export const AssetClosedPositionsTable: React.FC<{ timetravel?: string }> = ({ t
       const profitPercentage = BigNumber(p.closePrice).minus(p.openPrice).dividedBy(p.openPrice).multipliedBy(100)
       const id = `${p.accountId}-${p.assetId}`
 
-      // if (asset?.status === 'hidden' || account?.status === 'hidden' || portfolio?.status === 'hidden') {
-      //   return []
-      // }
+      if (asset?.status === 'hidden' || account?.status === 'hidden' || portfolio?.status === 'hidden') {
+        return []
+      }
 
       return [
         {
