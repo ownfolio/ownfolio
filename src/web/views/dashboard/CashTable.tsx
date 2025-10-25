@@ -53,15 +53,22 @@ export const CashTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => 
   )
 
   const rows = React.useMemo<TableDefinitionRow[]>(() => {
-    return accounts
-      .filter(a => a.status !== 'hidden')
-      .filter(a => !BigNumber(evaluations.value[a.id]?.cash || 0).eq(0))
-      .map(account => {
-        const accountCurrency = allCurrencies.find(c => c.symbol === account?.currency)
-        const portfolio = portfolios.find(p => p.id === account?.portfolioId)
-        const id = account.id
-        const cashAmount = BigNumber(evaluations.value[account.id]?.cash || 0)
-        return {
+    return accounts.flatMap(account => {
+      const accountCurrency = allCurrencies.find(c => c.symbol === account?.currency)
+      const portfolio = portfolios.find(p => p.id === account?.portfolioId)
+      const id = account.id
+      const cashAmount = BigNumber(evaluations.value[account.id]?.cash || 0)
+
+      if (account?.status === 'hidden' || portfolio?.status === 'hidden') {
+        return []
+      }
+
+      if (BigNumber(evaluations.value[account.id]?.cash || 0).eq(0)) {
+        return []
+      }
+
+      return [
+        {
           id,
           columns: {
             account: (
@@ -123,8 +130,9 @@ export const CashTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => 
               },
             },
           ],
-        }
-      })
+        },
+      ]
+    })
   }, [portfolios, accounts, evaluations])
 
   return <CardTable columns={columns} rows={rows} />

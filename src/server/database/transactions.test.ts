@@ -7,8 +7,8 @@ it(
   databaseTest(async db => {
     await db.init()
     const u = await db.users.create({ email: 'user@domain.com' }, 'password')
-    const p1 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 1' })
-    const p2 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 2' })
+    const p1 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 1', status: 'active' })
+    const p2 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 2', status: 'active' })
     const a1 = await db.accounts.create({
       currency: 'EUR',
       portfolioId: p1.id,

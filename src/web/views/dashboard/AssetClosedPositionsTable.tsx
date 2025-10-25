@@ -51,19 +51,21 @@ export const AssetClosedPositionsTable: React.FC<{ timetravel?: string }> = ({ t
   )
 
   const rows = React.useMemo<TableDefinitionRow[]>(() => {
-    return evaluations.value.closedAssetPositions
-      .filter(p => !accounts.find(a => a.id === p.accountId && a.status === 'hidden'))
-      .filter(p => !assets.find(a => a.id === p.assetId && a.status === 'hidden'))
-      .map(p => {
-        const account = accounts.find(a => a.id === p.accountId)
-        const portfolio = portfolios.find(p => p.id === account?.portfolioId)
-        const asset = assets.find(s => s.id === p.assetId)
-        const assetCurrency = allCurrencies.find(c => c.symbol === asset?.currency)
-        const profit = BigNumber(p.closePrice).minus(p.openPrice)
-        const profitPercentage = BigNumber(p.closePrice).minus(p.openPrice).dividedBy(p.openPrice).multipliedBy(100)
-        const id = `${p.accountId}-${p.assetId}`
+    return evaluations.value.closedAssetPositions.flatMap(p => {
+      const account = accounts.find(a => a.id === p.accountId)
+      const portfolio = portfolios.find(p => p.id === account?.portfolioId)
+      const asset = assets.find(s => s.id === p.assetId)
+      const assetCurrency = allCurrencies.find(c => c.symbol === asset?.currency)
+      const profit = BigNumber(p.closePrice).minus(p.openPrice)
+      const profitPercentage = BigNumber(p.closePrice).minus(p.openPrice).dividedBy(p.openPrice).multipliedBy(100)
+      const id = `${p.accountId}-${p.assetId}`
 
-        return {
+      // if (asset?.status === 'hidden' || account?.status === 'hidden' || portfolio?.status === 'hidden') {
+      //   return []
+      // }
+
+      return [
+        {
           id,
           columns: {
             asset: (
@@ -240,8 +242,9 @@ export const AssetClosedPositionsTable: React.FC<{ timetravel?: string }> = ({ t
               },
             },
           ]),
-        }
-      })
+        },
+      ]
+    })
   }, [allCurrencies, portfolios, accounts, assets, evaluations])
 
   const expansion = usePersistentState<TableExpansionState>(

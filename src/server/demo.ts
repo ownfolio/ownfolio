@@ -14,6 +14,7 @@ export async function generateDemoPortfolio(database: Database, userId: string):
   const portfolio = await database.portfolios.create({
     userId,
     name: 'Demo',
+    status: 'active',
   })
   const accountSavings = await database.accounts.create({
     currency,

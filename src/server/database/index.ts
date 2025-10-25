@@ -83,6 +83,7 @@ export class Database {
     await this.migrate('attachments.makeDerivationCacheExpiryOptional', sql =>
       this.attachments.makeDerivationCacheExpiryOptional(sql)
     )
+    await this.migrate('portfolios.addStatusColumn', sql => this.portfolios.addStatusColumn(sql))
     logger.info(`Finished database migrations`)
   }
 

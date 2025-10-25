@@ -8,7 +8,7 @@ it(
   databaseTest(async db => {
     await db.init()
     const u = await db.users.create({ email: 'user@domain.com' }, 'password')
-    const p = await db.portfolios.create({ userId: u.id, name: 'Portfolio' })
+    const p = await db.portfolios.create({ userId: u.id, name: 'Portfolio', status: 'active' })
     await db.accounts.create({ currency: 'EUR', portfolioId: p.id, name: 'Account 1', number: '', status: 'active' })
     await db.accounts.create({ currency: 'EUR', portfolioId: p.id, name: 'Account 2', number: '', status: 'active' })
     await expect(db.accounts.list()).resolves.toHaveLength(2)

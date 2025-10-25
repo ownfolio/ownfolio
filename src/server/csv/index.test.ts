@@ -66,7 +66,7 @@ it(
 
 async function prepareTransactions(db: Database, u: User): Promise<User> {
   await db.init()
-  const p = await db.portfolios.create({ userId: u.id, name: 'Portfolio' })
+  const p = await db.portfolios.create({ userId: u.id, name: 'Portfolio', status: 'active' })
   const a1 = await db.accounts.create({
     currency: 'EUR',
     portfolioId: p.id,

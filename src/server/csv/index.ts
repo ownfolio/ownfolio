@@ -125,7 +125,7 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
     (a, b) => dateParse(a.Date + 'T' + a.Time).valueOf() - dateParse(b.Date + 'T' + b.Time).valueOf()
   )
 
-  const portfolio = await db.portfolios.create({ name: 'Import', userId })
+  const portfolio = await db.portfolios.create({ name: 'Import', userId, status: 'active' })
   const ensureAccount = async (name: string) => {
     const accounts = await db.accounts.listByUserId(userId)
     const account = accounts.find(a => a.name === name)

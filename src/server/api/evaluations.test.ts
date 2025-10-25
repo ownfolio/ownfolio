@@ -22,7 +22,7 @@ describe('evaluatePlausibility', () => {
       const u = await db.users.create({ email: 'user@domain.com' }, 'password')
       const api = createRpcV1Evaluations(db)
       const ctx = { user: u, sessionId: u.id, setSessionId: async () => {}, unsetSessionId: async () => {} }
-      const port = await db.portfolios.create({ userId: u.id, name: 'Portfolio' })
+      const port = await db.portfolios.create({ userId: u.id, name: 'Portfolio', status: 'active' })
       const ast1 = await db.assets.create({
         userId: u.id,
         name: 'Asset 1',
@@ -104,7 +104,7 @@ describe('evaluatePlausibility', () => {
       const u = await db.users.create({ email: 'user@domain.com' }, 'password')
       const api = createRpcV1Evaluations(db)
       const ctx = { user: u, sessionId: u.id, setSessionId: async () => {}, unsetSessionId: async () => {} }
-      const port = await db.portfolios.create({ userId: u.id, name: 'Portfolio' })
+      const port = await db.portfolios.create({ userId: u.id, name: 'Portfolio', status: 'active' })
       const ast1 = await db.assets.create({
         userId: u.id,
         name: 'Asset 1',
@@ -235,7 +235,7 @@ describe('evaluatePlausibility', () => {
       const u = await db.users.create({ email: 'user@domain.com' }, 'password')
       const api = createRpcV1Evaluations(db)
       const ctx = { user: u, sessionId: u.id, setSessionId: async () => {}, unsetSessionId: async () => {} }
-      const port = await db.portfolios.create({ userId: u.id, name: 'Portfolio' })
+      const port = await db.portfolios.create({ userId: u.id, name: 'Portfolio', status: 'active' })
       const ast1 = await db.assets.create({
         userId: u.id,
         name: 'Asset 1',

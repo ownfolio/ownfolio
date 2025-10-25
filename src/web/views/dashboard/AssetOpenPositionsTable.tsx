@@ -50,19 +50,21 @@ export const AssetOpenPositionsTable: React.FC<{ timetravel?: string }> = ({ tim
     []
   )
   const rows = React.useMemo<TableDefinitionRow[]>(() => {
-    return evaluations.value.openAssetPositions
-      .filter(p => !accounts.find(a => a.id === p.accountId && a.status === 'hidden'))
-      .filter(p => !assets.find(a => a.id === p.assetId && a.status === 'hidden'))
-      .map(p => {
-        const account = accounts.find(a => a.id === p.accountId)
-        const portfolio = portfolios.find(p => p.id === account?.portfolioId)
-        const asset = assets.find(s => s.id === p.assetId)
-        const assetCurrency = allCurrencies.find(c => c.symbol === asset?.currency)
-        const profit = BigNumber(p.currentPrice).minus(p.openPrice)
-        const profitPercentage = BigNumber(p.currentPrice).dividedBy(p.openPrice).minus(1).multipliedBy(100)
-        const id = `${p.accountId}-${p.assetId}`
+    return evaluations.value.openAssetPositions.flatMap(p => {
+      const account = accounts.find(a => a.id === p.accountId)
+      const portfolio = portfolios.find(p => p.id === account?.portfolioId)
+      const asset = assets.find(s => s.id === p.assetId)
+      const assetCurrency = allCurrencies.find(c => c.symbol === asset?.currency)
+      const profit = BigNumber(p.currentPrice).minus(p.openPrice)
+      const profitPercentage = BigNumber(p.currentPrice).dividedBy(p.openPrice).minus(1).multipliedBy(100)
+      const id = `${p.accountId}-${p.assetId}`
 
-        return {
+      if (asset?.status === 'hidden' || account?.status === 'hidden' || portfolio?.status === 'hidden') {
+        return []
+      }
+
+      return [
+        {
           id,
           columns: {
             asset: (
@@ -217,8 +219,9 @@ export const AssetOpenPositionsTable: React.FC<{ timetravel?: string }> = ({ tim
               },
             },
           ]),
-        }
-      })
+        },
+      ]
+    })
   }, [allCurrencies, portfolios, accounts, assets, evaluations])
 
   const expansion = usePersistentState<TableExpansionState>(

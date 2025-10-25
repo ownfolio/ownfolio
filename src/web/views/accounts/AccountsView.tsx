@@ -30,6 +30,7 @@ export const AccountsView: React.FC = () => {
       { id: 'name', title: 'Name', minWidth: 200 },
       { id: 'number', title: 'Number', width: 200, priority: 1, className: stylesNumberColumn },
       { id: 'currency', title: 'Currency', align: 'right', width: 150, priority: 3 },
+      { id: 'status', title: 'Status', align: 'right', width: 150, priority: 4 },
     ],
     []
   )
@@ -47,6 +48,7 @@ export const AccountsView: React.FC = () => {
               name: account.name,
               number: account.number,
               currency: account.currency,
+              status: account.status,
             },
             menuItems: filterNotFalse([
               {

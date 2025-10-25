@@ -7,11 +7,13 @@ it(
   'portfolios',
   databaseTest(async db => {
     await db.init()
-    await expect(db.portfolios.create({ userId: 'user_unknown', name: 'Portfolio 1' })).rejects.toThrow()
+    await expect(
+      db.portfolios.create({ userId: 'user_unknown', name: 'Portfolio 1', status: 'active' })
+    ).rejects.toThrow()
     const u = await db.users.create({ email: 'user@domain.com' }, 'password')
-    const p1 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 1' })
-    const p2 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 2' })
-    const p3 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 3' })
+    const p1 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 1', status: 'active' })
+    const p2 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 2', status: 'active' })
+    const p3 = await db.portfolios.create({ userId: u.id, name: 'Portfolio 3', status: 'active' })
     await expect(db.portfolios.retrieve('port_unknown')).rejects.toThrow()
     await expect(db.portfolios.find('port_unknown')).resolves.toBeUndefined()
     await expect(db.portfolios.retrieve(p1.id)).resolves.toEqual(p1)

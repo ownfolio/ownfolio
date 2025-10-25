@@ -192,7 +192,7 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
           ],
         }
       })(),
-      ...portfolios.map(portfolio => {
+      ...portfolios.flatMap(portfolio => {
         const { total: totalYtd, deposit: depositYtd } = evaluations.value[portfolio.id][0]
         const { total: totalMtd, deposit: depositMtd } = evaluations.value[portfolio.id][1]
         const { total: totalToday, deposit: depositToday } = evaluations.value[portfolio.id][2]
@@ -205,115 +205,132 @@ export const PortfoliosTable: React.FC<{ timetravel?: string }> = ({ timetravel 
         const changeTodayPercentage = changeToday.dividedBy(totalToday).multipliedBy(100)
         const profit = total.minus(deposit)
         const profitPercentage = profit.dividedBy(deposit).multipliedBy(100)
-        return {
-          id: portfolio.id,
-          columns: {
-            portfolio: portfolios.find(p => p.id === portfolio.id)?.name || '???',
-            changeYtd: (
-              <>
-                <div>
-                  <Amount
-                    amount={changeYtd}
-                    denomination={rootCurrency.denomination}
-                    symbol={rootCurrency.symbol}
-                    abbreviate
-                    signColor
-                    signChar
-                    signIcon
-                  />
-                </div>
-                <div>
-                  <Percentage percentage={changeYtdPercentage} decimals={2} signChar signColor signIcon />
-                </div>
-              </>
-            ),
-            changeMtd: (
-              <>
-                <div>
-                  <Amount
-                    amount={changeMtd}
-                    denomination={rootCurrency.denomination}
-                    symbol={rootCurrency.symbol}
-                    abbreviate
-                    signColor
-                    signChar
-                    signIcon
-                  />
-                </div>
-                <div>
-                  <Percentage percentage={changeMtdPercentage} decimals={2} signChar signColor signIcon />
-                </div>
-              </>
-            ),
-            changeToday: (
-              <>
-                <div>
-                  <Amount
-                    amount={changeToday}
-                    denomination={rootCurrency.denomination}
-                    symbol={rootCurrency.symbol}
-                    abbreviate
-                    signColor
-                    signChar
-                    signIcon
-                  />
-                </div>
-                <div>
-                  <Percentage percentage={changeTodayPercentage} decimals={2} signChar signColor signIcon />
-                </div>
-              </>
-            ),
-            profit: (
-              <>
-                <div>
-                  <Amount
-                    amount={profit}
-                    denomination={rootCurrency.denomination}
-                    symbol={rootCurrency.symbol}
-                    abbreviate
-                    signColor
-                    signChar
-                    signIcon
-                  />
-                </div>
-                <div>
-                  <Percentage percentage={profitPercentage} decimals={2} signColor signChar signIcon />
-                </div>
-              </>
-            ),
-            cash: (
-              <Amount amount={cash} denomination={rootCurrency.denomination} symbol={rootCurrency.symbol} abbreviate />
-            ),
-            assets: (
-              <Amount
-                amount={assetsCurrentPrice}
-                denomination={rootCurrency.denomination}
-                symbol={rootCurrency.symbol}
-                abbreviate
-              />
-            ),
-            total: (
-              <Amount amount={total} denomination={rootCurrency.denomination} symbol={rootCurrency.symbol} abbreviate />
-            ),
-          },
-          menuItems: [
-            {
-              label: 'Show total chart',
-              onClick: () => navigate(`/chart/total/${portfolio.id}`),
-            },
-            {
-              label: 'Show profit chart',
-              onClick: () => navigate(`/chart/profit/${portfolio.id}`),
-            },
-            null,
-            {
-              label: 'Edit portfolio',
-              onClick: async () => {
-                await openDialog(PortfolioDialog, { mode: { type: 'edit', portfolioId: portfolio.id } })
-              },
-            },
-          ],
+
+        if (portfolio.status === 'hidden') {
+          return []
         }
+
+        return [
+          {
+            id: portfolio.id,
+            columns: {
+              portfolio: portfolios.find(p => p.id === portfolio.id)?.name || '???',
+              changeYtd: (
+                <>
+                  <div>
+                    <Amount
+                      amount={changeYtd}
+                      denomination={rootCurrency.denomination}
+                      symbol={rootCurrency.symbol}
+                      abbreviate
+                      signColor
+                      signChar
+                      signIcon
+                    />
+                  </div>
+                  <div>
+                    <Percentage percentage={changeYtdPercentage} decimals={2} signChar signColor signIcon />
+                  </div>
+                </>
+              ),
+              changeMtd: (
+                <>
+                  <div>
+                    <Amount
+                      amount={changeMtd}
+                      denomination={rootCurrency.denomination}
+                      symbol={rootCurrency.symbol}
+                      abbreviate
+                      signColor
+                      signChar
+                      signIcon
+                    />
+                  </div>
+                  <div>
+                    <Percentage percentage={changeMtdPercentage} decimals={2} signChar signColor signIcon />
+                  </div>
+                </>
+              ),
+              changeToday: (
+                <>
+                  <div>
+                    <Amount
+                      amount={changeToday}
+                      denomination={rootCurrency.denomination}
+                      symbol={rootCurrency.symbol}
+                      abbreviate
+                      signColor
+                      signChar
+                      signIcon
+                    />
+                  </div>
+                  <div>
+                    <Percentage percentage={changeTodayPercentage} decimals={2} signChar signColor signIcon />
+                  </div>
+                </>
+              ),
+              profit: (
+                <>
+                  <div>
+                    <Amount
+                      amount={profit}
+                      denomination={rootCurrency.denomination}
+                      symbol={rootCurrency.symbol}
+                      abbreviate
+                      signColor
+                      signChar
+                      signIcon
+                    />
+                  </div>
+                  <div>
+                    <Percentage percentage={profitPercentage} decimals={2} signColor signChar signIcon />
+                  </div>
+                </>
+              ),
+              cash: (
+                <Amount
+                  amount={cash}
+                  denomination={rootCurrency.denomination}
+                  symbol={rootCurrency.symbol}
+                  abbreviate
+                />
+              ),
+              assets: (
+                <Amount
+                  amount={assetsCurrentPrice}
+                  denomination={rootCurrency.denomination}
+                  symbol={rootCurrency.symbol}
+                  abbreviate
+                />
+              ),
+              total: (
+                <Amount
+                  amount={total}
+                  denomination={rootCurrency.denomination}
+                  symbol={rootCurrency.symbol}
+                  abbreviate
+                />
+              ),
+            },
+            menuItems: [
+              {
+                label: 'Show total chart',
+                onClick: () => navigate(`/chart/total/${portfolio.id}`),
+              },
+              {
+                label: 'Show profit chart',
+                onClick: () => navigate(`/chart/profit/${portfolio.id}`),
+              },
+              null,
+              {
+                label: 'Edit portfolio',
+                onClick: async () => {
+                  await openDialog(PortfolioDialog, { mode: { type: 'edit', portfolioId: portfolio.id } })
+                },
+              },
+            ],
+          },
+        ]
       }),
     ]
   }, [evaluations])

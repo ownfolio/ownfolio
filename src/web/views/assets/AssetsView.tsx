@@ -61,6 +61,7 @@ export const AssetsView: React.FC = () => {
       { id: 'lastMonthQuote', title: '1M', align: 'right', width: 150, priority: 4 },
       { id: 'yesterdayQuote', title: '1D', align: 'right', width: 150, priority: 3 },
       { id: 'latestQuote', title: 'Now', align: 'right', width: 150, priority: 1 },
+      { id: 'status', title: 'Status', align: 'right', width: 150, priority: 7 },
     ],
     []
   )
@@ -166,6 +167,7 @@ export const AssetsView: React.FC = () => {
                   />
                 </div>
               ),
+              status: asset.status,
             },
             menuItems: filterNotFalse([
               !!asset.quoteProvider && {

@@ -46,6 +46,17 @@ export function createRpcV1Portfolio(database: Database) {
         return { data: portfolio2 }
       }
     ),
+    updatePortfolioStatus: createRpcCall(
+      updatePortfolioSchema.pick({ id: true, status: true }),
+      responseSchema(portfolioSchema),
+      async (ctx: RpcCtx, input) => {
+        if (!ctx.user) throw RpcError.unauthorized()
+        const portfolio = await database.portfolios.find(input.id)
+        if (!portfolio || portfolio.userId !== ctx.user.id) throw RpcError.badRequest(`Unknown portfolio ${input.id}`)
+        const portfolio2 = await database.portfolios.update({ ...portfolio, status: input.status })
+        return { data: portfolio2 }
+      }
+    ),
     deletePortfolio: createRpcCall(byIdSchema, responseSchema(z.void()), async (ctx: RpcCtx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const portfolio = await database.portfolios.find(input.id)

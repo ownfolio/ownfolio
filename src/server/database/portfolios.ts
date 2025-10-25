@@ -31,6 +31,10 @@ export class DatabasePortfolios extends DatabaseEntity<Portfolio, 'createdAt'> {
     `
   }
 
+  public async addStatusColumn(sql: postgres.Sql<{}>): Promise<void> {
+    await sql`ALTER TABLE "portfolio" ADD COLUMN "status" VARCHAR(16) NOT NULL CHECK ("status" = 'active' OR "status" = 'inactive' OR "status" = 'hidden') DEFAULT 'active'`
+  }
+
   protected override prepare(template: Omit<Portfolio, 'id' | 'createdAt'>): Portfolio {
     return {
       ...template,
