@@ -322,5 +322,54 @@ export async function generateDemoPortfolio(database: Database, userId: string):
       }
     }
   }
+  const msciWorldAsset = await database.assets.listByUserId(userId).then(as => as.find(a => a.symbol === 'EUNL')!)
+  const riskClassification = await database.classifications.create({
+    userId,
+    parentClassificationId: null,
+    name: 'Risk profile',
+    status: 'active',
+  })
+  const riskClassificationNoRisk = await database.classifications.create({
+    userId,
+    parentClassificationId: riskClassification.id,
+    name: 'No risk',
+    status: 'active',
+  })
+  const riskClassificationModerateRisk = await database.classifications.create({
+    userId,
+    parentClassificationId: riskClassification.id,
+    name: 'Moderate risk',
+    status: 'active',
+  })
+  const riskClassificationHighRisk = await database.classifications.create({
+    userId,
+    parentClassificationId: riskClassification.id,
+    name: 'High risk',
+    status: 'active',
+  })
+  await database.classifications.assignToClassification(
+    riskClassificationNoRisk.id,
+    accountSavings.id,
+    null,
+    BigNumber('100')
+  )
+  await database.classifications.assignToClassification(
+    riskClassificationModerateRisk.id,
+    accountStocks.id,
+    null,
+    BigNumber('100')
+  )
+  await database.classifications.assignToClassification(
+    riskClassificationHighRisk.id,
+    accountCrypto.id,
+    null,
+    BigNumber('100')
+  )
+  await database.classifications.assignToClassification(
+    riskClassificationModerateRisk.id,
+    null,
+    msciWorldAsset.id,
+    BigNumber('100')
+  )
   return portfolio
 }
