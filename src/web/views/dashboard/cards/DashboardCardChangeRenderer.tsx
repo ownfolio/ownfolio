@@ -28,19 +28,15 @@ export const DashboardCardChangeRenderer: React.FC<{
             ),
           },
           buckets: [{ type: 'all' }],
-          values: ['cash', 'assetsOpenPrice', 'assetsCurrentPrice', 'realizedProfits', 'total', 'deposit'],
+          values: ['total', 'deposit'],
         })
         .then(r => r.data)
       return {
         ...raw,
         value: recordMap(raw.value, items => {
-          return items.map(([date, cash, assetsOpenPrice, assetsCurrentPrice, realizedProfits, total, deposit]) => {
+          return items.map(([date, total, deposit]) => {
             return {
               date: date,
-              cash: BigNumber(cash),
-              assetsOpenPrice: BigNumber(assetsOpenPrice),
-              assetsCurrentPrice: BigNumber(assetsCurrentPrice),
-              realizedProfits: BigNumber(realizedProfits),
               total: BigNumber(total),
               deposit: BigNumber(deposit),
             }
