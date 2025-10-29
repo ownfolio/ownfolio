@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const currencySymbolSchema = z.enum(['USD', 'EUR'])
+export const currencySymbolSchema = z.enum(['EUR'])
 
 export type CurrencySymbol = z.infer<typeof currencySymbolSchema>
 
@@ -12,6 +12,9 @@ export const currencySchema = z.object({
 
 export type Currency = z.infer<typeof currencySchema>
 
-export const allCurrencies: Currency[] = [{ name: 'Euro', symbol: 'EUR', denomination: 2 }]
+export const currencies: Record<CurrencySymbol, Currency> = {
+  EUR: { name: 'Euro', symbol: 'EUR', denomination: 2 },
+}
+export const currenciesList: Currency[] = Object.keys(currencies).map(symbol => currencies[symbol as CurrencySymbol])
 
-export const rootCurrency: Currency = allCurrencies[0]
+export const rootCurrency: Currency = currencies.EUR

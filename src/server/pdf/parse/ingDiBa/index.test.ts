@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js'
 import path from 'path'
 import { describe, expect, it } from 'vitest'
 
+import { currencies } from '../../../../shared/models/Currency'
 import { PdfParserResult } from '../index'
 import { testPdfText } from '../testPdf'
 import { ingDiBaPdfParser } from './index'
@@ -14,7 +15,7 @@ describe('extracts', () => {
       type: 'assetBuy',
       date: '2023-11-06',
       time: '08:31:32',
-      currency: 'EUR',
+      currency: currencies.EUR.symbol,
       asset: ['iShsIII-Core MSCI World U.ETF Registered Shs USD (Acc) o.N.', 'IE00B4L5Y983', 'A0RPWH'],
       assetAmount: BigNumber('20').toString(),
       assetPrice: BigNumber('1538.76').toString(),
@@ -31,7 +32,7 @@ describe('extracts', () => {
       type: 'assetSell',
       date: '2018-10-23',
       time: '16:38:04',
-      currency: 'EUR',
+      currency: currencies.EUR.symbol,
       asset: ['iShsIII-Core MSCI World U.ETF Registered Shs USD (Acc) o.N.', 'IE00B4L5Y983', 'A0RPWH'],
       assetAmount: BigNumber('110').toString(),
       assetPrice: BigNumber('5046.8').toString(),

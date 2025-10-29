@@ -1,6 +1,8 @@
 import postgres from 'postgres'
 
 import { Quote, quoteSchema } from '../../shared/models/Quote'
+import { chunks } from '../../shared/utils/array'
+import { sequential } from '../../shared/utils/promise'
 import { DatabaseTable } from './DatabaseTable'
 
 export class DatabaseQuotes extends DatabaseTable {
@@ -24,10 +26,14 @@ export class DatabaseQuotes extends DatabaseTable {
 
   async createOrUpdate(...quotes: Quote[]): Promise<Quote[]> {
     const quotes2 = quotes.map(quote => this.schema.parse(quote))
-    await this.sql`
-      INSERT INTO "quote" ${this.sql(quotes2)}
-      ON CONFLICT ON CONSTRAINT "quote_pkey" DO UPDATE SET "open" = EXCLUDED."open", "high" = EXCLUDED."high", "low" = EXCLUDED."low", "close" = EXCLUDED."close"
-    `
+    await sequential(
+      chunks(quotes2, 1000).map(chunk => async () => {
+        await this.sql`
+        INSERT INTO "quote" ${this.sql(chunk)}
+        ON CONFLICT ON CONSTRAINT "quote_pkey" DO UPDATE SET "open" = EXCLUDED."open", "high" = EXCLUDED."high", "low" = EXCLUDED."low", "close" = EXCLUDED."close"
+      `
+      })
+    )
     return quotes2
   }
 

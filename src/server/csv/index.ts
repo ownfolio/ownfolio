@@ -1,5 +1,6 @@
 import { parse } from 'csv-parse/sync'
 
+import { rootCurrency } from '../../shared/models/Currency'
 import { Transaction, TransactionData, TransactionType } from '../../shared/models/Transaction'
 import { selectionSortBy } from '../../shared/utils/array'
 import { dateParse } from '../../shared/utils/date'
@@ -132,7 +133,13 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
     if (account) {
       return account
     }
-    return await db.accounts.create({ portfolioId: portfolio.id, name, number: '', currency: 'EUR', status: 'active' })
+    return await db.accounts.create({
+      portfolioId: portfolio.id,
+      name,
+      number: '',
+      currency: rootCurrency.symbol,
+      status: 'active',
+    })
   }
   const ensureAsset = async (name: string) => {
     const assets = await db.assets.listByUserId(userId)
@@ -145,7 +152,7 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
       symbol: 'XXX',
       name,
       number: '',
-      currency: 'EUR',
+      currency: rootCurrency.symbol,
       denomination: 0,
       quoteProvider: null,
       status: 'active',

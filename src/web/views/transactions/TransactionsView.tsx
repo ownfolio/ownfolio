@@ -3,7 +3,7 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
 import { Account } from '../../../shared/models/Account'
-import { allCurrencies } from '../../../shared/models/Currency'
+import { currenciesList } from '../../../shared/models/Currency'
 import {
   createEmptyTransaction,
   Transaction,
@@ -198,7 +198,7 @@ const TransactionDataText: React.FC<{ data: TransactionData }> = ({ data }): Rea
   switch (data.type) {
     case 'cashDeposit': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
           Deposit{' '}
@@ -214,7 +214,7 @@ const TransactionDataText: React.FC<{ data: TransactionData }> = ({ data }): Rea
     }
     case 'cashWithdrawal': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
           Withdraw{' '}
@@ -231,7 +231,7 @@ const TransactionDataText: React.FC<{ data: TransactionData }> = ({ data }): Rea
     case 'cashTransfer': {
       const fromCashAccount = accounts.find(a => a.id === data.fromCashAccountId)
       const toCashAccount = accounts.find(a => a.id === data.toCashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === fromCashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === fromCashAccount?.currency)
       return (
         <div>
           Transfer{' '}
@@ -249,7 +249,7 @@ const TransactionDataText: React.FC<{ data: TransactionData }> = ({ data }): Rea
       const asset = assets.find(a => a.id === data.assetId)
       const assetAccount = accounts.find(a => a.id === data.assetAccountId)
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
           Buy{' '}
@@ -274,7 +274,7 @@ const TransactionDataText: React.FC<{ data: TransactionData }> = ({ data }): Rea
       const asset = assets.find(a => a.id === data.assetId)
       const assetAccount = accounts.find(a => a.id === data.assetAccountId)
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
           Sell{' '}
@@ -346,7 +346,7 @@ const TransactionDataText: React.FC<{ data: TransactionData }> = ({ data }): Rea
     }
     case 'interest': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
           Receive{' '}
@@ -363,7 +363,7 @@ const TransactionDataText: React.FC<{ data: TransactionData }> = ({ data }): Rea
     case 'dividend': {
       const asset = assets.find(a => a.id === data.assetId)
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
           Receive{' '}
@@ -380,7 +380,7 @@ const TransactionDataText: React.FC<{ data: TransactionData }> = ({ data }): Rea
     }
     case 'tax': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
           Pay{' '}
@@ -396,7 +396,7 @@ const TransactionDataText: React.FC<{ data: TransactionData }> = ({ data }): Rea
     }
     case 'fee': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return (
         <div>
           Pay{' '}

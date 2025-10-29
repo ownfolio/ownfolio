@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { allCurrencies } from '../../../shared/models/Currency'
+import { currenciesList } from '../../../shared/models/Currency'
 import { filterNotFalse } from '../../../shared/utils/array'
 import { dateEndOf, dateFormat, dateMinus } from '../../../shared/utils/date'
 import { rpcClient } from '../../api'
@@ -71,7 +71,7 @@ export const AssetsView: React.FC = () => {
       assets
         .filter(a => showHidden || a.status !== 'hidden')
         .map(asset => {
-          const assetCurrency = allCurrencies.find(c => c.symbol === asset?.currency)
+          const assetCurrency = currenciesList.find(c => c.symbol === asset?.currency)
           const lastYearQuote = lastYearQuotes.find(q => q.assetId === asset.id)
           const lastMonthQuote = lastMonthQuotes.find(q => q.assetId === asset.id)
           const yesterdayQuote = yesterdayQuotes.find(q => q.assetId === asset.id)

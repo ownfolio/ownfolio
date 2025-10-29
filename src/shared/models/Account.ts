@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { currenciesList, rootCurrency } from './Currency'
+
 export const accountSchema = z.object({
   id: z.string(),
   portfolioId: z.string(),
@@ -17,7 +19,10 @@ export const accountSchema = z.object({
     .min(1)
     .max(4)
     .toUpperCase()
-    .refine(currency => currency === 'EUR', 'Only EUR is supported currently'),
+    .refine(
+      currency => currenciesList.find(c => c.symbol === currency),
+      `Currency must be one of ${currenciesList.map(c => c.symbol).join(', ')}`
+    ),
   status: z.enum(['active', 'inactive', 'hidden']).default('active'),
   createdAt: z.string().datetime(),
 })
@@ -30,7 +35,7 @@ export function createEmptyAccount(): Account {
     portfolioId: '',
     name: '',
     number: '',
-    currency: 'EUR',
+    currency: rootCurrency.symbol,
     status: 'active',
     createdAt: '',
   }

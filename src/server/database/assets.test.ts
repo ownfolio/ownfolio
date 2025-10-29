@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { expect, it } from 'vitest'
 
+import { currencies } from '../../shared/models/Currency'
 import { databaseTest } from './databaseTest'
 
 it(
@@ -14,7 +15,7 @@ it(
       number: '',
       symbol: 'S1',
       denomination: 2,
-      currency: 'EUR',
+      currency: currencies.EUR.symbol,
       quoteProvider: null,
       status: 'active',
     })
@@ -24,7 +25,7 @@ it(
       number: '',
       symbol: 'S2',
       denomination: 2,
-      currency: 'EUR',
+      currency: currencies.EUR.symbol,
       quoteProvider: null,
       status: 'active',
     })
@@ -38,7 +39,7 @@ it(
       number: '',
       symbol: 'S3',
       denomination: 2,
-      currency: 'EUR',
+      currency: currencies.EUR.symbol,
       quoteProvider: null,
       status: 'active',
     })

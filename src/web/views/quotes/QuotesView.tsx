@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js'
 import React from 'react'
 import { useParams } from 'react-router-dom'
 
-import { allCurrencies } from '../../../shared/models/Currency'
+import { currenciesList } from '../../../shared/models/Currency'
 import { filterNotFalse } from '../../../shared/utils/array'
 import { rpcClient } from '../../api'
 import { Amount } from '../../components/Amount'
@@ -23,7 +23,7 @@ export const QuotesView: React.FC = () => {
     queryKey: ['assets', params.assetId],
     queryFn: () => rpcClient.retrieveAsset({ id: params.assetId }).then(r => r.data),
   })
-  const assetCurrency = allCurrencies.find(c => c.symbol === asset.currency)
+  const assetCurrency = currenciesList.find(c => c.symbol === asset.currency)
   const { data: quotes } = useSuspenseQuery({
     queryKey: ['assets', params.assetId, 'quotes'],
     queryFn: () => rpcClient.listQuotesForAsset({ id: params.assetId }).then(r => r.data),

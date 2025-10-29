@@ -207,9 +207,9 @@ export function createRpcV1Evaluations(database: Database) {
                   ...input.values.map(value => {
                     switch (value) {
                       case 'total':
-                        return evaluationSumOverAccounts(r.value.accountCashHoldings, accountFilter).plus(
-                          evaluationSumOverAccountsAndAssets(r.value.accountAssetCurrentPrices, accountFilter)
-                        )
+                        return evaluationSumOverAccounts(r.value.accountCashHoldings, accountFilter)
+                          .plus(evaluationSumOverAccountsAndAssets(r.value.accountAssetCurrentPrices, accountFilter))
+                          .toString()
                       case 'deposit':
                         return evaluationSumOverAccounts(r.value.accountCashHoldings, accountFilter)
                           .plus(evaluationSumOverAccountsAndAssets(r.value.accountAssetOpenPrices, accountFilter))
@@ -218,6 +218,7 @@ export function createRpcV1Evaluations(database: Database) {
                           .minus(evaluationSumOverAccounts(r.value.accountCashDividend, accountFilter))
                           .plus(evaluationSumOverAccounts(r.value.accountCashFee, accountFilter))
                           .plus(evaluationSumOverAccounts(r.value.accountCashTax, accountFilter))
+                          .toString()
                       case 'cash':
                         return evaluationSumOverAccounts(r.value.accountCashHoldings, accountFilter).toString()
                       case 'cashInterest':

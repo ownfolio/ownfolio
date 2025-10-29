@@ -1,5 +1,7 @@
 import { z } from 'zod'
 
+import { currenciesList, rootCurrency } from './Currency'
+
 export const assetQuoteProviderSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('yahooFinance'),
@@ -29,7 +31,10 @@ export const assetSchema = z.object({
     .min(1)
     .max(4)
     .toUpperCase()
-    .refine(currency => currency === 'EUR', 'Only EUR is supported currently'),
+    .refine(
+      currency => currenciesList.find(c => c.symbol === currency),
+      `Currency must be one of ${currenciesList.map(c => c.symbol).join(', ')}`
+    ),
   quoteProvider: assetQuoteProviderSchema.nullable().default(null),
   status: z.enum(['active', 'inactive', 'hidden']).default('active'),
   createdAt: z.string().datetime(),
@@ -45,7 +50,7 @@ export function createEmptyAsset(): Asset {
     number: '',
     symbol: '',
     denomination: 0,
-    currency: 'EUR',
+    currency: rootCurrency.symbol,
     quoteProvider: null,
     status: 'active',
     createdAt: '',

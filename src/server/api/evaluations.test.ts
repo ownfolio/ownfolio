@@ -2,6 +2,7 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
+import { currencies } from '../../shared/models/Currency'
 import { databaseTest } from '../database/databaseTest'
 import { PdfParserResult } from '../pdf/parse'
 import { createRpcV1Evaluations, evaluatePlausibilityResponseSchema } from './evaluations'
@@ -29,19 +30,19 @@ describe('evaluatePlausibility', () => {
         number: '',
         symbol: 'S1',
         denomination: 2,
-        currency: 'EUR',
+        currency: currencies.EUR.symbol,
         quoteProvider: null,
         status: 'active',
       })
       const act1 = await db.accounts.create({
-        currency: 'EUR',
+        currency: currencies.EUR.symbol,
         portfolioId: port.id,
         name: 'Account 1',
         number: '',
         status: 'active',
       })
       const act2 = await db.accounts.create({
-        currency: 'EUR',
+        currency: currencies.EUR.symbol,
         portfolioId: port.id,
         name: 'Account 2',
         number: '',
@@ -111,19 +112,19 @@ describe('evaluatePlausibility', () => {
         number: '',
         symbol: 'S1',
         denomination: 2,
-        currency: 'EUR',
+        currency: currencies.EUR.symbol,
         quoteProvider: null,
         status: 'active',
       })
       const act1 = await db.accounts.create({
-        currency: 'EUR',
+        currency: currencies.EUR.symbol,
         portfolioId: port.id,
         name: 'Account 1',
         number: '',
         status: 'active',
       })
       const act2 = await db.accounts.create({
-        currency: 'EUR',
+        currency: currencies.EUR.symbol,
         portfolioId: port.id,
         name: 'Account 2',
         number: '',
@@ -168,7 +169,7 @@ describe('evaluatePlausibility', () => {
               type: 'assetBuy',
               date: '2020-01-01',
               time: '00:00:00',
-              currency: 'EUR',
+              currency: currencies.EUR.symbol,
               assetAmount: '10',
               assetPrice: '100',
             } as PdfParserResult),
@@ -192,7 +193,7 @@ describe('evaluatePlausibility', () => {
               type: 'assetSell',
               date: '2020-01-02',
               time: '00:00:01',
-              currency: 'EUR',
+              currency: currencies.EUR.symbol,
               assetAmount: '11',
               assetPrice: '101',
               fee: '1',
@@ -242,19 +243,19 @@ describe('evaluatePlausibility', () => {
         number: '',
         symbol: 'S1',
         denomination: 2,
-        currency: 'EUR',
+        currency: currencies.EUR.symbol,
         quoteProvider: null,
         status: 'active',
       })
       const act1 = await db.accounts.create({
-        currency: 'EUR',
+        currency: currencies.EUR.symbol,
         portfolioId: port.id,
         name: 'Account 1',
         number: '',
         status: 'active',
       })
       const act2 = await db.accounts.create({
-        currency: 'EUR',
+        currency: currencies.EUR.symbol,
         portfolioId: port.id,
         name: 'Account 2',
         number: '',

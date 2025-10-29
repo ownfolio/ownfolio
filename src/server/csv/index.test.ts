@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest'
 
+import { currencies } from '../../shared/models/Currency'
 import { Transaction } from '../../shared/models/Transaction'
 import { User } from '../../shared/models/User'
 import { Database } from '../database'
@@ -68,14 +69,14 @@ async function prepareTransactions(db: Database, u: User): Promise<User> {
   await db.init()
   const p = await db.portfolios.create({ userId: u.id, name: 'Portfolio', status: 'active' })
   const a1 = await db.accounts.create({
-    currency: 'EUR',
+    currency: currencies.EUR.symbol,
     portfolioId: p.id,
     name: 'Account 1',
     number: '',
     status: 'active',
   })
   const a2 = await db.accounts.create({
-    currency: 'EUR',
+    currency: currencies.EUR.symbol,
     portfolioId: p.id,
     name: 'Account 2',
     number: '',
@@ -87,7 +88,7 @@ async function prepareTransactions(db: Database, u: User): Promise<User> {
     number: '',
     symbol: 'S1',
     denomination: 2,
-    currency: 'EUR',
+    currency: currencies.EUR.symbol,
     quoteProvider: null,
     status: 'active',
   })

@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 
 import { Asset, AssetQuoteProvider, createEmptyAsset } from '../../../shared/models/Asset'
+import { CurrencySymbol } from '../../../shared/models/Currency'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
 import { DialogContentProps } from '../../components/DialogsContext'
@@ -106,7 +107,7 @@ export const AssetDialog: React.FC<Props> = ({ mode, closeDialog }) => {
         <SelectCurrency
           id="currency"
           value={asset.currency}
-          onChange={event => setAsset(asset => ({ ...asset!, currency: event.target.value as 'EUR' }))}
+          onChange={event => setAsset(asset => ({ ...asset!, currency: event.target.value as CurrencySymbol }))}
           required
         />
       </Label>

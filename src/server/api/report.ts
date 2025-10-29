@@ -2,6 +2,7 @@ import { createRpcCall, RpcError } from '@choffmeister/rpc-core'
 import BigNumber from 'bignumber.js'
 import { z } from 'zod'
 
+import { rootCurrency } from '../../shared/models/Currency'
 import { bigNumberFormat } from '../../shared/utils/bignumber'
 import { dateEndOf, dateFormat, dateList, dateParse } from '../../shared/utils/date'
 import { fileSchema, renderDataUrl } from '../../shared/utils/file'
@@ -43,14 +44,18 @@ export function createRpcV1Report(database: Database) {
                   return [
                     { text: dateParse(result.date).getFullYear() },
                     {
-                      text: renderAmountString(evaluationSumOverAccounts(result.value.accountCashHoldings), 2, 'EUR'),
+                      text: renderAmountString(
+                        evaluationSumOverAccounts(result.value.accountCashHoldings),
+                        2,
+                        rootCurrency.symbol
+                      ),
                       style: 'amount',
                     },
                     {
                       text: renderAmountString(
                         evaluationSumOverAccountsAndAssets(result.value.accountAssetCurrentPrices),
                         2,
-                        'EUR'
+                        rootCurrency.symbol
                       ),
                       style: 'amount',
                     },
@@ -60,7 +65,7 @@ export function createRpcV1Report(database: Database) {
                           evaluationSumOverAccountsAndAssets(result.value.accountAssetCurrentPrices)
                         ),
                         2,
-                        'EUR'
+                        rootCurrency.symbol
                       ),
                       style: 'totalAmount',
                     },

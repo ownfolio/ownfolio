@@ -6,7 +6,7 @@ import { dateFormat } from '../utils/date'
 import { formatInt } from '../utils/string'
 import { Account } from './Account'
 import { Asset } from './Asset'
-import { allCurrencies } from './Currency'
+import { currenciesList } from './Currency'
 
 export const transactionDataSchema = z.discriminatedUnion('type', [
   z.object({
@@ -279,18 +279,18 @@ export function renderTransactionAsString(
   switch (data.type) {
     case 'cashDeposit': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return dateStr + `Deposit ${formatAmount(data.cashAmount, currency)} to ${cashAccount?.name || '???'}`
     }
     case 'cashWithdrawal': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return dateStr + `Withdraw ${formatAmount(data.cashAmount, currency)} from ${cashAccount?.name || '???'}`
     }
     case 'cashTransfer': {
       const fromCashAccount = accounts.find(a => a.id === data.fromCashAccountId)
       const toCashAccount = accounts.find(a => a.id === data.toCashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === fromCashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === fromCashAccount?.currency)
       return (
         dateStr +
         `Transfer ${formatAmount(data.cashAmount, currency)} from ${fromCashAccount?.name || '???'} to ${toCashAccount?.name || '???'}`
@@ -300,7 +300,7 @@ export function renderTransactionAsString(
       const asset = assets.find(a => a.id === data.assetId)
       const assetAccount = accounts.find(a => a.id === data.assetAccountId)
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return (
         dateStr +
         `Buy ${formatAmount(data.assetAmount, asset)} on ${assetAccount?.name || '???'} for ${formatAmount(data.cashAmount, currency)} on ${cashAccount?.name || '???'}`
@@ -310,7 +310,7 @@ export function renderTransactionAsString(
       const asset = assets.find(a => a.id === data.assetId)
       const assetAccount = accounts.find(a => a.id === data.assetAccountId)
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return (
         dateStr +
         `Sell ${formatAmount(data.assetAmount, asset)} on ${assetAccount?.name || '???'} for ${formatAmount(data.cashAmount, currency)} on ${cashAccount?.name || '???'}`
@@ -337,13 +337,13 @@ export function renderTransactionAsString(
     }
     case 'interest': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return dateStr + `Receive ${formatAmount(data.cashAmount, currency)} interest to ${cashAccount?.name || '???'}`
     }
     case 'dividend': {
       const asset = assets.find(a => a.id === data.assetId)
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return (
         dateStr +
         `Receive ${formatAmount(data.cashAmount, currency)} dividend to ${cashAccount?.name || '???'} for ${formatAmount(data.assetAmount, asset)}`
@@ -351,12 +351,12 @@ export function renderTransactionAsString(
     }
     case 'tax': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return dateStr + `Pay ${formatAmount(data.taxCashAmount, currency)} tax from ${cashAccount?.name || '???'}`
     }
     case 'fee': {
       const cashAccount = accounts.find(a => a.id === data.cashAccountId)
-      const currency = allCurrencies.find(c => c.symbol === cashAccount?.currency)
+      const currency = currenciesList.find(c => c.symbol === cashAccount?.currency)
       return dateStr + `Pay ${formatAmount(data.feeCashAmount, currency)} fee from ${cashAccount?.name || '???'}`
     }
   }

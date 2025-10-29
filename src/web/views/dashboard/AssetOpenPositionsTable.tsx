@@ -4,7 +4,7 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
 
-import { allCurrencies } from '../../../shared/models/Currency'
+import { currenciesList } from '../../../shared/models/Currency'
 import { filterNotFalse } from '../../../shared/utils/array'
 import { rpcClient } from '../../api'
 import { Amount } from '../../components/Amount'
@@ -54,7 +54,7 @@ export const AssetOpenPositionsTable: React.FC<{ timetravel?: string }> = ({ tim
       const account = accounts.find(a => a.id === p.accountId)
       const portfolio = portfolios.find(p => p.id === account?.portfolioId)
       const asset = assets.find(s => s.id === p.assetId)
-      const assetCurrency = allCurrencies.find(c => c.symbol === asset?.currency)
+      const assetCurrency = currenciesList.find(c => c.symbol === asset?.currency)
       const profit = BigNumber(p.currentPrice).minus(p.openPrice)
       const profitPercentage = BigNumber(p.currentPrice).dividedBy(p.openPrice).minus(1).multipliedBy(100)
       const id = `${p.accountId}-${p.assetId}`
@@ -222,7 +222,7 @@ export const AssetOpenPositionsTable: React.FC<{ timetravel?: string }> = ({ tim
         },
       ]
     })
-  }, [allCurrencies, portfolios, accounts, assets, evaluations])
+  }, [currenciesList, portfolios, accounts, assets, evaluations])
 
   const expansion = usePersistentState<TableExpansionState>(
     'dashboard.assetOpenPositionsTable.expansion',

@@ -2,7 +2,7 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import BigNumber from 'bignumber.js'
 import React from 'react'
 
-import { allCurrencies } from '../../../shared/models/Currency'
+import { currenciesList } from '../../../shared/models/Currency'
 import { recordMap } from '../../../shared/utils/record'
 import { rpcClient } from '../../api'
 import { Amount } from '../../components/Amount'
@@ -54,7 +54,7 @@ export const CashTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => 
 
   const rows = React.useMemo<TableDefinitionRow[]>(() => {
     return accounts.flatMap(account => {
-      const accountCurrency = allCurrencies.find(c => c.symbol === account?.currency)
+      const accountCurrency = currenciesList.find(c => c.symbol === account?.currency)
       const portfolio = portfolios.find(p => p.id === account?.portfolioId)
       const id = account.id
       const cashAmount = BigNumber(evaluations.value[account.id]?.cash || 0)

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { allCurrencies } from '../../shared/models/Currency'
+import { currenciesList } from '../../shared/models/Currency'
 import { Select } from './Select'
 
 type Props = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement> & {
@@ -10,7 +10,7 @@ type Props = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElemen
 
 export const SelectCurrency = React.forwardRef<HTMLSelectElement, Props>(
   ({ value, onChange, emptyLabel = '-', clearable, className, ...other }, ref: any) => {
-    const options = allCurrencies.map(currency => ({
+    const options = currenciesList.map(currency => ({
       symbol: currency.symbol,
       name: `${currency.name} (${currency.symbol})`,
     }))

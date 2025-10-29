@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 
 import { Account, createEmptyAccount } from '../../../shared/models/Account'
+import { CurrencySymbol } from '../../../shared/models/Currency'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
 import { DialogContentProps } from '../../components/DialogsContext'
@@ -95,7 +96,7 @@ export const AccountDialog: React.FC<Props> = ({ mode, closeDialog }) => {
         <SelectCurrency
           id="currency"
           value={account.currency}
-          onChange={event => setAccount(account => ({ ...account!, currency: event.target.value as 'EUR' }))}
+          onChange={event => setAccount(account => ({ ...account!, currency: event.target.value as CurrencySymbol }))}
           required
         />
       </Label>

@@ -128,3 +128,11 @@ export function upsertFirstBy<T>(
     return [...elems.slice(0, idx), update(elems[idx]), ...elems.slice(idx + 1)]
   }
 }
+
+export function chunks<T>(elems: T[], size: number): T[][] {
+  const result: T[][] = []
+  for (let i = 0; i < elems.length; i += size) {
+    result.push(elems.slice(i, i + size))
+  }
+  return result
+}

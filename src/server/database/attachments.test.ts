@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { expect, it } from 'vitest'
 
+import { currencies } from '../../shared/models/Currency'
 import { databaseTest } from './databaseTest'
 
 it(
@@ -13,7 +14,7 @@ it(
       portfolioId: p.id,
       name: 'Account',
       number: '',
-      currency: 'EUR',
+      currency: currencies.EUR.symbol,
       status: 'active',
     })
     const t1 = await db.transactions.create({
