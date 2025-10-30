@@ -7,7 +7,7 @@ A personal portfolio tracker.
 ## Development
 
 ```bash
-docker-compose up -d postgres
+docker compose up -d postgres
 npm run start -- create-user --email test@test.com --password testtest --demo-portfolio
 npm run start:dev
 ```
