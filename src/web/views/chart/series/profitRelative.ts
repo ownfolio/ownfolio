@@ -30,11 +30,12 @@ export const profitRelativeSeries: ChartViewSeries<ProfitRelativeSeriesConfig> =
       color: 'black',
       filled: false,
       staircase: false,
-      points: data.value[key].map(([date, total, deposit]) => ({
+      points: data.value[key].flatMap(([date, total, deposit]) => ({
         timestamp: dateEndOf(dateParse(date), 'day').valueOf(),
-        value: BigNumber(deposit).isPositive()
-          ? BigNumber(total).dividedBy(deposit).minus(1).multipliedBy(100).toNumber()
-          : 0,
+        value:
+          BigNumber(deposit).isPositive() && !BigNumber(deposit).eq(0)
+            ? BigNumber(total).dividedBy(deposit).minus(1).multipliedBy(100).toNumber()
+            : 0,
       })),
     },
   ]
