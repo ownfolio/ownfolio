@@ -6,14 +6,13 @@ import { fileAsDataUrl, fileDownload } from '../../../shared/utils/file'
 import { sleep } from '../../../shared/utils/promise'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
-import { DialogContentProps, useDialogs } from '../../components/DialogsContext'
+import { DialogContentProps } from '../../components/DialogsContext'
 import { Form } from '../../components/Form'
 import { Input } from '../../components/Input'
 import { Label } from '../../components/Label'
 import { Message } from '../../components/Message'
 import { parseError } from '../../error'
 import { useMultiState } from '../../hooks/useMultiState'
-import { AttachmentDialog } from '../attachments/AttachmentDialog'
 
 export const UserDialog: React.FC<DialogContentProps<void>> = ({ closeDialog }) => {
   const { data: me } = useSuspenseQuery({
@@ -48,7 +47,7 @@ const EmailForm: React.FC<{ email: string }> = ({ email }) => {
         updateState({ busy: true })
         try {
           await rpcClient.changeEmail({ newEmail: form.email })
-          queryClient.invalidateQueries()
+          await queryClient.invalidateQueries()
           updateState({ message: { text: 'Email has been changed', kind: 'info' } })
         } catch (err) {
           updateState({ message: { text: parseError(err).title, kind: 'warning' } })
@@ -101,7 +100,7 @@ const PasswordForm: React.FC = () => {
         try {
           await rpcClient.changePassword({ oldPassword: form.oldPassword, newPassword: form.newPassword })
           updateForm({ oldPassword: '', newPassword: '' })
-          queryClient.invalidateQueries()
+          await queryClient.invalidateQueries()
           updateState({ message: { text: 'Password has been changed', kind: 'info' } })
         } catch (err) {
           updateState({ message: { text: parseError(err).title, kind: 'warning' } })
@@ -215,19 +214,14 @@ const ImportExportSection: React.FC = () => {
   )
 }
 
-const ReportSection: React.FC<{ closeDialog: () => void }> = ({ closeDialog }) => {
-  const queryClient = useQueryClient()
-  const { openDialog } = useDialogs()
+const ReportSection: React.FC<{ closeDialog: () => void }> = () => {
   return (
     <div className={stylesSection}>
       <Button
         type="button"
         onClick={async () => {
           const download = await rpcClient.generateYearlyPdfReport().then(r => r.data)
-          const attachment = await rpcClient.uploadAttachment(download).then(r => r.data)
-          queryClient.invalidateQueries()
-          closeDialog()
-          openDialog(AttachmentDialog, { attachmentId: attachment.id })
+          await fileDownload(download)
         }}
       >
         Generate yearly report
