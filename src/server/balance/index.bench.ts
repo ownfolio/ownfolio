@@ -54,7 +54,7 @@ describe('evaluateBalance', () => {
     const dates = dateList(startDate, endDate, 'day').map(date => dateFormat(date, 'yyyy-MM-dd'))
 
     bench(`${years} years`, () => {
-      evaluateBalance(transactions, quotes, dates)
+      evaluateBalance(dates, transactions, { quotes })
     })
   })
 })

@@ -291,9 +291,8 @@ export async function generateDemoPortfolio(database: Database, userId: string):
           }
         } else {
           const availableAssetAmount = await evaluateBalance(
-            await database.transactions.listByUserId(portfolio.userId, {}, 'asc'),
-            [],
-            [dateFormat(date, 'yyyy-MM-dd')]
+            [dateFormat(date, 'yyyy-MM-dd')],
+            await database.transactions.listByUserId(portfolio.userId, {}, 'asc')
           )[0]
             .assetPositions.open.filter(
               p => p.accountId === assetAccumulationPlan.assetAccount.id && p.assetId === asset.id

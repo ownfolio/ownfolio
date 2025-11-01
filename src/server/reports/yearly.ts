@@ -20,7 +20,7 @@ export const generateYearlyReport: ReportGenerator<YearlyReportParams> = async (
   const dates = dateList(transactions[0] ? dateParse(transactions[0].date) : now, now, 'year')
     .map(d => dateEndOf(d, 'year'))
     .map(date => dateFormat(date, 'yyyy-MM-dd'))
-  const balances = evaluateBalance(transactions, quotes, dates)
+  const balances = evaluateBalance(dates, transactions, { quotes })
   return generatePdf({
     content: [
       { text: 'Yearly report', style: 'h1' },

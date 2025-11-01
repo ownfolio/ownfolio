@@ -167,7 +167,7 @@ export function createRpcV1Evaluations(database: Database) {
             }
           }
         })()
-        const result = evaluateBalance(transactions, quotes, dates)
+        const result = evaluateBalance(dates, transactions, { quotes })
         const data = {
           value: input.buckets.reduce((acc, bucket) => {
             const [key, accountFilter] = (() => {
@@ -269,7 +269,7 @@ export function createRpcV1Evaluations(database: Database) {
         )
         const date =
           input.when.type === 'date' ? input.when.date : dateFormat(dateStartOf(new Date(), 'day'), 'yyyy-MM-dd')
-        const result = evaluateBalance(transactions, quotes, [date])[0]
+        const result = evaluateBalance([date], transactions, { quotes })[0]
         const openAssetPositions = groupBy(result.assetPositions.open, p => `${p.accountId}-${p.assetId}`).map(ps => {
           const accountId = ps[0].accountId
           const assetId = ps[0].assetId

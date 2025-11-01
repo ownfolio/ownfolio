@@ -78,10 +78,10 @@ export function createEmptyBalance(): Balance {
   }
 }
 
-export function evaluateBalance(transactions: Transaction[], quotes: Quote[], dates: string[]): Balance[] {
+export function evaluateBalance(dates: string[], transactions: Transaction[], opts?: { quotes?: Quote[] }): Balance[] {
   let nextDateIndex = 0
   let nextTransactionIndex = 0
-  const quotesMap = mapGroupBy(quotes, q => q.assetId)
+  const quotesMap = mapGroupBy(opts?.quotes || [], q => q.assetId)
   const nextQuoteIndexes = Object.keys(quotesMap).reduce<{ [assetId: string]: number }>(
     (acc, assetId) => ({ ...acc, [assetId]: 0 }),
     {}

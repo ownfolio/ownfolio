@@ -6,17 +6,17 @@ import { Balance, createEmptyBalance, evaluateBalance, updateBalanceByTransactio
 
 describe('evaluateBalance', () => {
   it('empty', () => {
-    expect(evaluateBalance([], [], [])).toEqual([])
+    expect(evaluateBalance([], [])).toEqual([])
   })
 
   it('dates', () => {
-    expect(evaluateBalance([], [], ['2020-01-01'])).toEqual([
+    expect(evaluateBalance(['2020-01-01'], [])).toEqual([
       {
         ...createEmptyBalance(),
         date: '2020-01-01',
       } satisfies Balance,
     ])
-    expect(evaluateBalance([], [], ['2020-01-01', '2021-01-01', '2022-01-01'])).toEqual([
+    expect(evaluateBalance(['2020-01-01', '2021-01-01', '2022-01-01'], [])).toEqual([
       {
         ...createEmptyBalance(),
         date: '2020-01-01',
@@ -35,14 +35,13 @@ describe('evaluateBalance', () => {
   it('transactions', () => {
     expect(
       evaluateBalance(
+        ['2021-01-01', '2023-01-01', '2025-01-01'],
         [
           tx('tx1', '2020-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '10' }),
           tx('tx2', '2022-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '20' }),
           tx('tx3', '2024-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '30' }),
           tx('tx4', '2026-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '40' }),
-        ],
-        [],
-        ['2021-01-01', '2023-01-01', '2025-01-01']
+        ]
       )
     ).toEqual([
       {
@@ -138,6 +137,7 @@ describe('evaluateBalance', () => {
   it('quotes', () => {
     expect(
       evaluateBalance(
+        ['2021-01-01', '2022-01-01', '2023-01-01', '2024-01-01'],
         [
           tx('tx1', '2020-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '1000' }),
           tx('tx2', '2021-01-01', {
@@ -150,13 +150,14 @@ describe('evaluateBalance', () => {
             feeCashAmount: '0',
           }),
         ],
-        [
-          { date: '2022-01-01', assetId: 'asset', open: null, high: null, low: null, close: '15' },
-          { date: '2022-07-01', assetId: 'otherAsset', open: null, high: null, low: null, close: '150' },
-          { date: '2023-01-01', assetId: 'asset', open: null, high: null, low: null, close: '20' },
-          { date: '2023-07-01', assetId: 'otherAsset', open: null, high: null, low: null, close: '200' },
-        ],
-        ['2021-01-01', '2022-01-01', '2023-01-01', '2024-01-01']
+        {
+          quotes: [
+            { date: '2022-01-01', assetId: 'asset', open: null, high: null, low: null, close: '15' },
+            { date: '2022-07-01', assetId: 'otherAsset', open: null, high: null, low: null, close: '150' },
+            { date: '2023-01-01', assetId: 'asset', open: null, high: null, low: null, close: '20' },
+            { date: '2023-07-01', assetId: 'otherAsset', open: null, high: null, low: null, close: '200' },
+          ],
+        }
       )
     ).toEqual([
       {
