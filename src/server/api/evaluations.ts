@@ -3,10 +3,9 @@ import BigNumber from 'bignumber.js'
 import { z } from 'zod'
 
 import { groupBy, maxBy, minBy, selectionSortBy } from '../../shared/utils/array'
-import { dateEquals, dateList, dateParse, dateStartOf, dateUnitSchema } from '../../shared/utils/date'
+import { dateEquals, dateFormat, dateList, dateParse, dateStartOf, dateUnitSchema } from '../../shared/utils/date'
+import { evaluateBalance } from '../balance'
 import { Database } from '../database'
-import { evaluationSumOverAccounts, evaluationSumOverAccountsAndAssets } from '../evaluations/evaluate'
-import { evaluateAll, evaluateHistoricalAllWithQuotes } from '../evaluations/evaluateAll'
 import { PdfParserResult } from '../pdf/parse'
 import { RpcCtx } from './context'
 import { listResponseSchema, responseSchema } from './utils'
@@ -25,20 +24,7 @@ export const evaluateSummaryRequestSchema = z.object({
     ])
   ),
   values: z
-    .array(
-      z.enum([
-        'total',
-        'deposit',
-        'cash',
-        'cashInterest',
-        'cashDividend',
-        'cashFee',
-        'cashTax',
-        'assetsOpenPrice',
-        'assetsCurrentPrice',
-        'realizedProfits',
-      ])
-    )
+    .array(z.enum(['total', 'deposit', 'cash', 'assetsOpenPrice', 'assetsCurrentPrice', 'realizedProfits']))
     .min(1),
 })
 export const evaluateSummaryResponseSchema = responseSchema(
@@ -160,17 +146,15 @@ export function createRpcV1Evaluations(database: Database) {
         if (!ctx.user) throw RpcError.unauthorized()
         const accounts = await database.accounts.listByUserId(ctx.user.id)
         const transactions = await database.transactions.listByUserId(ctx.user.id, {}, 'asc')
-        const allQuotes = (['total', 'assetsCurrentPrice'] as const).find(value => input.values.includes(value))
-          ? await database.quotes.listAllClosesByUserId(ctx.user.id)
-          : []
+        const quotes = await database.quotes.listAllClosesByUserId(ctx.user.id)
         const now = new Date()
-        const dates = (() => {
+        const dates: string[] = (() => {
           switch (input.when.type) {
             case 'now': {
-              return [dateStartOf(now, 'day')]
+              return [dateFormat(dateStartOf(now, 'day'), 'yyyy-MM-dd')]
             }
             case 'dates': {
-              return input.when.dates.map(dateParse)
+              return input.when.dates
             }
             case 'historical': {
               const dates = transactions[0]
@@ -179,11 +163,11 @@ export function createRpcV1Evaluations(database: Database) {
               if (dates.length === 0 || !dateEquals(dates[dates.length - 1], now, 'day')) {
                 dates.push(dateStartOf(now, 'day'))
               }
-              return dates
+              return dates.map(date => dateFormat(date, 'yyyy-MM-dd'))
             }
           }
         })()
-        const result = evaluateHistoricalAllWithQuotes(transactions, allQuotes, dates)
+        const result = evaluateBalance(transactions, quotes, dates)
         const data = {
           value: input.buckets.reduce((acc, bucket) => {
             const [key, accountFilter] = (() => {
@@ -206,44 +190,58 @@ export function createRpcV1Evaluations(database: Database) {
                   r.date,
                   ...input.values.map(value => {
                     switch (value) {
-                      case 'total':
-                        return evaluationSumOverAccounts(r.value.accountCashHoldings, accountFilter)
-                          .plus(evaluationSumOverAccountsAndAssets(r.value.accountAssetCurrentPrices, accountFilter))
+                      case 'total': {
+                        const cash = r.cashPositions.open
+                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .reduce((sum, p) => sum.plus(p.amount), BigNumber(0))
+                        const assets = r.assetPositions.open
+                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .reduce((sum, p) => {
+                            const quote = r.quotes[p.assetId]
+                            return sum.plus(quote ? BigNumber(quote).multipliedBy(p.amount) : p.openPrice)
+                          }, BigNumber(0))
+                        return cash.plus(assets).toString()
+                      }
+                      case 'deposit': {
+                        const cash = r.cashPositions.open
+                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .reduce((sum, p) => sum.plus(p.amount), BigNumber(0))
+                        const assetOpenPrices = r.assetPositions.open
+                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .reduce((sum, p) => sum.plus(p.openPrice), BigNumber(0))
+                        const realizedProfits = r.assetPositions.closed
+                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .reduce((sum, p) => sum.plus(p.closePrice).minus(p.openPrice), BigNumber(0))
                           .toString()
-                      case 'deposit':
-                        return evaluationSumOverAccounts(r.value.accountCashHoldings, accountFilter)
-                          .plus(evaluationSumOverAccountsAndAssets(r.value.accountAssetOpenPrices, accountFilter))
-                          .minus(evaluationSumOverAccountsAndAssets(r.value.accountAssetRealizedProfits, accountFilter))
-                          .minus(evaluationSumOverAccounts(r.value.accountCashInterest, accountFilter))
-                          .minus(evaluationSumOverAccounts(r.value.accountCashDividend, accountFilter))
-                          .plus(evaluationSumOverAccounts(r.value.accountCashFee, accountFilter))
-                          .plus(evaluationSumOverAccounts(r.value.accountCashTax, accountFilter))
+                        return cash.plus(assetOpenPrices).minus(realizedProfits).toString()
+                      }
+                      case 'cash': {
+                        return r.cashPositions.open
+                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .reduce((sum, p) => sum.plus(p.amount), BigNumber(0))
                           .toString()
-                      case 'cash':
-                        return evaluationSumOverAccounts(r.value.accountCashHoldings, accountFilter).toString()
-                      case 'cashInterest':
-                        return evaluationSumOverAccounts(r.value.accountCashInterest, accountFilter).toString()
-                      case 'cashDividend':
-                        return evaluationSumOverAccounts(r.value.accountCashDividend, accountFilter).toString()
-                      case 'cashFee':
-                        return evaluationSumOverAccounts(r.value.accountCashFee, accountFilter).toString()
-                      case 'cashTax':
-                        return evaluationSumOverAccounts(r.value.accountCashTax, accountFilter).toString()
-                      case 'assetsOpenPrice':
-                        return evaluationSumOverAccountsAndAssets(
-                          r.value.accountAssetOpenPrices,
-                          accountFilter
-                        ).toString()
-                      case 'assetsCurrentPrice':
-                        return evaluationSumOverAccountsAndAssets(
-                          r.value.accountAssetCurrentPrices,
-                          accountFilter
-                        ).toString()
-                      case 'realizedProfits':
-                        return evaluationSumOverAccountsAndAssets(
-                          r.value.accountAssetRealizedProfits,
-                          accountFilter
-                        ).toString()
+                      }
+                      case 'assetsOpenPrice': {
+                        return r.assetPositions.open
+                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .reduce((sum, p) => sum.plus(p.openPrice), BigNumber(0))
+                          .toString()
+                      }
+                      case 'assetsCurrentPrice': {
+                        return r.assetPositions.open
+                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .reduce((sum, p) => {
+                            const quote = r.quotes[p.assetId]
+                            return sum.plus(quote ? BigNumber(quote).multipliedBy(p.amount) : p.openPrice)
+                          }, BigNumber(0))
+                          .toString()
+                      }
+                      case 'realizedProfits': {
+                        return r.assetPositions.closed
+                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .reduce((sum, p) => sum.plus(p.closePrice).minus(p.openPrice), BigNumber(0))
+                          .toString()
+                      }
                     }
                   }),
                 ]
@@ -269,43 +267,43 @@ export function createRpcV1Evaluations(database: Database) {
           ctx.user.id,
           input.when.type === 'date' ? input.when.date : undefined
         )
-        const result = evaluateAll(transactions)
-        const openAssetPositions = groupBy(result.value.openAssetPositions, p => `${p.accountId}-${p.assetId}`).map(
-          ps => {
-            const accountId = ps[0].accountId
-            const assetId = ps[0].assetId
-            const amount = BigNumber.sum(...ps.map(p => p.amount))
-            const openDate = minBy(ps, p => dateParse(p.openDate + 'T' + p.openTime).valueOf())!.openDate
-            const openTime = minBy(ps, p => dateParse(p.openDate + 'T' + p.openTime).valueOf())!.openTime
-            const openPrice = BigNumber.sum(...ps.map(p => p.openPrice))
-            const currentQuote = quotes.find(q => q.assetId === assetId)
-            return {
-              type: 'open' as const,
-              accountId,
-              assetId,
-              amount: amount.toString(),
-              openDate: openDate,
-              openTime: openTime,
-              openPrice: openPrice.toString(),
-              currentPrice: currentQuote
-                ? BigNumber(currentQuote.close).multipliedBy(amount).toString()
-                : openPrice.toString(),
-              positions: ps.map(p => {
-                return {
-                  amount: p.amount.toString(),
-                  openTransactionId: p.openTransactionId,
-                  openDate: p.openDate,
-                  openTime: p.openTime,
-                  openPrice: p.openPrice.toString(),
-                  currentPrice: currentQuote
-                    ? BigNumber(currentQuote.close).multipliedBy(p.amount).toString()
-                    : p.openPrice.toString(),
-                }
-              }),
-            }
+        const date =
+          input.when.type === 'date' ? input.when.date : dateFormat(dateStartOf(new Date(), 'day'), 'yyyy-MM-dd')
+        const result = evaluateBalance(transactions, quotes, [date])[0]
+        const openAssetPositions = groupBy(result.assetPositions.open, p => `${p.accountId}-${p.assetId}`).map(ps => {
+          const accountId = ps[0].accountId
+          const assetId = ps[0].assetId
+          const amount = BigNumber.sum(...ps.map(p => p.amount))
+          const openDate = minBy(ps, p => dateParse(p.openDate + 'T' + p.openTime).valueOf())!.openDate
+          const openTime = minBy(ps, p => dateParse(p.openDate + 'T' + p.openTime).valueOf())!.openTime
+          const openPrice = BigNumber.sum(...ps.map(p => p.openPrice))
+          const currentQuote = quotes.find(q => q.assetId === assetId)
+          return {
+            type: 'open' as const,
+            accountId,
+            assetId,
+            amount: amount.toString(),
+            openDate: openDate,
+            openTime: openTime,
+            openPrice: openPrice.toString(),
+            currentPrice: currentQuote
+              ? BigNumber(currentQuote.close).multipliedBy(amount).toString()
+              : openPrice.toString(),
+            positions: ps.map(p => {
+              return {
+                amount: p.amount.toString(),
+                openTransactionId: p.openTransactionId,
+                openDate: p.openDate,
+                openTime: p.openTime,
+                openPrice: p.openPrice.toString(),
+                currentPrice: currentQuote
+                  ? BigNumber(currentQuote.close).multipliedBy(p.amount).toString()
+                  : p.openPrice.toString(),
+              }
+            }),
           }
-        )
-        const closedAssetPositions = groupBy(result.value.closedAssetPositions, p => `${p.accountId}-${p.assetId}`).map(
+        })
+        const closedAssetPositions = groupBy(result.assetPositions.closed, p => `${p.accountId}-${p.assetId}`).map(
           ps => {
             const accountId = ps[0].accountId
             const assetId = ps[0].assetId
@@ -374,7 +372,6 @@ export function createRpcV1Evaluations(database: Database) {
               }
             })
           )
-        const { errors: evaluateAllErrors } = evaluateAll(transactions, {})
         transactions.forEach(transaction => {
           const {
             id,
@@ -476,20 +473,6 @@ export function createRpcV1Evaluations(database: Database) {
               })
             }
           })
-        })
-        evaluateAllErrors.forEach(error => {
-          if (error.type === 'consumeExcessiveAssetAmount') {
-            const transaction = transactions.find(t => t.id === error.transactionId)!
-            data.push({
-              type: 'transactionConsumesMoreAssetAmountThanAvailable',
-              date: transaction.date,
-              level: 'error',
-              transactionId: error.transactionId,
-              assetAccountId: error.assetAccountId,
-              assetId: error.assetId,
-              excessiveAssetAmount: error.excessiveAssetAmount.toString(),
-            })
-          }
         })
         return {
           data: selectionSortBy(data, (f1, f2) => (f1.date === f2.date ? 0 : f1.date < f2.date ? -1 : 1)),

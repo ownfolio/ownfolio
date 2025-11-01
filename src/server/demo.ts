@@ -6,8 +6,8 @@ import { currencies, CurrencySymbol } from '../shared/models/Currency'
 import { Portfolio } from '../shared/models/Portfolio'
 import { findClosest } from '../shared/utils/array'
 import { dateEndOf, dateFormat, dateList, dateParse, DateUnit } from '../shared/utils/date'
+import { evaluateBalance } from './balance'
 import { Database } from './database'
-import { evaluateAll } from './evaluations/evaluateAll'
 import { updateAssetQuotes } from './quotes'
 
 export async function generateDemoPortfolio(database: Database, userId: string): Promise<Portfolio> {
@@ -290,9 +290,15 @@ export async function generateDemoPortfolio(database: Database, userId: string):
             })
           }
         } else {
-          const availableAssetAmount = await evaluateAll(
-            await database.transactions.listByUserId(portfolio.userId, {}, 'asc')
-          ).value.accountAssetHoldings[assetAccumulationPlan.assetAccount.id][asset.id]
+          const availableAssetAmount = await evaluateBalance(
+            await database.transactions.listByUserId(portfolio.userId, {}, 'asc'),
+            [],
+            [dateFormat(date, 'yyyy-MM-dd')]
+          )[0]
+            .assetPositions.open.filter(
+              p => p.accountId === assetAccumulationPlan.assetAccount.id && p.assetId === asset.id
+            )
+            .reduce((sum, p) => sum.plus(p.amount), BigNumber(0))
           const cashAmount = availableAssetAmount
             .multipliedBy(closestQuote.close)
             .decimalPlaces(assetCurrency.denomination)

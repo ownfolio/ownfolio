@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest'
 
 import { currencies } from '../../shared/models/Currency'
+import { sleep } from '../../shared/utils/promise'
 import { databaseTest } from './databaseTest'
 
 it(
@@ -46,6 +47,7 @@ it(
       reference: 'ref1',
       comment: 'comment1',
     })
+    await sleep(100)
     const t2 = await db.transactions.create({
       userId: u.id,
       date: '2020-01-02',
@@ -60,7 +62,7 @@ it(
         feeCashAmount: '0',
       },
       reference: 'ref2',
-      comment: 'comment',
+      comment: 'comment2',
     })
     const attm = await db.attachments.create({ userId: u.id, fileName: 'test.txt', mimeType: 'text/plain', size: 1 })
     await db.attachments.linkToTransaction(attm.id, t1.id)

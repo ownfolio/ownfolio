@@ -1,20 +1,20 @@
+import BigNumber from 'bignumber.js'
 import { bench, describe } from 'vitest'
 
 import { Quote } from '../../shared/models/Quote'
 import { Transaction, TransactionData } from '../../shared/models/Transaction'
 import { dateEndOf, dateFormat, dateList, dateParse, datePlus } from '../../shared/utils/date'
-import { evaluateHistoricalAllWithQuotes } from './evaluateAll'
+import { evaluateBalance } from './index'
 
 const years = [1, 2, 3, 5, 10]
 
-describe('evaluateHistoricalAllWithQuotes', () => {
+describe('evaluateBalance', () => {
   years.forEach(years => {
     const startDate = dateParse('2010-01-01')
     const endDate = dateEndOf(datePlus(startDate, 'year', years - 1), 'year')
-    const dates = dateList(startDate, endDate, 'day')
+    const quotes: Quote[] = []
     const transactions: Transaction[] = []
     let date = startDate
-    const quotes: Quote[] = []
     while (date.valueOf() <= endDate.valueOf()) {
       const dateStr = dateFormat(date, 'yyyy-MM-dd')
       transactions.push(
@@ -43,16 +43,18 @@ describe('evaluateHistoricalAllWithQuotes', () => {
       )
       quotes.push({
         assetId: 'btc',
-        date: dateFormat(date, 'yyyy-MM-dd'),
+        date: dateStr,
         open: null,
         high: null,
         low: null,
-        close: '10',
+        close: BigNumber(Math.random() * 100).toString(),
       })
       date = datePlus(date, 'day', 2)
     }
+    const dates = dateList(startDate, endDate, 'day').map(date => dateFormat(date, 'yyyy-MM-dd'))
+
     bench(`${years} years`, () => {
-      evaluateHistoricalAllWithQuotes(transactions, quotes, dates)
+      evaluateBalance(transactions, quotes, dates)
     })
   })
 })

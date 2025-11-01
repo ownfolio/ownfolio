@@ -14,6 +14,19 @@ export function groupBy<T>(elems: T[], keyFn: (elem: T) => string): T[][] {
   return result
 }
 
+export function mapGroupBy<T>(elems: T[], keyFn: (elem: T) => string): Record<string, T[]> {
+  const result: Record<string, T[]> = {}
+  elems.forEach(elem => {
+    const key = keyFn(elem)
+    if (result[key]) {
+      result[key] = [...result[key], elem]
+    } else {
+      result[key] = [elem]
+    }
+  })
+  return result
+}
+
 export function selectionSortBy<T>(elems: T[], cmp: (a: T, b: T) => number): T[] {
   const result = [...elems]
   for (let i = 0; i < result.length; i++) {
@@ -109,24 +122,6 @@ export function filterNotUndefined<T>(elems: (T | undefined)[]): T[] {
     }
     return [elem]
   })
-}
-
-export function uniqueBy<T, T2>(elems: T[], fn: (elem: T) => T2): T[] {
-  return elems.reduce<T[]>((acc, elem) => (!acc.find(elem2 => fn(elem2) === fn(elem)) ? [...acc, elem] : acc), [])
-}
-
-export function upsertFirstBy<T>(
-  elems: T[],
-  matcher: (elem: T) => boolean,
-  insert: () => T,
-  update: (elem: T) => T
-): T[] {
-  const idx = elems.findIndex(matcher)
-  if (idx < 0) {
-    return [...elems, insert()]
-  } else {
-    return [...elems.slice(0, idx), update(elems[idx]), ...elems.slice(idx + 1)]
-  }
 }
 
 export function chunks<T>(elems: T[], size: number): T[][] {

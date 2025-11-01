@@ -3,9 +3,8 @@ import { z } from 'zod'
 
 import { rootCurrency } from '../../shared/models/Currency'
 import { bigNumberFormat } from '../../shared/utils/bignumber'
-import { dateEndOf, dateList, dateParse } from '../../shared/utils/date'
-import { evaluationSumOverAccounts, evaluationSumOverAccountsAndAssets } from '../evaluations/evaluate'
-import { evaluateHistoricalAllWithQuotes } from '../evaluations/evaluateAll'
+import { dateEndOf, dateFormat, dateList, dateParse } from '../../shared/utils/date'
+import { evaluateBalance } from '../balance'
 import { generatePdf } from '../pdf/generatePdf'
 import { type ReportGenerator } from './index'
 import { reportStyles } from './shared'
@@ -16,12 +15,12 @@ export type YearlyReportParams = z.infer<typeof yearlyReportParamsSchema>
 
 export const generateYearlyReport: ReportGenerator<YearlyReportParams> = async (database, userId) => {
   const transactions = await database.transactions.listByUserId(userId).then(txs => txs.reverse())
-  const allQuotes = await database.quotes.listAllClosesByUserId(userId)
+  const quotes = await database.quotes.listAllClosesByUserId(userId)
   const now = new Date()
-  const dates = dateList(transactions[0] ? dateParse(transactions[0].date) : now, now, 'year').map(d =>
-    dateEndOf(d, 'year')
-  )
-  const allResult = evaluateHistoricalAllWithQuotes(transactions, allQuotes, dates)
+  const dates = dateList(transactions[0] ? dateParse(transactions[0].date) : now, now, 'year')
+    .map(d => dateEndOf(d, 'year'))
+    .map(date => dateFormat(date, 'yyyy-MM-dd'))
+  const balances = evaluateBalance(transactions, quotes, dates)
   return generatePdf({
     content: [
       { text: 'Yearly report', style: 'h1' },
@@ -36,33 +35,25 @@ export const generateYearlyReport: ReportGenerator<YearlyReportParams> = async (
               { text: 'Assets', style: 'amount' },
               { text: 'Total', style: 'totalAmount' },
             ],
-            ...allResult.map(result => {
+            ...balances.map(result => {
+              const cash = result.cashPositions.open.reduce((sum, p) => sum.plus(p.amount), BigNumber(0))
+              const assets = result.assetPositions.open.reduce((sum, p) => {
+                const quote = result.quotes[p.assetId]
+                return sum.plus(quote ? BigNumber(quote).multipliedBy(p.amount) : p.openPrice)
+              }, BigNumber(0))
+              const total = cash.plus(assets)
               return [
                 { text: dateParse(result.date).getFullYear() },
                 {
-                  text: renderAmountString(
-                    evaluationSumOverAccounts(result.value.accountCashHoldings),
-                    2,
-                    rootCurrency.symbol
-                  ),
+                  text: renderAmountString(cash, 2, rootCurrency.symbol),
                   style: 'amount',
                 },
                 {
-                  text: renderAmountString(
-                    evaluationSumOverAccountsAndAssets(result.value.accountAssetCurrentPrices),
-                    2,
-                    rootCurrency.symbol
-                  ),
+                  text: renderAmountString(assets, 2, rootCurrency.symbol),
                   style: 'amount',
                 },
                 {
-                  text: renderAmountString(
-                    evaluationSumOverAccounts(result.value.accountCashHoldings).plus(
-                      evaluationSumOverAccountsAndAssets(result.value.accountAssetCurrentPrices)
-                    ),
-                    2,
-                    rootCurrency.symbol
-                  ),
+                  text: renderAmountString(total, 2, rootCurrency.symbol),
                   style: 'totalAmount',
                 },
               ]
