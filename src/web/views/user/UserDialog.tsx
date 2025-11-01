@@ -220,7 +220,7 @@ const ReportSection: React.FC<{ closeDialog: () => void }> = () => {
       <Button
         type="button"
         onClick={async () => {
-          const download = await rpcClient.generateYearlyPdfReport().then(r => r.data)
+          const download = await rpcClient.generateReport({ type: 'yearly' }).then(r => r.data)
           await fileDownload(download)
         }}
       >
