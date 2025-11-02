@@ -6,7 +6,7 @@ import { currencies, CurrencySymbol } from '../shared/models/Currency'
 import { Portfolio } from '../shared/models/Portfolio'
 import { findClosest } from '../shared/utils/array'
 import { dateEndOf, dateFormat, dateList, dateParse, DateUnit } from '../shared/utils/date'
-import { evaluateBalance } from './balance'
+import { evaluateBalances } from './balance'
 import { Database } from './database'
 import { updateAssetQuotes } from './quotes'
 
@@ -290,7 +290,7 @@ export async function generateDemoPortfolio(database: Database, userId: string):
             })
           }
         } else {
-          const availableAssetAmount = await evaluateBalance(
+          const availableAssetAmount = await evaluateBalances(
             [dateFormat(date, 'yyyy-MM-dd')],
             await database.transactions.listByUserId(portfolio.userId, {}, 'asc')
           )[0]

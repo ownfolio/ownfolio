@@ -29,6 +29,7 @@ import { PortfolioDialog } from '../portfolios/PortfolioDialog'
 import { PortfoliosView } from '../portfolios/PortfoliosView'
 import { QuotesView } from '../quotes/QuotesView'
 import { TestView } from '../test/TestView'
+import { TradesView } from '../trades/TradesView'
 import { TransactionDialog } from '../transactions/TransactionDialog'
 import { TransactionsView } from '../transactions/TransactionsView'
 import { UserDialog } from '../user/UserDialog'
@@ -78,6 +79,10 @@ export const HomeView: React.FC = () => {
                 {
                   label: 'Transactions',
                   onClick: () => navigate('/transactions'),
+                },
+                {
+                  label: 'Trades',
+                  onClick: () => navigate('/trades'),
                 },
                 {
                   label: 'Attachments',
@@ -192,6 +197,7 @@ export const HomeView: React.FC = () => {
                   <Route path="assets" element={<AssetsView />} />
                   <Route path="quotes/:assetId" element={<QuotesView />} />
                   <Route path="transactions" element={<TransactionsView />} />
+                  <Route path="trades" element={<TradesView />} />
                   <Route path="attachments" element={<AttachmentsView />} />
                   <Route path="plausibility" element={<PlausibilityView />} />
                   <Route path="chart/:type/:id?" element={<ChartView />} />

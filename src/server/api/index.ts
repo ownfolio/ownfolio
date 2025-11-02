@@ -9,6 +9,7 @@ import { Database } from '../database'
 import { createRpcV1Account } from './account'
 import { createRpcV1Asset } from './asset'
 import { createRpcV1Attachment } from './attachment'
+import { createRpcV1Balance } from './balance'
 import { createRpcCtx, RpcCtx } from './context'
 import { createRpcV1Evaluations } from './evaluations'
 import { createRpcV1Portfolio } from './portfolio'
@@ -34,6 +35,7 @@ export function createRpcV1(database: Database, config: Config) {
     ...createRpcV1Transaction(database),
     ...createRpcV1User(database, config),
     ...createRpcV1Attachment(database),
+    ...createRpcV1Balance(database),
     ...createRpcV1Report(database),
   }
 }

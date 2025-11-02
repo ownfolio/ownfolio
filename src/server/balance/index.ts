@@ -1,94 +1,20 @@
 import BigNumber from 'bignumber.js'
 
+import {
+  Balance,
+  ClosedAssetPosition,
+  ClosedCashPosition,
+  createEmptyBalance,
+  OpenAssetPosition,
+  OpenCashPosition,
+} from '../../shared/models/Balance'
 import { Quote } from '../../shared/models/Quote'
 import { Transaction, TransactionData } from '../../shared/models/Transaction'
 import { findIndexLeft, findIndexLeftUntil, mapGroupBy, mergeSortedBy } from '../../shared/utils/array'
 import { endBenchmark, startBenchmark, wrapBenchmark } from '../utils/benchmark'
 
-interface OpenPosition {
-  state: 'open'
-  accountId: string
-  amount: BigNumber
-  openTransactionId: string
-  openDate: string
-  openTime: string
-  openPrice: BigNumber
-}
-
-interface ClosedPosition extends Omit<OpenPosition, 'state'> {
-  state: 'closed'
-  closeTransactionId: string
-  closeDate: string
-  closeTime: string
-  closePrice: BigNumber
-}
-
-export interface OpenAssetPosition extends OpenPosition {
-  type: 'asset'
-  assetId: string
-}
-
-export interface ClosedAssetPosition extends ClosedPosition {
-  type: 'asset'
-  assetId: string
-}
-
-export type AssetPosition = OpenAssetPosition | ClosedAssetPosition
-
-export interface OpenCashPosition extends OpenPosition {
-  type: 'cash'
-}
-
-export interface ClosedCashPosition extends ClosedPosition {
-  type: 'cash'
-}
-
-export type CashPosition = OpenCashPosition | ClosedCashPosition
-
-export type BalanceIssue = {
-  type: 'negativeAssetAmounts'
-  transactionId: string
-  accountId: string
-  assetId: string
-  exceededAssetAmount: BigNumber
-}
-
-export interface Balance {
-  date: string
-  time: string
-  cashPositions: {
-    open: OpenCashPosition[]
-    closed: ClosedCashPosition[]
-  }
-  assetPositions: {
-    open: OpenAssetPosition[]
-    closed: ClosedAssetPosition[]
-  }
-  quotes: {
-    [assetId: string]: BigNumber | undefined
-  }
-  issues: BalanceIssue[]
-}
-
-export function createEmptyBalance(): Balance {
-  return {
-    date: '0000-00-00',
-    time: '00:00:00',
-    cashPositions: {
-      open: [],
-      closed: [],
-    },
-    assetPositions: {
-      open: [],
-      closed: [],
-    },
-    quotes: {},
-    issues: [],
-  }
-}
-
-export function evaluateBalance(dates: string[], transactions: Transaction[], opts?: { quotes?: Quote[] }): Balance[] {
-  return wrapBenchmark('evaluateBalance', () => {
+export function evaluateBalances(dates: string[], transactions: Transaction[], opts?: { quotes?: Quote[] }): Balance[] {
+  return wrapBenchmark('evaluateBalances', () => {
     let nextDateIndex = 0
     let nextTransactionIndex = 0
     const quotesMap = mapGroupBy(opts?.quotes || [], q => q.assetId)
@@ -105,12 +31,12 @@ export function evaluateBalance(dates: string[], transactions: Transaction[], op
         nextTransactionIndex < transactions.length ? transactions[nextTransactionIndex] : undefined
 
       if (nextTransaction && (!nextDate || nextTransaction.date <= nextDate)) {
-        const benchmarkId = startBenchmark('evaluateBalance.iterate.transaction')
+        const benchmarkId = startBenchmark('evaluateBalances.iterate.transaction')
         state = updateBalanceByTransaction(state, nextTransaction)
         nextTransactionIndex = nextTransactionIndex + 1
         endBenchmark(benchmarkId)
       } else if (nextDate) {
-        const benchmarkId = startBenchmark('evaluateBalance.iterate.date')
+        const benchmarkId = startBenchmark('evaluateBalances.iterate.date')
         const nextQuotes = Object.keys(nextQuoteIndexes).reduce<{ [assetId: string]: BigNumber }>((acc, assetId) => {
           const index = nextQuoteIndexes[assetId]
           const nextIndex = findIndexLeftUntil(quotesMap[assetId], q => q.date > nextDate, index)
@@ -137,7 +63,7 @@ export function evaluateBalance(dates: string[], transactions: Transaction[], op
 }
 
 export function updateBalanceDateTime(b: Balance, date: string, time: string): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceDateTime', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceDateTime', () => {
     return {
       ...b,
       date,
@@ -146,8 +72,8 @@ export function updateBalanceDateTime(b: Balance, date: string, time: string): B
   })
 }
 
-export function updateBalanceQuotes(b: Balance, quotes: { [assetId: string]: BigNumber }): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceQuotes', () => {
+export function updateBalanceQuotes(b: Balance, quotes: Record<string, BigNumber>): Balance {
+  return wrapBenchmark('evaluateBalances.updateBalanceQuotes', () => {
     return {
       ...b,
       quotes,
@@ -156,7 +82,7 @@ export function updateBalanceQuotes(b: Balance, quotes: { [assetId: string]: Big
 }
 
 export function updateBalanceByTransaction(b: Balance, transaction: Transaction): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransaction', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransaction', () => {
     if (transaction.date < b.date) {
       throw new Error(`Updating balance must happen in chronological order`)
     }
@@ -198,7 +124,7 @@ function updateBalanceByTransactionCashDepositWithdrawal(
   data: Extract<TransactionData, { type: 'cashDeposit' | 'cashWithdrawal' }>
 ): Balance {
   const negateIfDeposit = (n: BigNumber) => (data.type === 'cashDeposit' ? n.negated() : n)
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransactionCashDepositWithdrawal', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransactionCashDepositWithdrawal', () => {
     return iterate(
       BigNumber(data.cashAmount),
       remainingAmount => !remainingAmount.gt(0),
@@ -300,7 +226,7 @@ function updateBalanceByTransactionCashTransfer(
   transaction: Transaction,
   data: Extract<TransactionData, { type: 'cashTransfer' }>
 ): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransactionCashTransfer', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransactionCashTransfer', () => {
     const b2 = updateBalanceByTransactionCashDepositWithdrawal(b, transaction, {
       type: 'cashWithdrawal',
       cashAccountId: data.fromCashAccountId,
@@ -344,7 +270,7 @@ function updateBalanceByTransactionAssetDeposit(
   transaction: Transaction,
   data: Extract<TransactionData, { type: 'assetDeposit' }>
 ): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransactionAssetDeposit', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransactionAssetDeposit', () => {
     return {
       ...b,
       assetPositions: {
@@ -373,7 +299,7 @@ function updateBalanceByTransactionAssetWithdrawal(
   transaction: Transaction,
   data: Extract<TransactionData, { type: 'assetWithdrawal' }>
 ): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransactionAssetWithdrawal', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransactionAssetWithdrawal', () => {
     return iterate(
       BigNumber(data.assetAmount),
       remainingAmount => !remainingAmount.gt(0),
@@ -468,7 +394,7 @@ function updateBalanceByTransactionAssetTransfer(
   transaction: Transaction,
   data: Extract<TransactionData, { type: 'assetTransfer' }>
 ): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransactionAssetTransfer', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransactionAssetTransfer', () => {
     const b2 = updateBalanceByTransactionAssetWithdrawal(b, transaction, {
       type: 'assetWithdrawal',
       assetAccountId: data.fromAssetAccountId,
@@ -517,7 +443,7 @@ function updateBalanceByTransactionAssetBuy(
   transaction: Transaction,
   data: Extract<TransactionData, { type: 'assetBuy' }>
 ): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransactionAssetBuy', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransactionAssetBuy', () => {
     const b2 = updateBalanceByTransactionCashDepositWithdrawal(b, transaction, {
       type: 'cashWithdrawal',
       cashAccountId: data.cashAccountId,
@@ -539,7 +465,7 @@ function updateBalanceByTransactionAssetSell(
   transaction: Transaction,
   data: Extract<TransactionData, { type: 'assetSell' }>
 ): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransactionAssetSell', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransactionAssetSell', () => {
     const b2 = updateBalanceByTransactionAssetWithdrawal(b, transaction, {
       type: 'assetWithdrawal',
       assetAccountId: data.assetAccountId,
@@ -561,7 +487,7 @@ function updateBalanceByTransactionFee(
   transaction: Transaction,
   data: Extract<TransactionData, { type: 'fee' }>
 ): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransactionFee', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransactionFee', () => {
     // TODO must be considered 0 price
     return updateBalanceByTransactionCashDepositWithdrawal(b, transaction, {
       type: 'cashWithdrawal',
@@ -576,7 +502,7 @@ function updateBalanceByTransactionTax(
   transaction: Transaction,
   data: Extract<TransactionData, { type: 'tax' }>
 ): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransactionTax', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransactionTax', () => {
     // TODO must be considered 0 price
     return updateBalanceByTransactionCashDepositWithdrawal(b, transaction, {
       type: 'cashWithdrawal',
@@ -591,7 +517,7 @@ function updateBalanceByTransactionDividend(
   transaction: Transaction,
   data: Extract<TransactionData, { type: 'dividend' }>
 ): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransactionDividend', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransactionDividend', () => {
     // TODO must be considered 0 price
     return updateBalanceByTransactionCashDepositWithdrawal(b, transaction, {
       type: 'cashDeposit',
@@ -606,7 +532,7 @@ function updateBalanceByTransactionInterest(
   transaction: Transaction,
   data: Extract<TransactionData, { type: 'interest' }>
 ): Balance {
-  return wrapBenchmark('evaluateBalance.updateBalanceByTransactionInterest', () => {
+  return wrapBenchmark('evaluateBalances.updateBalanceByTransactionInterest', () => {
     // TODO must be considered 0 price
     return updateBalanceByTransactionCashDepositWithdrawal(b, transaction, {
       type: 'cashDeposit',

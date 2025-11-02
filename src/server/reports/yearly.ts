@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { rootCurrency } from '../../shared/models/Currency'
 import { bigNumberFormat } from '../../shared/utils/bignumber'
 import { dateEndOf, dateFormat, dateList, dateParse } from '../../shared/utils/date'
-import { evaluateBalance } from '../balance'
+import { evaluateBalances } from '../balance'
 import { generatePdf } from '../pdf/generatePdf'
 import { type ReportGenerator } from './index'
 import { reportStyles } from './shared'
@@ -20,7 +20,7 @@ export const generateYearlyReport: ReportGenerator<YearlyReportParams> = async (
   const dates = dateList(transactions[0] ? dateParse(transactions[0].date) : now, now, 'year')
     .map(d => dateEndOf(d, 'year'))
     .map(date => dateFormat(date, 'yyyy-MM-dd'))
-  const balances = evaluateBalance(dates, transactions, { quotes })
+  const balances = evaluateBalances(dates, transactions, { quotes })
   return generatePdf({
     content: [
       { text: 'Yearly report', style: 'h1' },

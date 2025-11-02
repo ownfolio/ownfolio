@@ -1,22 +1,23 @@
 import BigNumber from 'bignumber.js'
 import { describe, expect, it } from 'vitest'
 
+import { Balance, createEmptyBalance } from '../../shared/models/Balance'
 import { Transaction, TransactionData } from '../../shared/models/Transaction'
-import { Balance, createEmptyBalance, evaluateBalance, updateBalanceByTransaction } from './index'
+import { evaluateBalances, updateBalanceByTransaction } from './index'
 
-describe('evaluateBalance', () => {
+describe('evaluateBalances', () => {
   it('empty', () => {
-    expect(evaluateBalance([], [])).toEqual([])
+    expect(evaluateBalances([], [])).toEqual([])
   })
 
   it('dates', () => {
-    expect(evaluateBalance(['2020-01-01'], [])).toEqual([
+    expect(evaluateBalances(['2020-01-01'], [])).toEqual([
       {
         ...createEmptyBalance(),
         date: '2020-01-01',
       } satisfies Balance,
     ])
-    expect(evaluateBalance(['2020-01-01', '2021-01-01', '2022-01-01'], [])).toEqual([
+    expect(evaluateBalances(['2020-01-01', '2021-01-01', '2022-01-01'], [])).toEqual([
       {
         ...createEmptyBalance(),
         date: '2020-01-01',
@@ -34,7 +35,7 @@ describe('evaluateBalance', () => {
 
   it('transactions', () => {
     expect(
-      evaluateBalance(
+      evaluateBalances(
         ['2021-01-01', '2023-01-01', '2025-01-01'],
         [
           tx('tx1', '2020-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '10' }),
@@ -136,7 +137,7 @@ describe('evaluateBalance', () => {
 
   it('quotes', () => {
     expect(
-      evaluateBalance(
+      evaluateBalances(
         ['2021-01-01', '2022-01-01', '2023-01-01', '2024-01-01'],
         [
           tx('tx1', '2020-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '1000' }),

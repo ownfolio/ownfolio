@@ -5,7 +5,6 @@ import { DashboardCard } from '../../../shared/models/DashboardCard'
 import { Input } from '../../components/Input'
 import { LoadingCardSuspense } from '../../components/LoadingCardSuspense'
 import { ViewContainer } from '../../components/ViewContainer'
-import { AssetClosedPositionsTable } from './AssetClosedPositionsTable'
 import { AssetOpenPositionsTable } from './AssetOpenPositionsTable'
 import { CashTable } from './CashTable'
 import { DashboardCardsGrid } from './DashboardCards'
@@ -42,10 +41,6 @@ export const DashboardView: React.FC = () => {
       <h2>Assets</h2>
       <LoadingCardSuspense>
         <AssetOpenPositionsTable timetravel={timetravel} />
-      </LoadingCardSuspense>
-      <h2>Realized Profits</h2>
-      <LoadingCardSuspense>
-        <AssetClosedPositionsTable timetravel={timetravel} />
       </LoadingCardSuspense>
     </ViewContainer>
   )

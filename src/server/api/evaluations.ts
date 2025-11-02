@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { groupBy, maxBy, minBy, selectionSortBy } from '../../shared/utils/array'
 import { dateEquals, dateFormat, dateList, dateParse, dateStartOf, dateUnitSchema } from '../../shared/utils/date'
-import { evaluateBalance } from '../balance'
+import { evaluateBalances } from '../balance'
 import { Database } from '../database'
 import { PdfParserResult } from '../pdf/parse'
 import { RpcCtx } from './context'
@@ -167,7 +167,7 @@ export function createRpcV1Evaluations(database: Database) {
             }
           }
         })()
-        const result = evaluateBalance(dates, transactions, { quotes })
+        const result = evaluateBalances(dates, transactions, { quotes })
         const data = {
           value: input.buckets.reduce((acc, bucket) => {
             const [key, accountFilter] = (() => {
@@ -269,7 +269,7 @@ export function createRpcV1Evaluations(database: Database) {
         )
         const date =
           input.when.type === 'date' ? input.when.date : dateFormat(dateStartOf(new Date(), 'day'), 'yyyy-MM-dd')
-        const result = evaluateBalance([date], transactions, { quotes })[0]
+        const result = evaluateBalances([date], transactions, { quotes })[0]
         const openAssetPositions = groupBy(result.assetPositions.open, p => `${p.accountId}-${p.assetId}`).map(ps => {
           const accountId = ps[0].accountId
           const assetId = ps[0].assetId

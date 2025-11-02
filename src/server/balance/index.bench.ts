@@ -4,7 +4,7 @@ import { bench, describe } from 'vitest'
 import { Quote } from '../../shared/models/Quote'
 import { Transaction, TransactionData } from '../../shared/models/Transaction'
 import { dateEndOf, dateFormat, dateList, dateParse, datePlus } from '../../shared/utils/date'
-import { evaluateBalance } from './index'
+import { evaluateBalances } from './index'
 
 const years = [1, 2, 3, 5, 10]
 
@@ -54,7 +54,7 @@ describe('evaluateBalance', () => {
     const dates = dateList(startDate, endDate, 'day').map(date => dateFormat(date, 'yyyy-MM-dd'))
 
     bench(`${years} years`, () => {
-      evaluateBalance(dates, transactions, { quotes })
+      evaluateBalances(dates, transactions, { quotes })
     })
   })
 })
