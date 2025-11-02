@@ -11,32 +11,19 @@ const build = benchmark('build', async () => {
 })
 
 const buildChangelog = benchmark('buildChangelog', async () => {
-  const conventionalChangeLog = await import('conventional-changelog').then(mod => mod.default)
-  const markdown = await new Promise((resolve, reject) => {
-    const stream = conventionalChangeLog(
-      {
-        warn: console.warn,
-        preset: 'angular',
-        releaseCount: 0,
-        outputUnreleased: false,
-        skipUnstable: true,
-      },
-      undefined,
-      {
-        path: path.resolve(__dirname, '..'),
-      }
-    )
-    let buffer = Buffer.from([])
-    stream.on('data', chunk => {
-      buffer = Buffer.concat([buffer, chunk])
-    })
-    stream.on('end', () => {
-      resolve(buffer.toString('utf-8'))
-    })
-    stream.on('error', err => {
-      reject(err)
-    })
+  const ConventionalChangelog = await import('conventional-changelog').then(mod => mod.ConventionalChangelog)
+  const generator = new ConventionalChangelog().readPackage().loadPreset('angular').options({
+    warn: console.warn,
+    releaseCount: 0,
+    outputUnreleased: false,
+    skipUnstable: true,
   })
+
+  let markdown = ''
+  for await (const chunk of generator.write()) {
+    markdown = markdown + chunk
+  }
+
   await fs.writeFile(path.resolve(__dirname, '../temp/changelog.md'), markdown, 'utf-8')
 })
 

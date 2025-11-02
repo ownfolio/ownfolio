@@ -6,11 +6,6 @@ on:
     tags:
       - 'v*'
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
   group: 'pages'
   cancel-in-progress: false
@@ -19,6 +14,13 @@ jobs:
   pages:
     runs-on: ubuntu-22.04
     name: Pages
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
         with:
