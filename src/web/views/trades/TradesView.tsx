@@ -35,7 +35,7 @@ export const TradesView: React.FC = () => {
     queryFn: () => rpcClient.listAssets({}).then(r => r.data),
   })
   const { data: balances } = useSuspenseQuery({
-    queryKey: ['balances'],
+    queryKey: ['balances', 'now'],
     queryFn: () => rpcClient.evaluateBalances({ when: { type: 'now' } }).then(r => r.data),
   })
   const balance = balanceSchema.parse(balances[0])

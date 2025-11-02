@@ -6,9 +6,8 @@ import { Input } from '../../components/Input'
 import { LoadingCardSuspense } from '../../components/LoadingCardSuspense'
 import { ViewContainer } from '../../components/ViewContainer'
 import { AssetOpenPositionsTable } from './AssetOpenPositionsTable'
-import { CashTable } from './CashTable'
 import { DashboardCardsGrid } from './DashboardCards'
-import { PortfoliosTable } from './PortfoliosTable'
+import { HoldingsTable } from './HoldingsTable'
 
 export const DashboardView: React.FC = () => {
   const [timetravel, setTimetravel] = React.useState<string | undefined>(undefined)
@@ -30,13 +29,9 @@ export const DashboardView: React.FC = () => {
         />
       </div>
       <DashboardCardsGrid cards={cards} timetravel={timetravel} />
-      <h2>Portfolios</h2>
+      <h2>Holdings</h2>
       <LoadingCardSuspense>
-        <PortfoliosTable timetravel={timetravel} />
-      </LoadingCardSuspense>
-      <h2>Cash</h2>
-      <LoadingCardSuspense>
-        <CashTable timetravel={timetravel} />
+        <HoldingsTable timetravel={timetravel} />
       </LoadingCardSuspense>
       <h2>Assets</h2>
       <LoadingCardSuspense>
