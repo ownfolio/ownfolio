@@ -44,6 +44,14 @@ export interface ClosedCashPosition extends ClosedPosition {
 
 export type CashPosition = OpenCashPosition | ClosedCashPosition
 
+export type BalanceIssue = {
+  type: 'negativeAssetAmounts'
+  transactionId: string
+  accountId: string
+  assetId: string
+  exceeededAssetAmount: BigNumber
+}
+
 export interface Balance {
   date: string
   time: string
@@ -58,7 +66,7 @@ export interface Balance {
   quotes: {
     [assetId: string]: BigNumber | undefined
   }
-  issues: string[]
+  issues: BalanceIssue[]
 }
 
 export function createEmptyBalance(): Balance {
@@ -511,7 +519,16 @@ function updateBalanceByTransactionAssetWithdrawal(
           BigNumber(0),
           {
             ...b,
-            issues: [...b.issues, 'Negative asset amounts are not supported'],
+            issues: [
+              ...b.issues,
+              {
+                type: 'negativeAssetAmounts',
+                transactionId: transaction.id,
+                accountId: data.assetAccountId,
+                assetId: data.assetId,
+                exceeededAssetAmount: remainingAmount,
+              },
+            ],
           },
         ]
       }

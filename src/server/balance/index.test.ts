@@ -1016,6 +1016,156 @@ describe('updateBalanceByTransaction', () => {
     let b = createEmptyBalance()
     b = testStep({
       initialBalance: b,
+      transaction: tx('txAssetDeposit1', '2020-01-02', {
+        type: 'assetDeposit',
+        cashAmount: '1000',
+        assetAccountId: 'assetAccount1',
+        assetId: 'asset1',
+        assetAmount: '10',
+      }),
+      expectedBalance: {
+        date: '2020-01-02',
+        time: '00:00:00',
+        cashPositions: {
+          open: [],
+          closed: [],
+        },
+        assetPositions: {
+          open: [
+            {
+              type: 'asset',
+              state: 'open',
+              accountId: 'assetAccount1',
+              assetId: 'asset1',
+              amount: BigNumber('10'),
+              openDate: '2020-01-02',
+              openTime: '00:00:00',
+              openPrice: BigNumber('1000'),
+              openTransactionId: 'txAssetDeposit1',
+            },
+          ],
+          closed: [],
+        },
+        quotes: {},
+        issues: [],
+      },
+    })
+    b = testStep({
+      initialBalance: b,
+      transaction: tx('txAssetDeposit2', '2020-01-03', {
+        type: 'assetDeposit',
+        cashAmount: '2000',
+        assetAccountId: 'assetAccount1',
+        assetId: 'asset1',
+        assetAmount: '30',
+      }),
+      expectedBalance: {
+        date: '2020-01-03',
+        time: '00:00:00',
+        cashPositions: {
+          open: [],
+          closed: [],
+        },
+        assetPositions: {
+          open: [
+            {
+              type: 'asset',
+              state: 'open',
+              accountId: 'assetAccount1',
+              assetId: 'asset1',
+              amount: BigNumber('10'),
+              openDate: '2020-01-02',
+              openTime: '00:00:00',
+              openPrice: BigNumber('1000'),
+              openTransactionId: 'txAssetDeposit1',
+            },
+            {
+              type: 'asset',
+              state: 'open',
+              accountId: 'assetAccount1',
+              assetId: 'asset1',
+              amount: BigNumber('30'),
+              openDate: '2020-01-03',
+              openTime: '00:00:00',
+              openPrice: BigNumber('2000'),
+              openTransactionId: 'txAssetDeposit2',
+            },
+          ],
+          closed: [],
+        },
+        quotes: {},
+        issues: [],
+      },
+    })
+    b = testStep({
+      initialBalance: b,
+      transaction: tx('txAssetWithdrawal', '2020-01-04', {
+        type: 'assetWithdrawal',
+        cashAmount: '6000',
+        assetAccountId: 'assetAccount1',
+        assetId: 'asset1',
+        assetAmount: '80',
+      }),
+      expectedBalance: {
+        date: '2020-01-04',
+        time: '00:00:00',
+        cashPositions: {
+          open: [],
+          closed: [],
+        },
+        assetPositions: {
+          open: [],
+          closed: [
+            {
+              type: 'asset',
+              state: 'closed',
+              accountId: 'assetAccount1',
+              assetId: 'asset1',
+              amount: BigNumber('10'),
+              openDate: '2020-01-02',
+              openTime: '00:00:00',
+              openPrice: BigNumber('1000'),
+              openTransactionId: 'txAssetDeposit1',
+              closeDate: '2020-01-04',
+              closeTime: '00:00:00',
+              closePrice: BigNumber('750'),
+              closeTransactionId: 'txAssetWithdrawal',
+            },
+            {
+              type: 'asset',
+              state: 'closed',
+              accountId: 'assetAccount1',
+              assetId: 'asset1',
+              amount: BigNumber('30'),
+              openDate: '2020-01-03',
+              openTime: '00:00:00',
+              openPrice: BigNumber('2000'),
+              openTransactionId: 'txAssetDeposit2',
+              closeDate: '2020-01-04',
+              closeTime: '00:00:00',
+              closePrice: BigNumber('2250'),
+              closeTransactionId: 'txAssetWithdrawal',
+            },
+          ],
+        },
+        quotes: {},
+        issues: [
+          {
+            type: 'negativeAssetAmounts',
+            transactionId: 'txAssetWithdrawal',
+            accountId: 'assetAccount1',
+            assetId: 'asset1',
+            exceeededAssetAmount: BigNumber(40),
+          },
+        ],
+      },
+    })
+  })
+
+  it('assetBuy / assetSell', () => {
+    let b = createEmptyBalance()
+    b = testStep({
+      initialBalance: b,
       transaction: tx('txCashDeposit', '2020-01-02', {
         type: 'cashDeposit',
         cashAccountId: 'cashAccount',
