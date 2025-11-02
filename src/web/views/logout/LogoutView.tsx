@@ -28,7 +28,7 @@ export const LogoutView: React.FC<Props> = ({ onLogout }) => {
   })
   return (
     <div className={stylesRoot}>
-      <h1>myfolio</h1>
+      <h1>ownfolio</h1>
       <Card className={stylesCard}>
         <h2>Goodbye</h2>
         <div>You are being logged out in a second...</div>

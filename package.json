@@ -1,5 +1,5 @@
 {
-  "name": "myfolio",
+  "name": "ownfolio",
   "private": true,
   "scripts": {
     "build": "cross-env NODE_ENV=production node build.js",
@@ -9,8 +9,8 @@
     "eslint": "eslint . --quiet",
     "pages": "cross-env NODE_ENV=pages node ./pages/build.js",
     "prettier": "prettier './**/*.{html,css,md,js,mjs,ts,mts,tsx,json,yml,yaml}'",
-    "screenshots": "npm run build && cross-env NODE_ENV=screnshots PGHOST=localhost PGDATABASE=myfolio PGUSER=myfolio PGPASSWORD=myfolio ts-node test/screenshots.ts",
-    "start": "node build.js && cross-env PGHOST=localhost PGDATABASE=myfolio PGUSER=myfolio PGPASSWORD=myfolio node --enable-source-maps dist/index.js",
+    "screenshots": "npm run build && cross-env NODE_ENV=screnshots PGHOST=localhost PGDATABASE=ownfolio PGUSER=ownfolio PGPASSWORD=ownfolio ts-node test/screenshots.ts",
+    "start": "node build.js && cross-env PGHOST=localhost PGDATABASE=ownfolio PGUSER=ownfolio PGPASSWORD=ownfolio node --enable-source-maps dist/index.js",
     "start:dev": "nodemon --watch ./src --ext html,css,ts,tsx server",
     "test": "vitest",
     "test:bench": "vitest bench",

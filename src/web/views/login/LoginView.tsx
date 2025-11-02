@@ -30,7 +30,7 @@ export const LoginView: React.FC<Props> = ({ onLogin }) => {
 
   return (
     <ViewContainer className={stylesRoot}>
-      <h1>myfolio</h1>
+      <h1>ownfolio</h1>
       <Card className={stylesCard}>
         <Form
           onSubmit={async event => {

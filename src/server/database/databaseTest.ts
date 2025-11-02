@@ -9,9 +9,9 @@ export function databaseTest(fn: (database: Database) => Promise<void>): () => P
     const containerDefinition = new GenericContainer('postgres:15')
       .withExposedPorts(5432)
       .withEnvironment({
-        POSTGRES_DB: 'myfolio',
-        POSTGRES_USER: 'myfolio',
-        POSTGRES_PASSWORD: 'myfolio',
+        POSTGRES_DB: 'ownfolio',
+        POSTGRES_USER: 'ownfolio',
+        POSTGRES_PASSWORD: 'ownfolio',
         PGDATA: '/var/lib/postgresql/data/pgdata',
       })
       .withTmpFs({
@@ -19,20 +19,20 @@ export function databaseTest(fn: (database: Database) => Promise<void>): () => P
       })
     const container = await startTestContainer(containerDefinition, !process.env.CI)
 
-    const id = 'myfolio_' + crypto.randomBytes(8).toString('hex')
+    const id = 'ownfolio_' + crypto.randomBytes(8).toString('hex')
     const db = postgres({
       host: container.getHost(),
       port: container.getMappedPort(5432),
-      user: 'myfolio',
-      password: 'myfolio',
+      user: 'ownfolio',
+      password: 'ownfolio',
     })
     try {
       await db`CREATE DATABASE ${db(id)}`
       const database = new Database({
         host: container.getHost(),
         port: container.getMappedPort(5432),
-        user: 'myfolio',
-        password: 'myfolio',
+        user: 'ownfolio',
+        password: 'ownfolio',
         database: id,
       })
       try {

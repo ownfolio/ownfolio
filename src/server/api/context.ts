@@ -25,10 +25,10 @@ export function createRpcCtx(database: Database): (req: express.Request, res: ex
           if (err) {
             return reject(err)
           }
-          const sessionId = req.cookies['myfolio-session']
+          const sessionId = req.cookies['ownfolio-session']
           const user = sessionId ? await database.users.findBySessionId(sessionId) : undefined
           if (!user && sessionId) {
-            res.cookie('myfolio-session', '', {
+            res.cookie('ownfolio-session', '', {
               ...rpcCtxCookieOptsBase,
               maxAge: 0,
             })
@@ -44,7 +44,7 @@ export function createRpcCtx(database: Database): (req: express.Request, res: ex
       user,
       sessionId,
       setSessionId: async (sessionId, rememberMe) => {
-        res.cookie('myfolio-session', sessionId, {
+        res.cookie('ownfolio-session', sessionId, {
           ...rpcCtxCookieOptsBase,
           maxAge: rememberMe ? 30 * 24 * 60 * 60 * 1000 : undefined,
         })
@@ -52,7 +52,7 @@ export function createRpcCtx(database: Database): (req: express.Request, res: ex
       unsetSessionId: async () => {
         if (sessionId) {
           await database.users.clearSession(sessionId)
-          res.cookie('myfolio-session', '', {
+          res.cookie('ownfolio-session', '', {
             ...rpcCtxCookieOptsBase,
             maxAge: 0,
           })

@@ -1,8 +1,8 @@
-# myfolio
+# ownfolio
 
 A personal portfolio tracker.
 
-![Dashboard](https://choffmeister.github.io/myfolio/screenshots/dashboard.png)
+![Dashboard](https://ownfolio.github.io/ownfolio/screenshots/dashboard.png)
 
 ## Development
 
@@ -17,15 +17,15 @@ npm run start:dev
 ```yaml
 # docker-compose.yaml
 services:
-  myfolio:
-    image: 'ghcr.io/choffmeister/myfolio:latest'
+  ownfolio:
+    image: 'ghcr.io/ownfolio/ownfolio:latest'
     ports:
       - '3000:3000'
     environment:
       PGHOST: 'postgres'
-      PGDATABASE: 'myfolio'
-      PGUSER: 'myfolio'
-      PGPASSWORD: 'myfolio'
+      PGDATABASE: 'ownfolio'
+      PGUSER: 'ownfolio'
+      PGPASSWORD: 'ownfolio'
       USER_REGISTRATION_ENABLED: '1'
     depends_on:
       - postgres
@@ -34,11 +34,11 @@ services:
     ports:
       - '5432:5432'
     environment:
-      POSTGRES_DB: 'myfolio'
-      POSTGRES_USER: 'myfolio'
-      POSTGRES_PASSWORD: 'myfolio'
+      POSTGRES_DB: 'ownfolio'
+      POSTGRES_USER: 'ownfolio'
+      POSTGRES_PASSWORD: 'ownfolio'
 ```
 
 ## Changelog
 
-See [here](https://choffmeister.github.io/myfolio/changelog).
+See [here](https://ownfolio.github.io/ownfolio/changelog).

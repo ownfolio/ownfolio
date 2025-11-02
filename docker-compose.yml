@@ -1,13 +1,13 @@
 services:
-  myfolio:
+  ownfolio:
     build: .
     ports:
       - 3000:3000
     environment:
       PGHOST: postgres
-      PGDATABASE: myfolio
-      PGUSER: myfolio
-      PGPASSWORD: myfolio
+      PGDATABASE: ownfolio
+      PGUSER: ownfolio
+      PGPASSWORD: ownfolio
     restart: always
     depends_on:
       - postgres
@@ -16,7 +16,7 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_DB: myfolio
-      POSTGRES_USER: myfolio
-      POSTGRES_PASSWORD: myfolio
+      POSTGRES_DB: ownfolio
+      POSTGRES_USER: ownfolio
+      POSTGRES_PASSWORD: ownfolio
     restart: always

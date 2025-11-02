@@ -106,7 +106,7 @@ export function createRpcV1User(database: Database, config: Config) {
       if (!ctx.user) throw RpcError.unauthorized()
       const csv = await exportTransactionsCsv(database, ctx.user.id)
       const file = {
-        fileName: 'myfolio-transactions.csv',
+        fileName: 'ownfolio-transactions.csv',
         dataUrl: renderDataUrl('text/csv', Buffer.from(csv).toString('base64')),
       }
       return { data: file }

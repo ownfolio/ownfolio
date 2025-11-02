@@ -60,7 +60,7 @@ export const HomeView: React.FC = () => {
                 navigate('/')
               }}
             >
-              myfolio
+              ownfolio
             </a>
             <ResponsiveMenu
               items={[

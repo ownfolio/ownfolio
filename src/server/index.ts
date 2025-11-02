@@ -8,7 +8,7 @@ import { logger } from './logger'
 import { createServer, runServer } from './server'
 
 const program = new Command()
-program.name('myfolio')
+program.name('ownfolio')
 
 program //
   .command('server')

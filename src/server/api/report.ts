@@ -15,7 +15,7 @@ export function createRpcV1Report(database: Database) {
       if (!ctx.user) throw RpcError.unauthorized()
       const pdf = await generateReport(database, ctx.user.id, input)
       const file = {
-        fileName: `myfolio-${input.type}-report-${dateFormat(new Date(), 'yyyyMMdd-HHMMSS')}.pdf`,
+        fileName: `ownfolio-${input.type}-report-${dateFormat(new Date(), 'yyyyMMdd-HHMMSS')}.pdf`,
         dataUrl: renderDataUrl('application/pdf', pdf.toString('base64')),
       }
       return { data: file }

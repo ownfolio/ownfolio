@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/web-manifest-combined.json",
-  "name": "myfolio",
-  "short_name": "myfolio",
+  "name": "ownfolio",
+  "short_name": "ownfolio",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#f5f5f6",

@@ -116,7 +116,12 @@ async function prepare(
           () => puppeteer.launch({ headless: !isDebug }),
           async browser => {
             const page = await browser.newPage()
-            await page.setCookie({ name: 'myfolio-session', value: session, path: '/', domain: `localhost:${port}` })
+            await browser.setCookie({
+              name: 'ownfolio-session',
+              value: session,
+              path: '/',
+              domain: `localhost:${port}`,
+            })
             const screenshot = async (name: string) => {
               await page.waitForNetworkIdle()
               await page.waitForSelector('#root')

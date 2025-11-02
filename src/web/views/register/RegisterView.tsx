@@ -29,7 +29,7 @@ export const RegisterView: React.FC<Props> = ({ onRegister }) => {
 
   return (
     <div className={stylesRoot}>
-      <h1>myfolio</h1>
+      <h1>ownfolio</h1>
       <Card className={stylesCard}>
         <Form
           onSubmit={async event => {

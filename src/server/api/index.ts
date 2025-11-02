@@ -47,7 +47,7 @@ export async function createApi(database: Database, config: Config): Promise<exp
 
   const rpcV1 = createRpcV1(database, config)
   const rpcV1OpenApi = createRpcOpenApi<RpcCtx>(rpcV1, {
-    infoTitle: 'myfolio',
+    infoTitle: 'ownfolio',
     infoVersion: 'v1',
     serverUrl: 'http://localhost:3000/api/v1',
   })
