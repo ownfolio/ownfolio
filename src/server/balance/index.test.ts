@@ -1155,7 +1155,7 @@ describe('updateBalanceByTransaction', () => {
             transactionId: 'txAssetWithdrawal',
             accountId: 'assetAccount1',
             assetId: 'asset1',
-            exceeededAssetAmount: BigNumber(40),
+            exceededAssetAmount: BigNumber(40),
           },
         ],
       },

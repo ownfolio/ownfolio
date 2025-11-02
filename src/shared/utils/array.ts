@@ -19,7 +19,7 @@ export function mapGroupBy<T>(elems: T[], keyFn: (elem: T) => string): Record<st
   elems.forEach(elem => {
     const key = keyFn(elem)
     if (result[key]) {
-      result[key] = [...result[key], elem]
+      result[key].push(elem)
     } else {
       result[key] = [elem]
     }
