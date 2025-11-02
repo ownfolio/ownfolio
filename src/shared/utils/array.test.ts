@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest'
 
-import { findIndexLeftUntil } from './array'
+import { findIndexLeftUntil, mergeSortedBy } from './array'
 
 it('findIndexLeftUntil', () => {
   expect(findIndexLeftUntil([1, 2, 3], i => i > 0, 0)).toBe(-1)
@@ -32,4 +32,48 @@ it('findIndexLeftUntil', () => {
   expect(findIndexLeftUntil([1, 2, 3], i => i > 2, 4)).toBe(2)
   expect(findIndexLeftUntil([1, 2, 3], i => i > 3, 4)).toBe(2)
   expect(findIndexLeftUntil([1, 2, 3], i => i > 4, 4)).toBe(2)
+})
+
+it('mergeSortedBy', () => {
+  expect(mergeSortedBy([], [], () => 0)).toEqual([])
+  expect(mergeSortedBy([{ n: 1, str: '11' }], [{ n: 2, str: '22' }], (a, b) => a.n - b.n)).toEqual([
+    { n: 1, str: '11' },
+    { n: 2, str: '22' },
+  ])
+  expect(
+    mergeSortedBy(
+      [
+        { n: 1, str: '11' },
+        { n: 3, str: '13' },
+      ],
+      [
+        { n: 2, str: '22' },
+        { n: 4, str: '24' },
+      ],
+      (a, b) => a.n - b.n
+    )
+  ).toEqual([
+    { n: 1, str: '11' },
+    { n: 2, str: '22' },
+    { n: 3, str: '13' },
+    { n: 4, str: '24' },
+  ])
+  expect(
+    mergeSortedBy(
+      [
+        { n: 1, str: '11' },
+        { n: 2, str: '12' },
+      ],
+      [
+        { n: 2, str: '22' },
+        { n: 3, str: '23' },
+      ],
+      (a, b) => a.n - b.n
+    )
+  ).toEqual([
+    { n: 1, str: '11' },
+    { n: 2, str: '12' },
+    { n: 2, str: '22' },
+    { n: 3, str: '23' },
+  ])
 })

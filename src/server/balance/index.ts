@@ -2,7 +2,7 @@ import BigNumber from 'bignumber.js'
 
 import { Quote } from '../../shared/models/Quote'
 import { Transaction, TransactionData } from '../../shared/models/Transaction'
-import { findIndexLeft, findIndexLeftUntil, mapGroupBy } from '../../shared/utils/array'
+import { findIndexLeft, findIndexLeftUntil, mapGroupBy, mergeSortedBy } from '../../shared/utils/array'
 
 interface OpenPosition {
   state: 'open'
@@ -395,9 +395,9 @@ function updateBalanceByTransactionCashTransfer(
     ...b3,
     cashPositions: {
       ...b3.cashPositions,
-      open: [
-        ...b3.cashPositions.open,
-        ...closedPositions.map(p => {
+      open: mergeSortedBy(
+        b3.cashPositions.open,
+        closedPositions.map(p => {
           return {
             type: 'cash',
             state: 'open',
@@ -409,7 +409,8 @@ function updateBalanceByTransactionCashTransfer(
             openPrice: p.openPrice,
           } satisfies OpenCashPosition
         }),
-      ],
+        (a, b) => (a.openDate < b.openDate || (a.openDate === b.openDate && a.openTime < b.openTime) ? -1 : 1)
+      ),
       closed: b2.cashPositions.closed,
     },
   } satisfies Balance
@@ -560,9 +561,9 @@ function updateBalanceByTransactionAssetTransfer(
     ...b3,
     assetPositions: {
       ...b3.assetPositions,
-      open: [
-        ...b3.assetPositions.open,
-        ...closedPositions.map(p => {
+      open: mergeSortedBy(
+        b3.assetPositions.open,
+        closedPositions.map(p => {
           return {
             type: 'asset',
             state: 'open',
@@ -575,7 +576,8 @@ function updateBalanceByTransactionAssetTransfer(
             openPrice: p.openPrice,
           } satisfies OpenAssetPosition
         }),
-      ],
+        (a, b) => (a.openDate < b.openDate || (a.openDate === b.openDate && a.openTime < b.openTime) ? -1 : 1)
+      ),
       closed: b2.assetPositions.closed,
     },
   } satisfies Balance

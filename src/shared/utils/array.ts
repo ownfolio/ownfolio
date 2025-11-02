@@ -47,6 +47,26 @@ export function selectionSortBy<T>(elems: T[], cmp: (a: T, b: T) => number): T[]
   return result
 }
 
+export function mergeSortedBy<T>(a: T[], b: T[], cmp: (a: T, b: T) => number): T[] {
+  let aIndex = 0,
+    bIndex = 0
+  const result: T[] = []
+  while (aIndex < a.length && bIndex < b.length) {
+    const aElem = a[aIndex]
+    const bElem = b[bIndex]
+    if (cmp(aElem, bElem) <= 0) {
+      result.push(aElem)
+      aIndex = aIndex + 1
+    } else {
+      result.push(bElem)
+      bIndex = bIndex + 1
+    }
+  }
+  result.push(...a.slice(aIndex))
+  result.push(...b.slice(bIndex))
+  return result
+}
+
 export function findIndexLeft<T>(array: readonly T[], fn: (item: T) => boolean, skipLeft: number = 0): number {
   for (let i = skipLeft; i < array.length; i++) {
     const item = array[i]
