@@ -327,5 +327,5 @@ export const HoldingsTable: React.FC<{ timetravel?: string }> = ({ timetravel })
     z.record(z.union([z.string(), z.number()]), z.boolean()),
     {}
   )
-  return <CardTable columns={columns} rows={rows} expansion={expansion} />
+  return <CardTable columns={columns} rows={rows} expansion={expansion} expandedByDefault />
 }

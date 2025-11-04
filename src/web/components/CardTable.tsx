@@ -37,12 +37,13 @@ export interface TableDefinition {
   columns: TableDefinitionColumn[]
   rows: TableDefinitionRow[]
   expansion?: [TableExpansionState, React.Dispatch<React.SetStateAction<TableExpansionState>>]
+  expandedByDefault?: boolean
 }
 
 type Props = React.DetailedHTMLProps<React.TableHTMLAttributes<HTMLTableElement>, HTMLTableElement> & TableDefinition
 
 export const CardTable = React.forwardRef<HTMLTableElement, Props>(
-  ({ columns, rows, className, expansion, ...other }, ref) => {
+  ({ columns, rows, className, expansion, expandedByDefault, ...other }, ref) => {
     const columnWidths = React.useMemo(() => {
       return selectionSortBy(columns, (a, b) => (a.priority || 0) - (b.priority || 0)).reduce<{
         consumedWidth: number
@@ -70,10 +71,13 @@ export const CardTable = React.forwardRef<HTMLTableElement, Props>(
       [rows]
     )
     const [expanded, setExpanded] = expansion || React.useState<TableExpansionState>({})
-    const isRowExpanded = React.useCallback((id: string | number) => expanded[id] === true, [expanded])
+    const isRowExpanded = React.useCallback(
+      (id: string | number) => (!expandedByDefault ? expanded[id] === true : expanded[id] !== false),
+      [expanded, expandedByDefault]
+    )
     const toggleRowExpanded = React.useCallback(
-      (id: string | number) => setExpanded(expanded => ({ ...expanded, [id]: !expanded[id] })),
-      []
+      (id: string | number) => setExpanded({ ...expanded, [id]: !isRowExpanded(id) }),
+      [expanded, expandedByDefault]
     )
     return (
       <Card>
