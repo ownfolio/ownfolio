@@ -71,7 +71,7 @@ export async function createApi(database: Database, config: Config): Promise<exp
     '/api/v1',
     createRpcExpressServer<RpcCtx>(rpcV1, {
       createContext: createRpcCtx(database),
-      requestBodyLimit: '1mb',
+      requestBodyLimit: '10mb',
     })
   )
 
