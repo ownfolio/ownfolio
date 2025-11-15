@@ -1,5 +1,5 @@
-import { RpcBrowserClientError } from '@choffmeister/rpc-browser'
 import { css } from '@linaria/core'
+import { RpcBrowserClientError } from '@ownfolio/rpc-browser'
 import React from 'react'
 
 import { rpcClient } from '../../api'

@@ -1,4 +1,4 @@
-import { RpcBrowserClientError } from '@choffmeister/rpc-browser'
+import { RpcBrowserClientError } from '@ownfolio/rpc-browser'
 
 export interface ParsedError {
   title: string

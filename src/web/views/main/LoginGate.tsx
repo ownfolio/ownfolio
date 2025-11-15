@@ -1,4 +1,4 @@
-import { RpcBrowserClientError } from '@choffmeister/rpc-browser'
+import { RpcBrowserClientError } from '@ownfolio/rpc-browser'
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 

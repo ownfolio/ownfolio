@@ -1,4 +1,4 @@
-import { createRpcCall, RpcError } from '@choffmeister/rpc-core'
+import { createRpcCall, RpcError } from '@ownfolio/rpc-core'
 
 import { dateFormat } from '../../shared/utils/date'
 import { fileSchema, renderDataUrl } from '../../shared/utils/file'

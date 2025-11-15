@@ -1,4 +1,4 @@
-import { createRpcBrowserClient } from '@choffmeister/rpc-browser'
+import { createRpcBrowserClient } from '@ownfolio/rpc-browser'
 
 import type { RpcV1 } from '../server/api'
 

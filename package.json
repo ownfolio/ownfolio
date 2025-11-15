@@ -17,11 +17,11 @@
     "verify": "npm run lint:commit -- --from HEAD~1 --to HEAD && npm run lint:fix && npm run lint && npm test -- --run"
   },
   "dependencies": {
-    "@choffmeister/rpc-browser": "0.1.2",
-    "@choffmeister/rpc-core": "0.1.2",
-    "@choffmeister/rpc-express": "0.1.2",
-    "@choffmeister/rpc-openapi": "0.1.2",
     "@headlessui/react": "2.2.9",
+    "@ownfolio/rpc-browser": "0.2.0",
+    "@ownfolio/rpc-core": "0.2.0",
+    "@ownfolio/rpc-express": "0.2.0",
+    "@ownfolio/rpc-openapi": "0.2.0",
     "@tanstack/react-query": "5.90.9",
     "@types/body-parser": "1.19.6",
     "@types/compression": "1.8.1",

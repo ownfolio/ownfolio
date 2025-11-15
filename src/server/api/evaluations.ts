@@ -1,4 +1,4 @@
-import { createRpcCall, RpcError } from '@choffmeister/rpc-core'
+import { createRpcCall, RpcError } from '@ownfolio/rpc-core'
 import BigNumber from 'bignumber.js'
 import { z } from 'zod'
 

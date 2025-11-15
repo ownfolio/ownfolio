@@ -7,8 +7,19 @@ A personal portfolio tracker.
 ## Development
 
 ```bash
+# install dependencies
+npm login --registry https://npm.pkg.github.com
+npm ci
+```
+
+```bash
+# run database and create test data
 docker compose up -d postgres
 npm run start -- create-user --email test@test.com --password testtest --demo-portfolio
+```
+
+```bash
+# run dev server
 npm run start:dev
 ```
 

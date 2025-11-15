@@ -1,6 +1,6 @@
-import { createRpcCall } from '@choffmeister/rpc-core'
-import { createRpcExpressServer } from '@choffmeister/rpc-express'
-import { createRpcOpenApi } from '@choffmeister/rpc-openapi'
+import { createRpcCall } from '@ownfolio/rpc-core'
+import { createRpcExpressServer } from '@ownfolio/rpc-express'
+import { createRpcOpenApi } from '@ownfolio/rpc-openapi'
 import express from 'express'
 import { z } from 'zod'
 
