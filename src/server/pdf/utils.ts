@@ -9,7 +9,7 @@ export async function execAsync(file: string, args: string[], input?: Buffer): P
 
 async function execAsyncDirect(file: string, args: string[], input?: Buffer): Promise<Buffer> {
   const stdout = await new Promise<Buffer>((resolve, reject) => {
-    const process = execFile(file, args, { encoding: 'buffer' }, (err, stdout) => {
+    const process = execFile(file, args, { encoding: 'buffer', maxBuffer: 10_000_000 }, (err, stdout) => {
       if (err) {
         reject(err)
       } else {
