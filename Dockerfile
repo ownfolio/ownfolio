@@ -2,8 +2,8 @@ FROM alpine:3.21.2 AS builder
 RUN apk add --no-cache nodejs npm
 WORKDIR /build
 COPY . .
-RUN npm ci
-RUN ls -al
+RUN echo '//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}' > ~/.npmrc
+RUN --mount=type=secret,id=node-auth-token,env=NODE_AUTH_TOKEN npm ci
 ENV NODE_ENV=production
 RUN node build.js
 
