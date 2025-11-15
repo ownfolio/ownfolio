@@ -16,6 +16,7 @@ jobs:
     name: Pages
     permissions:
       contents: read
+      packages: read
       pages: write
       id-token: write
     environment:
