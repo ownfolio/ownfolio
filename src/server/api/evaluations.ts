@@ -21,6 +21,7 @@ export const evaluateSummaryRequestSchema = z.object({
       z.object({ type: z.literal('all') }),
       z.object({ type: z.literal('portfolio'), portfolioId: z.string() }),
       z.object({ type: z.literal('account'), accountId: z.string() }),
+      z.object({ type: z.literal('classification'), classificationId: z.string() }),
     ])
   ),
   values: z
@@ -146,6 +147,8 @@ export function createRpcV1Evaluations(database: Database) {
         if (!ctx.user) throw RpcError.unauthorized()
         const accounts = await database.accounts.listByUserId(ctx.user.id)
         const transactions = await database.transactions.listByUserId(ctx.user.id, {}, 'asc')
+        // const classifications = await database.classifications.listByUserId(ctx.user.id)
+        // const classificationAssignments = await database.classifications.listAssignmentsByUserId(ctx.user.id)
         const quotes = await database.quotes.listAllClosesByUserId(ctx.user.id)
         const now = new Date()
         const dates: string[] = (() => {
@@ -181,6 +184,13 @@ export function createRpcV1Evaluations(database: Database) {
                   ] as const
                 case 'account':
                   return [bucket.accountId, (aid: string) => aid === bucket.accountId] as const
+                case 'classification':
+                  return [
+                    bucket.classificationId,
+                    (_aid: string) => {
+                      return false
+                    },
+                  ] as const
               }
             })()
             return {

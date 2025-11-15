@@ -5,6 +5,7 @@ import { DashboardCard } from '../../../shared/models/DashboardCard'
 import { Input } from '../../components/Input'
 import { LoadingCardSuspense } from '../../components/LoadingCardSuspense'
 import { ViewContainer } from '../../components/ViewContainer'
+import { ClassificationTable } from './ClassificationTable'
 import { DashboardCardsGrid } from './DashboardCards'
 import { HoldingsTable } from './HoldingsTable'
 
@@ -31,6 +32,10 @@ export const DashboardView: React.FC = () => {
       <h2>Holdings</h2>
       <LoadingCardSuspense>
         <HoldingsTable timetravel={timetravel} />
+      </LoadingCardSuspense>
+      <h2>Classification</h2>
+      <LoadingCardSuspense>
+        <ClassificationTable timetravel={timetravel} />
       </LoadingCardSuspense>
     </ViewContainer>
   )
