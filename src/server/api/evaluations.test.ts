@@ -3,10 +3,11 @@ import BigNumber from 'bignumber.js'
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
+import { evaluatePlausibilityResponseSchema } from '../../shared/api/evaluations'
 import { currencies } from '../../shared/models/Currency'
 import { databaseTest } from '../database/databaseTest'
 import { PdfParserResult } from '../pdf/parse'
-import { createRpcV1Evaluations, evaluatePlausibilityResponseSchema } from './evaluations'
+import { createRpcV1Evaluations } from './evaluations'
 
 describe('evaluatePlausibility', () => {
   const findingsForType = (

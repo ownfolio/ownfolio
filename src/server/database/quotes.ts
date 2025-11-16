@@ -5,7 +5,7 @@ import { chunks } from '../../shared/utils/array'
 import { sequential } from '../../shared/utils/promise'
 import { DatabaseTable } from './DatabaseTable'
 
-export class DatabaseQuotes extends DatabaseTable {
+export class DatabaseQuotes extends DatabaseTable<Quote> {
   protected override table = 'quote'
   protected override schema = quoteSchema
 

@@ -1,17 +1,13 @@
 import BigNumber from 'bignumber.js'
-import { z } from 'zod'
 
 import { rootCurrency } from '../../shared/models/Currency'
+import { YearlyReportParams } from '../../shared/models/Report'
 import { bigNumberFormat } from '../../shared/utils/bignumber'
 import { dateEndOf, dateFormat, dateList, dateParse } from '../../shared/utils/date'
 import { evaluateBalances } from '../balance'
 import { generatePdf } from '../pdf/generatePdf'
 import { type ReportGenerator } from './index'
 import { reportStyles } from './shared'
-
-export const yearlyReportParamsSchema = z.object({ type: z.literal('yearly') })
-
-export type YearlyReportParams = z.infer<typeof yearlyReportParamsSchema>
 
 export const generateYearlyReport: ReportGenerator<YearlyReportParams> = async (database, userId) => {
   const transactions = await database.transactions.listByUserId(userId).then(txs => txs.reverse())

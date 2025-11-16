@@ -1,35 +1,30 @@
-import { createRpcCall, RpcError } from '@ownfolio/rpc-core'
-import { z } from 'zod'
+import { createRpcRouterFromDefinitionAndHandler, RpcError } from '@ownfolio/rpc-core'
 
-import { accountSchema } from '../../shared/models/Account'
+import { rpcV1AccountDefinition } from '../../shared/api/account'
 import { Database } from '../database'
 import { RpcCtx } from './context'
-import { byIdSchema, listResponseSchema, pagingParamsSchema, responseSchema } from './utils'
-
-const createAccountSchema = accountSchema.omit({ id: true, createdAt: true })
-const updateAccountSchema = accountSchema
 
 export function createRpcV1Account(database: Database) {
-  return {
-    listAccounts: createRpcCall(pagingParamsSchema, listResponseSchema(accountSchema), async (ctx: RpcCtx, input) => {
+  return createRpcRouterFromDefinitionAndHandler<RpcCtx, typeof rpcV1AccountDefinition>(rpcV1AccountDefinition, {
+    listAccounts: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const accounts = await database.accounts.listByUserId(ctx.user.id, input.skip, input.top)
       return { data: accounts }
-    }),
-    retrieveAccount: createRpcCall(byIdSchema, responseSchema(accountSchema), async (ctx: RpcCtx, input) => {
+    },
+    retrieveAccount: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const account = await database.accounts.find(input.id)
       const portfolio = await database.portfolios.find(account?.portfolioId || '')
       if (!account || !portfolio || portfolio.userId !== ctx.user.id)
         throw RpcError.badRequest(`Unknown account ${input.id}`)
       return { data: account }
-    }),
-    createAccount: createRpcCall(createAccountSchema, responseSchema(accountSchema), async (ctx: RpcCtx, input) => {
+    },
+    createAccount: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const account = await database.accounts.create({ ...input })
       return { data: account }
-    }),
-    updateAccount: createRpcCall(updateAccountSchema, responseSchema(accountSchema), async (ctx: RpcCtx, input) => {
+    },
+    updateAccount: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const account = await database.accounts.find(input.id)
       const portfolio = await database.portfolios.find(account?.portfolioId || '')
@@ -43,21 +38,17 @@ export function createRpcV1Account(database: Database) {
       }
       const account2 = await database.accounts.update(input)
       return { data: account2 }
-    }),
-    updateAccountStatus: createRpcCall(
-      updateAccountSchema.pick({ id: true, status: true }),
-      responseSchema(accountSchema),
-      async (ctx: RpcCtx, input) => {
-        if (!ctx.user) throw RpcError.unauthorized()
-        const account = await database.accounts.find(input.id)
-        const portfolio = await database.portfolios.find(account?.portfolioId || '')
-        if (!account || !portfolio || portfolio.userId !== ctx.user.id)
-          throw RpcError.badRequest(`Unknown account ${input.id}`)
-        const account2 = await database.accounts.update({ ...account, status: input.status })
-        return { data: account2 }
-      }
-    ),
-    deleteAccount: createRpcCall(byIdSchema, responseSchema(z.void()), async (ctx: RpcCtx, input) => {
+    },
+    updateAccountStatus: async (ctx, input) => {
+      if (!ctx.user) throw RpcError.unauthorized()
+      const account = await database.accounts.find(input.id)
+      const portfolio = await database.portfolios.find(account?.portfolioId || '')
+      if (!account || !portfolio || portfolio.userId !== ctx.user.id)
+        throw RpcError.badRequest(`Unknown account ${input.id}`)
+      const account2 = await database.accounts.update({ ...account, status: input.status })
+      return { data: account2 }
+    },
+    deleteAccount: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const account = await database.accounts.find(input.id)
       const portfolio = await database.portfolios.find(account?.portfolioId || '')
@@ -68,7 +59,7 @@ export function createRpcV1Account(database: Database) {
         throw RpcError.badRequest('Accounts with at least one transaction cannot be deleted')
       }
       await database.accounts.delete(input.id)
-      return {}
-    }),
-  }
+      return { data: undefined }
+    },
+  })
 }

@@ -11,7 +11,6 @@ export const accountSchema = z.object({
     .trim()
     .max(128)
     .regex(/^[0-9a-zA-Z\s]*$/)
-    .transform(s => s.replace(/\s/g, ''))
     .default(''),
   currency: z
     .string()

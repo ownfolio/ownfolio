@@ -50,7 +50,8 @@ export function EnhancedInput<T>(props: EnhancedInputProps<T>) {
             event.preventDefault()
             event.stopPropagation()
             const nextValue = fromString(stringValue)
-            if (nextValue) {
+            console.log('fromString', stringValue, nextValue)
+            if (nextValue !== undefined) {
               onValueChange(nextValue)
               setStringValue(toString(nextValue))
             } else {
@@ -60,7 +61,8 @@ export function EnhancedInput<T>(props: EnhancedInputProps<T>) {
         }}
         onBlur={() => {
           const nextValue = fromString(stringValue)
-          if (nextValue) {
+          console.log('fromString', stringValue, nextValue)
+          if (nextValue !== undefined) {
             onValueChange(nextValue)
             setStringValue(toString(nextValue))
           } else {

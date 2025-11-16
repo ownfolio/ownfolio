@@ -19,7 +19,6 @@ export const PortfoliosView: React.FC = () => {
     queryFn: () => rpcClient.listPortfolios({}).then(r => r.data),
   })
   const [showHidden, setShowHidden] = React.useState(false)
-  console.log(showHidden)
 
   const columns = React.useMemo<TableDefinitionColumn[]>(
     () => [
