@@ -21,7 +21,6 @@ export const assetSchema = z.object({
     .trim()
     .max(128)
     .regex(/^[0-9a-zA-Z\s]*$/)
-    .transform(s => s.replace(/\s/g, ''))
     .default(''),
   symbol: z.string().trim().min(1).max(8).toUpperCase(),
   denomination: z.number().int().min(0).max(20).default(0),

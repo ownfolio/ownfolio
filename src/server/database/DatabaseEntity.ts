@@ -3,7 +3,7 @@ import { DatabaseTable } from './DatabaseTable'
 
 export type Entity = { id: string }
 
-export abstract class DatabaseEntity<E extends Entity, P extends keyof E = never> extends DatabaseTable {
+export abstract class DatabaseEntity<E extends Entity, P extends keyof E = never> extends DatabaseTable<E> {
   public async create(template: Omit<E, 'id' | P>): Promise<E> {
     const entity: E = this.schema.parse(this.prepare(template))
     await this.sql`INSERT INTO ${this.sql(this.table)} ${this.sql(entity as any)}`

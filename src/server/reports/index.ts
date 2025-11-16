@@ -1,13 +1,8 @@
-import { z } from 'zod'
-
+import { ReportParams } from '../../shared/models/Report'
 import { Database } from '../database'
-import { generateYearlyReport, yearlyReportParamsSchema } from './yearly'
+import { generateYearlyReport } from './yearly'
 
 export type ReportGenerator<T> = (database: Database, userId: string, params: T) => Promise<Buffer<ArrayBufferLike>>
-
-export const reportParamsSchema = z.discriminatedUnion('type', [yearlyReportParamsSchema])
-
-export type ReportParams = z.infer<typeof reportParamsSchema>
 
 export const generateReport: ReportGenerator<ReportParams> = async (database, userId, params) => {
   switch (params.type) {

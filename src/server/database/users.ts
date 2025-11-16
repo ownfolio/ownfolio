@@ -7,7 +7,7 @@ import { DatabaseError } from './DatabaseError'
 import { DatabaseTable } from './DatabaseTable'
 import { randomId } from './id'
 
-export class DatabaseUsers extends DatabaseTable {
+export class DatabaseUsers extends DatabaseTable<User> {
   protected override table = 'user'
   protected override schema = userSchema
 

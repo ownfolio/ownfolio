@@ -1,9 +1,9 @@
 import { createRpcCall } from '@ownfolio/rpc-core'
 import { createRpcExpressServer } from '@ownfolio/rpc-express'
-import { createRpcOpenApi } from '@ownfolio/rpc-openapi'
 import express from 'express'
 import { z } from 'zod'
 
+import { responseSchema } from '../../shared/utils/schemas'
 import { Config } from '../config'
 import { Database } from '../database'
 import { createRpcV1Account } from './account'
@@ -17,13 +17,12 @@ import { createRpcV1Quote } from './quote'
 import { createRpcV1Report } from './report'
 import { createRpcV1Transaction } from './transaction'
 import { createRpcV1User } from './user'
-import { responseSchema } from './utils'
 
 export type { RpcCtx } from './context'
 
 export function createRpcV1(database: Database, config: Config) {
   return {
-    ping: createRpcCall(z.void(), responseSchema(z.void()), async (_ctx: RpcCtx) => ({})),
+    ping: createRpcCall(z.void(), responseSchema(z.void()), async (_ctx: RpcCtx) => ({ data: undefined })),
     version: createRpcCall(z.void(), responseSchema(z.object({ version: z.string() })), async (_ctx: RpcCtx) => ({
       data: { version: 'dev' },
     })),
@@ -40,33 +39,10 @@ export function createRpcV1(database: Database, config: Config) {
   }
 }
 
-export type RpcV1 = ReturnType<typeof createRpcV1>
-
 export async function createApi(database: Database, config: Config): Promise<express.Router> {
   const router = express.Router()
 
   const rpcV1 = createRpcV1(database, config)
-  const rpcV1OpenApi = createRpcOpenApi<RpcCtx>(rpcV1, {
-    infoTitle: 'ownfolio',
-    infoVersion: 'v1',
-    serverUrl: 'http://localhost:3000/api/v1',
-  })
-  router.options('/api/v1/openapi.json', (_req, res) => {
-    res.writeHead(200, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET',
-    })
-    res.end()
-  })
-  router.get('/api/v1/openapi.json', (_req, res) => {
-    res.writeHead(200, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET',
-      'Content-Type': 'application/json',
-    })
-    res.write(JSON.stringify(rpcV1OpenApi))
-    res.end()
-  })
   router.use(
     '/api/v1',
     createRpcExpressServer<RpcCtx>(rpcV1, {

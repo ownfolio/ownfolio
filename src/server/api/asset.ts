@@ -1,34 +1,29 @@
-import { createRpcCall, RpcError } from '@ownfolio/rpc-core'
-import { z } from 'zod'
+import { createRpcRouterFromDefinitionAndHandler, RpcError } from '@ownfolio/rpc-core'
 
-import { assetSchema } from '../../shared/models/Asset'
+import { rpcV1AssetDefinition } from '../../shared/api/asset'
 import { Database } from '../database'
 import { RpcCtx } from './context'
-import { byIdSchema, listResponseSchema, pagingParamsSchema, responseSchema } from './utils'
-
-const createAssetSchema = assetSchema.omit({ id: true, userId: true, createdAt: true })
-const updateAssetSchema = assetSchema
 
 export function createRpcV1Asset(database: Database) {
-  return {
-    listAssets: createRpcCall(pagingParamsSchema, listResponseSchema(assetSchema), async (ctx: RpcCtx, input) => {
+  return createRpcRouterFromDefinitionAndHandler<RpcCtx, typeof rpcV1AssetDefinition>(rpcV1AssetDefinition, {
+    listAssets: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const assets = await database.assets.listByUserId(ctx.user.id, input.skip, input.top)
       return { data: assets }
-    }),
-    retrieveAsset: createRpcCall(byIdSchema, responseSchema(assetSchema), async (ctx: RpcCtx, input) => {
+    },
+    retrieveAsset: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const asset = await database.assets.find(input.id)
       if (!asset || (!!asset.userId && asset.userId !== ctx.user.id))
         throw RpcError.badRequest(`Unknown asset ${input.id}`)
       return { data: asset }
-    }),
-    createAsset: createRpcCall(createAssetSchema, responseSchema(assetSchema), async (ctx: RpcCtx, input) => {
+    },
+    createAsset: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const asset = await database.assets.create({ ...input, userId: ctx.user.id })
       return { data: asset }
-    }),
-    updateAsset: createRpcCall(updateAssetSchema, responseSchema(assetSchema), async (ctx: RpcCtx, input) => {
+    },
+    updateAsset: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const asset = await database.assets.find(input.id)
       if (!asset || (!!asset.userId && asset.userId !== ctx.user.id))
@@ -45,20 +40,16 @@ export function createRpcV1Asset(database: Database) {
       }
       const asset2 = await database.assets.update(input)
       return { data: asset2 }
-    }),
-    updateAssetStatus: createRpcCall(
-      updateAssetSchema.pick({ id: true, status: true }),
-      responseSchema(assetSchema),
-      async (ctx: RpcCtx, input) => {
-        if (!ctx.user) throw RpcError.unauthorized()
-        const asset = await database.assets.find(input.id)
-        if (!asset || (!!asset.userId && asset.userId !== ctx.user.id))
-          throw RpcError.badRequest(`Unknown asset ${input.id}`)
-        const asset2 = await database.assets.update({ ...asset, status: input.status })
-        return { data: asset2 }
-      }
-    ),
-    deleteAsset: createRpcCall(byIdSchema, responseSchema(z.void()), async (ctx: RpcCtx, input) => {
+    },
+    updateAssetStatus: async (ctx, input) => {
+      if (!ctx.user) throw RpcError.unauthorized()
+      const asset = await database.assets.find(input.id)
+      if (!asset || (!!asset.userId && asset.userId !== ctx.user.id))
+        throw RpcError.badRequest(`Unknown asset ${input.id}`)
+      const asset2 = await database.assets.update({ ...asset, status: input.status })
+      return { data: asset2 }
+    },
+    deleteAsset: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const asset = await database.assets.find(input.id)
       if (!asset || (!!asset.userId && asset.userId !== ctx.user.id))
@@ -68,7 +59,7 @@ export function createRpcV1Asset(database: Database) {
         throw RpcError.badRequest('Assets with at least one transaction cannot be deleted')
       }
       await database.assets.delete(input.id)
-      return {}
-    }),
-  }
+      return { data: undefined }
+    },
+  })
 }

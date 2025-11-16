@@ -1,25 +1,14 @@
-import { createRpcCall, RpcError } from '@ownfolio/rpc-core'
-import { z } from 'zod'
+import { createRpcRouterFromDefinitionAndHandler, RpcError } from '@ownfolio/rpc-core'
 
-import { balanceSchema } from '../../shared/models/Balance'
-import { dateEquals, dateFormat, dateList, dateParse, dateStartOf, dateUnitSchema } from '../../shared/utils/date'
+import { rpcV1BalanceDefinition } from '../../shared/api/balance'
+import { dateEquals, dateFormat, dateList, dateParse, dateStartOf } from '../../shared/utils/date'
 import { evaluateBalances } from '../balance'
 import { Database } from '../database'
 import { RpcCtx } from './context'
-import { listResponseSchema } from './utils'
-
-export const balanceRequestSchema = z.object({
-  when: z.discriminatedUnion('type', [
-    z.object({ type: z.literal('now') }),
-    z.object({ type: z.literal('dates'), dates: z.array(z.string().regex(/^(\d{4}-\d{2}-\d{2})$/)).min(1) }),
-    z.object({ type: z.literal('historical'), resolution: dateUnitSchema.optional() }),
-  ]),
-})
-export const balanceResponseSchema = listResponseSchema(balanceSchema)
 
 export function createRpcV1Balance(database: Database) {
-  return {
-    evaluateBalances: createRpcCall(balanceRequestSchema, balanceResponseSchema, async (ctx: RpcCtx, input) => {
+  return createRpcRouterFromDefinitionAndHandler<RpcCtx, typeof rpcV1BalanceDefinition>(rpcV1BalanceDefinition, {
+    evaluateBalances: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
       const transactions = await database.transactions.listByUserId(ctx.user.id, {}, 'asc')
       const quotes = await database.quotes.listAllClosesByUserId(ctx.user.id)
@@ -45,6 +34,6 @@ export function createRpcV1Balance(database: Database) {
       })()
       const data = evaluateBalances(dates, transactions, { quotes })
       return { data }
-    }),
-  }
+    },
+  })
 }
