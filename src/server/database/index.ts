@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js'
 import postgres from 'postgres'
 
 import { logger } from '../logger'
@@ -46,12 +47,12 @@ export class Database {
           serialize: (timestamptz: string) => timestamptz,
           parse: (timestamptz: string) => new Date(timestamptz).toISOString(),
         },
-        // numeric: {
-        //   to: 1700,
-        //   from: [1700],
-        //   serialize: (numeric: BigNumber) => numeric.toString(),
-        //   parse: (numeric: string) => BigNumber(numeric),
-        // },
+        numeric: {
+          to: 1700,
+          from: [1700],
+          serialize: (numeric: BigNumber) => numeric.toString(),
+          parse: (numeric: string) => BigNumber(numeric),
+        },
       },
     })
     this.users = new DatabaseUsers(this.sql)
