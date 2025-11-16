@@ -17,10 +17,10 @@ export async function updateAssetQuotes(database: Database, asset: Asset): Promi
             return {
               assetId: asset.id,
               date,
-              open: rawQuote.open ? rawQuote.open.toString() : null,
-              high: rawQuote.high ? rawQuote.high.toString() : null,
-              low: rawQuote.low ? rawQuote.low.toString() : null,
-              close: rawQuote.close.toString(),
+              open: rawQuote.open ? rawQuote.open : null,
+              high: rawQuote.high ? rawQuote.high : null,
+              low: rawQuote.low ? rawQuote.low : null,
+              close: rawQuote.close,
             }
           })
           await database.quotes.createOrUpdate(...quotes)

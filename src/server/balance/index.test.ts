@@ -38,10 +38,10 @@ describe('evaluateBalances', () => {
       evaluateBalances(
         ['2021-01-01', '2023-01-01', '2025-01-01'],
         [
-          tx('tx1', '2020-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '10' }),
-          tx('tx2', '2022-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '20' }),
-          tx('tx3', '2024-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '30' }),
-          tx('tx4', '2026-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '40' }),
+          tx('tx1', '2020-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: BigNumber('10') }),
+          tx('tx2', '2022-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: BigNumber('20') }),
+          tx('tx3', '2024-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: BigNumber('30') }),
+          tx('tx4', '2026-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: BigNumber('40') }),
         ]
       )
     ).toEqual([
@@ -140,23 +140,23 @@ describe('evaluateBalances', () => {
       evaluateBalances(
         ['2021-01-01', '2022-01-01', '2023-01-01', '2024-01-01'],
         [
-          tx('tx1', '2020-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: '1000' }),
+          tx('tx1', '2020-01-01', { type: 'cashDeposit', cashAccountId: 'cashAccount', cashAmount: BigNumber('1000') }),
           tx('tx2', '2021-01-01', {
             type: 'assetBuy',
             assetAccountId: 'assetAccount',
             assetId: 'asset',
-            assetAmount: '5',
+            assetAmount: BigNumber('5'),
             cashAccountId: 'cashAccount',
-            cashAmount: '50',
-            feeCashAmount: '0',
+            cashAmount: BigNumber('50'),
+            feeCashAmount: BigNumber('0'),
           }),
         ],
         {
           quotes: [
-            { date: '2022-01-01', assetId: 'asset', open: null, high: null, low: null, close: '15' },
-            { date: '2022-07-01', assetId: 'otherAsset', open: null, high: null, low: null, close: '150' },
-            { date: '2023-01-01', assetId: 'asset', open: null, high: null, low: null, close: '20' },
-            { date: '2023-07-01', assetId: 'otherAsset', open: null, high: null, low: null, close: '200' },
+            { date: '2022-01-01', assetId: 'asset', open: null, high: null, low: null, close: BigNumber('15') },
+            { date: '2022-07-01', assetId: 'otherAsset', open: null, high: null, low: null, close: BigNumber('150') },
+            { date: '2023-01-01', assetId: 'asset', open: null, high: null, low: null, close: BigNumber('20') },
+            { date: '2023-07-01', assetId: 'otherAsset', open: null, high: null, low: null, close: BigNumber('200') },
           ],
         }
       )
@@ -384,7 +384,7 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txCashDeposit11', '2020-01-02', {
         type: 'cashDeposit',
         cashAccountId: 'cashAccount1',
-        cashAmount: '10000',
+        cashAmount: BigNumber('10000'),
       }),
       expectedBalance: {
         date: '2020-01-02',
@@ -417,7 +417,7 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txCashDeposit2', '2020-01-03', {
         type: 'cashDeposit',
         cashAccountId: 'cashAccount2',
-        cashAmount: '5000',
+        cashAmount: BigNumber('5000'),
       }),
       expectedBalance: {
         date: '2020-01-03',
@@ -460,7 +460,7 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txCashDeposit12', '2020-01-04', {
         type: 'cashDeposit',
         cashAccountId: 'cashAccount1',
-        cashAmount: '20000',
+        cashAmount: BigNumber('20000'),
       }),
       expectedBalance: {
         date: '2020-01-04',
@@ -513,7 +513,7 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txCashWithdrawal11', '2020-01-05', {
         type: 'cashWithdrawal',
         cashAccountId: 'cashAccount1',
-        cashAmount: '15000',
+        cashAmount: BigNumber('15000'),
       }),
       expectedBalance: {
         date: '2020-01-05',
@@ -585,7 +585,7 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txCashWithdrawal12', '2020-01-06', {
         type: 'cashWithdrawal',
         cashAccountId: 'cashAccount1',
-        cashAmount: '25000',
+        cashAmount: BigNumber('25000'),
       }),
       expectedBalance: {
         date: '2020-01-06',
@@ -671,7 +671,7 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txCashWithdrawal13', '2020-01-07', {
         type: 'cashWithdrawal',
         cashAccountId: 'cashAccount1',
-        cashAmount: '5000',
+        cashAmount: BigNumber('5000'),
       }),
       expectedBalance: {
         date: '2020-01-07',
@@ -767,7 +767,7 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txCashDeposit13', '2020-01-08', {
         type: 'cashDeposit',
         cashAccountId: 'cashAccount1',
-        cashAmount: '30000',
+        cashAmount: BigNumber('30000'),
       }),
       expectedBalance: {
         date: '2020-01-08',
@@ -885,7 +885,7 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txCashDeposit11', '2020-01-02', {
         type: 'cashDeposit',
         cashAccountId: 'cashAccount1',
-        cashAmount: '10000',
+        cashAmount: BigNumber('10000'),
       }),
       expectedBalance: {
         date: '2020-01-02',
@@ -918,7 +918,7 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txCashDeposit12', '2020-01-03', {
         type: 'cashDeposit',
         cashAccountId: 'cashAccount1',
-        cashAmount: '5000',
+        cashAmount: BigNumber('5000'),
       }),
       expectedBalance: {
         date: '2020-01-03',
@@ -962,8 +962,8 @@ describe('updateBalanceByTransaction', () => {
         type: 'cashTransfer',
         fromCashAccountId: 'cashAccount1',
         toCashAccountId: 'cashAccount2',
-        cashAmount: '11000',
-        feeCashAmount: '0',
+        cashAmount: BigNumber('11000'),
+        feeCashAmount: BigNumber('0'),
       }),
       expectedBalance: {
         date: '2020-01-04',
@@ -1019,10 +1019,10 @@ describe('updateBalanceByTransaction', () => {
       initialBalance: b,
       transaction: tx('txAssetDeposit1', '2020-01-02', {
         type: 'assetDeposit',
-        cashAmount: '1000',
+        cashAmount: BigNumber('1000'),
         assetAccountId: 'assetAccount1',
         assetId: 'asset1',
-        assetAmount: '10',
+        assetAmount: BigNumber('10'),
       }),
       expectedBalance: {
         date: '2020-01-02',
@@ -1055,10 +1055,10 @@ describe('updateBalanceByTransaction', () => {
       initialBalance: b,
       transaction: tx('txAssetDeposit2', '2020-01-03', {
         type: 'assetDeposit',
-        cashAmount: '2000',
+        cashAmount: BigNumber('2000'),
         assetAccountId: 'assetAccount1',
         assetId: 'asset1',
-        assetAmount: '30',
+        assetAmount: BigNumber('30'),
       }),
       expectedBalance: {
         date: '2020-01-03',
@@ -1102,10 +1102,10 @@ describe('updateBalanceByTransaction', () => {
       initialBalance: b,
       transaction: tx('txAssetWithdrawal', '2020-01-04', {
         type: 'assetWithdrawal',
-        cashAmount: '6000',
+        cashAmount: BigNumber('6000'),
         assetAccountId: 'assetAccount1',
         assetId: 'asset1',
-        assetAmount: '80',
+        assetAmount: BigNumber('80'),
       }),
       expectedBalance: {
         date: '2020-01-04',
@@ -1170,7 +1170,7 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txCashDeposit', '2020-01-02', {
         type: 'cashDeposit',
         cashAccountId: 'cashAccount',
-        cashAmount: '10000',
+        cashAmount: BigNumber('10000'),
       }),
       expectedBalance: {
         date: '2020-01-02',
@@ -1203,11 +1203,11 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txAssetBuy11', '2020-01-03', {
         type: 'assetBuy',
         cashAccountId: 'cashAccount',
-        cashAmount: '1000',
+        cashAmount: BigNumber('1000'),
         assetAccountId: 'assetAccount1',
         assetId: 'asset1',
-        assetAmount: '10',
-        feeCashAmount: '0',
+        assetAmount: BigNumber('10'),
+        feeCashAmount: BigNumber('0'),
       }),
       expectedBalance: {
         date: '2020-01-03',
@@ -1267,11 +1267,11 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txAssetBuy21', '2020-01-04', {
         type: 'assetBuy',
         cashAccountId: 'cashAccount',
-        cashAmount: '2000',
+        cashAmount: BigNumber('2000'),
         assetAccountId: 'assetAccount1',
         assetId: 'asset2',
-        assetAmount: '100',
-        feeCashAmount: '0',
+        assetAmount: BigNumber('100'),
+        feeCashAmount: BigNumber('0'),
       }),
       expectedBalance: {
         date: '2020-01-04',
@@ -1356,11 +1356,11 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txAssetBuy12', '2020-01-05', {
         type: 'assetBuy',
         cashAccountId: 'cashAccount',
-        cashAmount: '5000',
+        cashAmount: BigNumber('5000'),
         assetAccountId: 'assetAccount1',
         assetId: 'asset1',
-        assetAmount: '20',
-        feeCashAmount: '0',
+        assetAmount: BigNumber('20'),
+        feeCashAmount: BigNumber('0'),
       }),
       expectedBalance: {
         date: '2020-01-05',
@@ -1470,12 +1470,12 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txAssetSell', '2020-01-06', {
         type: 'assetSell',
         cashAccountId: 'cashAccount',
-        cashAmount: '6000',
+        cashAmount: BigNumber('6000'),
         assetAccountId: 'assetAccount1',
         assetId: 'asset1',
-        assetAmount: '15',
-        feeCashAmount: '0',
-        taxCashAmount: '0',
+        assetAmount: BigNumber('15'),
+        feeCashAmount: BigNumber('0'),
+        taxCashAmount: BigNumber('0'),
       }),
       expectedBalance: {
         date: '2020-01-06',
@@ -1619,7 +1619,7 @@ describe('updateBalanceByTransaction', () => {
       transaction: tx('txCashDeposit', '2020-01-02', {
         type: 'cashDeposit',
         cashAccountId: 'cashAccount',
-        cashAmount: '10000',
+        cashAmount: BigNumber('10000'),
       }),
       expectedBalance: {
         date: '2020-01-02',
@@ -1653,10 +1653,10 @@ describe('updateBalanceByTransaction', () => {
         type: 'assetBuy',
         assetAccountId: 'assetAccount1',
         assetId: 'asset',
-        assetAmount: '100',
+        assetAmount: BigNumber('100'),
         cashAccountId: 'cashAccount',
-        cashAmount: '3000',
-        feeCashAmount: '0',
+        cashAmount: BigNumber('3000'),
+        feeCashAmount: BigNumber('0'),
       }),
       expectedBalance: {
         date: '2020-01-03',
@@ -1717,10 +1717,10 @@ describe('updateBalanceByTransaction', () => {
         type: 'assetBuy',
         assetAccountId: 'assetAccount1',
         assetId: 'asset',
-        assetAmount: '200',
+        assetAmount: BigNumber('200'),
         cashAccountId: 'cashAccount',
-        cashAmount: '7000',
-        feeCashAmount: '0',
+        cashAmount: BigNumber('7000'),
+        feeCashAmount: BigNumber('0'),
       }),
       expectedBalance: {
         date: '2020-01-04',
@@ -1796,8 +1796,8 @@ describe('updateBalanceByTransaction', () => {
         fromAssetAccountId: 'assetAccount1',
         toAssetAccountId: 'assetAccount2',
         assetId: 'asset',
-        assetAmount: '150',
-        feeAssetAmount: '0',
+        assetAmount: BigNumber('150'),
+        feeAssetAmount: BigNumber('0'),
       }),
       expectedBalance: {
         date: '2020-01-05',

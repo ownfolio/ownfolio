@@ -24,14 +24,14 @@ export const assetSeries: ChartViewSeries<AssetSeriesConfig> = async (
       points: groupBy(quotes, q => dateStartOf(dateParse(q.date), resolution).valueOf().toString()).map(quotes => {
         const openTimestamp = dateStartOf(dateParse(quotes[0].date), resolution)
         const closeTimestamp = dateEndOf(openTimestamp, resolution)
-        const close = Number.parseFloat(quotes[quotes.length - 1].close)
-        const open = quotes[0].open ? Number.parseFloat(quotes[0].open) : Number.parseFloat(quotes[0].close)
+        const close = quotes[quotes.length - 1].close.toNumber()
+        const open = quotes[0].open ? quotes[0].open.toNumber() : quotes[0].close.toNumber()
         const low = minBy(
-          quotes.map(q => (q.low ? Number.parseFloat(q.low) : Number.parseFloat(q.close))),
+          quotes.map(q => (q.low ? q.low.toNumber() : q.close.toNumber())),
           v => v
         )!
         const high = maxBy(
-          quotes.map(q => (q.high ? Number.parseFloat(q.high) : Number.parseFloat(q.close))),
+          quotes.map(q => (q.high ? q.high.toNumber() : q.close.toNumber())),
           v => v
         )!
         return {

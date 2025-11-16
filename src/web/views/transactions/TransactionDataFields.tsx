@@ -1,4 +1,3 @@
-import { css } from '@linaria/core'
 import BigNumber from 'bignumber.js'
 import React from 'react'
 
@@ -6,7 +5,7 @@ import { Attachment } from '../../../shared/models/Attachment'
 import { Transaction, TransactionData } from '../../../shared/models/Transaction'
 import { dateFormat, dateMinus, dateParse } from '../../../shared/utils/date'
 import { rpcClient } from '../../api'
-import { calculatorInputProps, Input } from '../../components/Input'
+import { BigNumberInput } from '../../components/Input'
 import { Label } from '../../components/Label'
 import { SelectAccount } from '../../components/SelectAccount'
 import { SelectAsset } from '../../components/SelectAsset'
@@ -147,11 +146,10 @@ const CashDepositTransactionDataFields: React.FC<{
         />
       </Label>
       <Label text="Cash Amount" htmlFor="cashAmount">
-        <Input
+        <BigNumberInput
           id="cashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.cashAmount, value => setData({ ...data, cashAmount: value }))}
+          value={data.cashAmount}
+          onValueChange={value => setData({ ...data, cashAmount: value })}
           required
         />
       </Label>
@@ -176,11 +174,10 @@ const CashWithdrawalTransactionDataFields: React.FC<{
         />
       </Label>
       <Label text="Cash Amount" htmlFor="cashAmount">
-        <Input
+        <BigNumberInput
           id="cashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.cashAmount, value => setData({ ...data, cashAmount: value }))}
+          value={data.cashAmount}
+          onValueChange={value => setData({ ...data, cashAmount: value })}
           required
         />
       </Label>
@@ -213,20 +210,18 @@ const CashTransferTransactionDataFields: React.FC<{
         />
       </Label>
       <Label text="Cash Amount" htmlFor="cashAmount">
-        <Input
+        <BigNumberInput
           id="cashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.cashAmount, value => setData({ ...data, cashAmount: value }))}
+          value={data.cashAmount}
+          onValueChange={value => setData({ ...data, cashAmount: value })}
           required
         />
       </Label>
       <Label text="Fee Cash Amount" htmlFor="feeCashAmount">
-        <Input
+        <BigNumberInput
           id="feeCashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.feeCashAmount, value => setData({ ...data, feeCashAmount: value }))}
+          value={data.feeCashAmount}
+          onValueChange={value => setData({ ...data, feeCashAmount: value })}
           required
         />
       </Label>
@@ -279,16 +274,15 @@ const AssetBuyTransactionDataFields: React.FC<{
                 deps: [previewedAttachment],
               },
             ]}
-            value={data.assetAmount}
-            setValue={value => setData({ ...data, assetAmount: value })}
+            value={data.assetAmount.toString()}
+            setValue={value => setData({ ...data, assetAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="assetAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.assetAmount, value => setData({ ...data, assetAmount: value }))}
+          value={data.assetAmount}
+          onValueChange={value => setData({ ...data, assetAmount: value })}
           required
         />
       </Label>
@@ -339,18 +333,12 @@ const AssetBuyTransactionDataFields: React.FC<{
                 deps: [data.assetId, transaction.date, data.assetAmount],
               },
             ]}
-            value={data.cashAmount}
-            setValue={value => setData({ ...data, cashAmount: value })}
+            value={data.cashAmount.toString()}
+            setValue={value => setData({ ...data, cashAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
-          id="cashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.cashAmount, value => setData({ ...data, cashAmount: value }))}
-          required
-        />
+        <BigNumberInput value={data.cashAmount} onValueChange={value => setData({ ...data, cashAmount: value })} />
       </Label>
       <Label
         text="Fee Cash Amount"
@@ -373,16 +361,15 @@ const AssetBuyTransactionDataFields: React.FC<{
                 deps: [previewedAttachment],
               },
             ]}
-            value={data.feeCashAmount}
-            setValue={value => setData({ ...data, feeCashAmount: value })}
+            value={data.feeCashAmount.toString()}
+            setValue={value => setData({ ...data, feeCashAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="feeCashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.feeCashAmount, value => setData({ ...data, feeCashAmount: value }))}
+          value={data.feeCashAmount}
+          onValueChange={value => setData({ ...data, feeCashAmount: value })}
           required
         />
       </Label>
@@ -434,16 +421,15 @@ const AssetSellTransactionDataFields: React.FC<{
                 deps: [previewedAttachment],
               },
             ]}
-            value={data.assetAmount}
-            setValue={value => setData({ ...data, assetAmount: value })}
+            value={data.assetAmount.toString()}
+            setValue={value => setData({ ...data, assetAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="assetAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.assetAmount, value => setData({ ...data, assetAmount: value }))}
+          value={data.assetAmount}
+          onValueChange={value => setData({ ...data, assetAmount: value })}
           required
         />
       </Label>
@@ -494,16 +480,15 @@ const AssetSellTransactionDataFields: React.FC<{
                 deps: [data.assetId, transaction.date, data.assetAmount],
               },
             ]}
-            value={data.cashAmount}
-            setValue={value => setData({ ...data, cashAmount: value })}
+            value={data.cashAmount.toString()}
+            setValue={value => setData({ ...data, cashAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="cashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.cashAmount, value => setData({ ...data, cashAmount: value }))}
+          value={data.cashAmount}
+          onValueChange={value => setData({ ...data, cashAmount: value })}
           required
         />
       </Label>
@@ -528,16 +513,15 @@ const AssetSellTransactionDataFields: React.FC<{
                 deps: [previewedAttachment],
               },
             ]}
-            value={data.feeCashAmount}
-            setValue={value => setData({ ...data, feeCashAmount: value })}
+            value={data.feeCashAmount.toString()}
+            setValue={value => setData({ ...data, feeCashAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="feeCashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.feeCashAmount, value => setData({ ...data, feeCashAmount: value }))}
+          value={data.feeCashAmount}
+          onValueChange={value => setData({ ...data, feeCashAmount: value })}
           required
         />
       </Label>
@@ -562,16 +546,15 @@ const AssetSellTransactionDataFields: React.FC<{
                 deps: [previewedAttachment],
               },
             ]}
-            value={data.taxCashAmount}
-            setValue={value => setData({ ...data, taxCashAmount: value })}
+            value={data.taxCashAmount.toString()}
+            setValue={value => setData({ ...data, taxCashAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="taxCashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.taxCashAmount, value => setData({ ...data, taxCashAmount: value }))}
+          value={data.taxCashAmount}
+          onValueChange={value => setData({ ...data, taxCashAmount: value })}
           required
         />
       </Label>
@@ -624,16 +607,15 @@ const AssetDepositTransactionDataFields: React.FC<{
                 deps: [previewedAttachment],
               },
             ]}
-            value={data.assetAmount}
-            setValue={value => setData({ ...data, assetAmount: value })}
+            value={data.assetAmount.toString()}
+            setValue={value => setData({ ...data, assetAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="assetAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.assetAmount, value => setData({ ...data, assetAmount: value }))}
+          value={data.assetAmount}
+          onValueChange={value => setData({ ...data, assetAmount: value })}
           required
         />
       </Label>
@@ -662,16 +644,15 @@ const AssetDepositTransactionDataFields: React.FC<{
                 deps: [data.assetId, transaction.date, data.assetAmount],
               },
             ]}
-            value={data.cashAmount}
-            setValue={value => setData({ ...data, cashAmount: value })}
+            value={data.cashAmount.toString()}
+            setValue={value => setData({ ...data, cashAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="cashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.cashAmount, value => setData({ ...data, cashAmount: value }))}
+          value={data.cashAmount}
+          onValueChange={value => setData({ ...data, cashAmount: value })}
           required
         />
       </Label>
@@ -724,16 +705,15 @@ const AssetWithdrawalTransactionDataFields: React.FC<{
                 deps: [previewedAttachment],
               },
             ]}
-            value={data.assetAmount}
-            setValue={value => setData({ ...data, assetAmount: value })}
+            value={data.assetAmount.toString()}
+            setValue={value => setData({ ...data, assetAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="assetAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.assetAmount, value => setData({ ...data, assetAmount: value }))}
+          value={data.assetAmount}
+          onValueChange={value => setData({ ...data, assetAmount: value })}
           required
         />
       </Label>
@@ -762,16 +742,15 @@ const AssetWithdrawalTransactionDataFields: React.FC<{
                 deps: [data.assetId, transaction.date, data.assetAmount],
               },
             ]}
-            value={data.cashAmount}
-            setValue={value => setData({ ...data, cashAmount: value })}
+            value={data.cashAmount.toString()}
+            setValue={value => setData({ ...data, cashAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="cashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.cashAmount, value => setData({ ...data, cashAmount: value }))}
+          value={data.cashAmount}
+          onValueChange={value => setData({ ...data, cashAmount: value })}
           required
         />
       </Label>
@@ -832,25 +811,23 @@ const AssetTransferTransactionDataFields: React.FC<{
                 deps: [previewedAttachment],
               },
             ]}
-            value={data.assetAmount}
-            setValue={value => setData({ ...data, assetAmount: value })}
+            value={data.assetAmount.toString()}
+            setValue={value => setData({ ...data, assetAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="assetAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.assetAmount, value => setData({ ...data, assetAmount: value }))}
+          value={data.assetAmount}
+          onValueChange={value => setData({ ...data, assetAmount: value })}
           required
         />
       </Label>
       <Label text="Fee Asset Amount" htmlFor="feeAssetAmount">
-        <Input
+        <BigNumberInput
           id="feeAssetAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.feeAssetAmount, value => setData({ ...data, feeAssetAmount: value }))}
+          value={data.feeAssetAmount}
+          onValueChange={value => setData({ ...data, feeAssetAmount: value })}
           required
         />
       </Label>
@@ -875,20 +852,18 @@ const InterestTransactionDataFields: React.FC<{
         />
       </Label>
       <Label text="Cash Amount" htmlFor="cashAmount">
-        <Input
+        <BigNumberInput
           id="cashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.cashAmount, value => setData({ ...data, cashAmount: value }))}
+          value={data.cashAmount}
+          onValueChange={value => setData({ ...data, cashAmount: value })}
           required
         />
       </Label>
       <Label text="Tax Cash Amount" htmlFor="taxCashAmount">
-        <Input
+        <BigNumberInput
           id="taxCashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.taxCashAmount, value => setData({ ...data, taxCashAmount: value }))}
+          value={data.taxCashAmount}
+          onValueChange={value => setData({ ...data, taxCashAmount: value })}
           required
         />
       </Label>
@@ -913,11 +888,10 @@ const DividendTransactionDataFields: React.FC<{
         />
       </Label>
       <Label text="Cash Amount" htmlFor="cashAmount">
-        <Input
+        <BigNumberInput
           id="cashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.cashAmount, value => setData({ ...data, cashAmount: value }))}
+          value={data.cashAmount}
+          onValueChange={value => setData({ ...data, cashAmount: value })}
           required
         />
       </Label>
@@ -960,25 +934,23 @@ const DividendTransactionDataFields: React.FC<{
                 deps: [data.assetId, transaction.date, data.assetAmount],
               },
             ]}
-            value={data.assetAmount}
-            setValue={value => setData({ ...data, cashAmount: value })}
+            value={data.assetAmount.toString()}
+            setValue={value => setData({ ...data, cashAmount: BigNumber(value) })}
           />
         }
       >
-        <Input
+        <BigNumberInput
           id="assetAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.assetAmount, value => setData({ ...data, assetAmount: value }))}
+          value={data.assetAmount}
+          onValueChange={value => setData({ ...data, assetAmount: value })}
           required
         />
       </Label>
       <Label text="Tax Cash Amount" htmlFor="taxCashAmount">
-        <Input
+        <BigNumberInput
           id="taxCashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.taxCashAmount, value => setData({ ...data, taxCashAmount: value }))}
+          value={data.taxCashAmount}
+          onValueChange={value => setData({ ...data, taxCashAmount: value })}
           required
         />
       </Label>
@@ -1003,11 +975,10 @@ const TaxTransactionDataFields: React.FC<{
         />
       </Label>
       <Label text="Tax Cash Amount" htmlFor="taxCashAmount">
-        <Input
+        <BigNumberInput
           id="taxCashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.taxCashAmount, value => setData({ ...data, taxCashAmount: value }))}
+          value={data.taxCashAmount}
+          onValueChange={value => setData({ ...data, taxCashAmount: value })}
           required
         />
       </Label>
@@ -1032,18 +1003,13 @@ const FeeTransactionDataFields: React.FC<{
         />
       </Label>
       <Label text="Fee Cash Amount" htmlFor="feeCashAmount">
-        <Input
+        <BigNumberInput
           id="feeCashAmount"
-          type="decimal"
-          className={stylesNumberField}
-          {...calculatorInputProps(data.feeCashAmount, value => setData({ ...data, feeCashAmount: value }))}
+          value={data.feeCashAmount}
+          onValueChange={value => setData({ ...data, feeCashAmount: value })}
           required
         />
       </Label>
     </>
   )
 }
-
-const stylesNumberField = css`
-  font-family: monospace;
-`

@@ -47,22 +47,24 @@ export class DatabaseQuotes extends DatabaseTable {
   }
 
   async listAllClosesByUserId(userId: string): Promise<Quote[]> {
-    return await this.sql`
+    const rows = await this.sql`
       SELECT q."assetId", q."date", q."close" FROM "quote" q
       LEFT JOIN "asset" a on a."id" = q."assetId"
       WHERE a."userId" = ${userId}
       ORDER BY q."assetId", q."date" ASC
     `
+    return rows.map(row => this.schema.parse(row))
   }
 
   async listLatestClosesByUserId(userId: string, date?: string): Promise<Quote[]> {
     const dateFilter = date ? this.sql`AND q."date" <= ${date}` : this.sql``
-    return await this.sql`
+    const rows = await this.sql`
       SELECT DISTINCT ON (q."assetId") q.* FROM "quote" q
       LEFT JOIN "asset" a on a."id" = q."assetId"
       WHERE a."userId" = ${userId} ${dateFilter}
       ORDER BY q."assetId", q."date" DESC
     `
+    return rows.map(row => this.schema.parse(row))
   }
 
   async countForAssetId(assetId: string): Promise<number> {

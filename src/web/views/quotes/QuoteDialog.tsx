@@ -1,4 +1,3 @@
-import { css } from '@linaria/core'
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 
@@ -7,7 +6,7 @@ import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
 import { DialogContentProps } from '../../components/DialogsContext'
 import { Form } from '../../components/Form'
-import { calculatorInputProps, Input } from '../../components/Input'
+import { BigNumberInput, Input, NullableBigNumberInput } from '../../components/Input'
 import { Label } from '../../components/Label'
 import { SelectAsset } from '../../components/SelectAsset'
 import { LoadingView } from '../loading/LoadingView'
@@ -76,32 +75,31 @@ export const QuoteDialog: React.FC<Props> = ({ mode, closeDialog }) => {
         />
       </Label>
       <Label text="Open" htmlFor="open">
-        <Input
+        <NullableBigNumberInput
           id="open"
-          className={stylesNumberField}
-          {...calculatorInputProps(quote.open || '', value => setQuote(quote => ({ ...quote!, open: value || null })))}
+          value={quote.open}
+          onValueChange={value => setQuote(quote => ({ ...quote!, open: value }))}
         />
       </Label>
       <Label text="High" htmlFor="high">
-        <Input
+        <NullableBigNumberInput
           id="high"
-          className={stylesNumberField}
-          {...calculatorInputProps(quote.high || '', value => setQuote(quote => ({ ...quote!, high: value || null })))}
+          value={quote.high}
+          onValueChange={value => setQuote(quote => ({ ...quote!, high: value }))}
         />
       </Label>
       <Label text="Low" htmlFor="low">
-        <Input
+        <NullableBigNumberInput
           id="low"
-          className={stylesNumberField}
-          {...calculatorInputProps(quote.low || '', value => setQuote(quote => ({ ...quote!, low: value || null })))}
+          value={quote.low}
+          onValueChange={value => setQuote(quote => ({ ...quote!, low: value }))}
         />
       </Label>
       <Label text="Close" htmlFor="close">
-        <Input
+        <BigNumberInput
           id="close"
-          className={stylesNumberField}
-          {...calculatorInputProps(quote.close, value => setQuote(quote => ({ ...quote!, close: value })))}
-          required
+          value={quote.close}
+          onValueChange={value => setQuote(quote => ({ ...quote!, close: value }))}
         />
       </Label>
       <Button type="submit" variant="primary" busy={state === 'busy'} check={state === 'done'} disabled={!!state}>
@@ -113,7 +111,3 @@ export const QuoteDialog: React.FC<Props> = ({ mode, closeDialog }) => {
     </Form>
   )
 }
-
-const stylesNumberField = css`
-  font-family: monospace;
-`

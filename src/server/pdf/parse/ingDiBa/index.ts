@@ -33,15 +33,15 @@ export const ingDiBaPdfParser: PdfParser = (text: string) => {
       ...(assetNameMatch?.map(s => s.replace(/\n/g, ' ')) || []),
       ...(assetIdentifiersMatch ? filterNotUndefined(assetIdentifiersMatch) : []),
     ],
-    assetAmount: assetAmountMatch ? parseGermanBigNumber(assetAmountMatch[0]).toString() : undefined,
-    assetPrice: assetPriceMatch ? parseGermanBigNumber(assetPriceMatch[1]).toString() : undefined,
+    assetAmount: assetAmountMatch ? parseGermanBigNumber(assetAmountMatch[0]) : undefined,
+    assetPrice: assetPriceMatch ? parseGermanBigNumber(assetPriceMatch[1]) : undefined,
     assetAccount: [...(assetAccountMatch?.map(n => n.trim().replace(/ /g, '')) || [])],
-    fee: feeMatch ? parseGermanBigNumber(feeMatch[1]).toString() : undefined,
+    fee: feeMatch ? parseGermanBigNumber(feeMatch[1]) : undefined,
     tax:
       tax1Match || tax2Match
-        ? (tax1Match ? parseGermanBigNumber(tax1Match[1]) : BigNumber(0))
-            .plus(tax2Match ? parseGermanBigNumber(tax2Match[1]) : BigNumber(0))
-            .toString()
+        ? (tax1Match ? parseGermanBigNumber(tax1Match[1]) : BigNumber(0)).plus(
+            tax2Match ? parseGermanBigNumber(tax2Match[1]) : BigNumber(0)
+          )
         : undefined,
     account: [...(accountMatch?.map(n => n.trim().replace(/ /g, '')) || [])],
     reference: referenceMatch ? referenceMatch[0] : undefined,

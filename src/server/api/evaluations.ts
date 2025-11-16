@@ -421,37 +421,37 @@ export function createRpcV1Evaluations(database: Database) {
                 actual: txTime,
               })
             }
-            if (parsed.assetAmount && txData.assetAmount !== parsed.assetAmount.toString()) {
+            if (parsed.assetAmount && !txData.assetAmount.eq(parsed.assetAmount)) {
               conflicts.push({
                 key: 'assetAmount',
                 expected: parsed.assetAmount.toString(),
-                actual: txData.assetAmount,
+                actual: txData.assetAmount.toString(),
               })
             }
-            if (parsed.assetPrice && txData.cashAmount !== parsed.assetPrice.toString()) {
+            if (parsed.assetPrice && !txData.cashAmount.eq(parsed.assetPrice)) {
               conflicts.push({
                 key: 'cashAmount',
                 expected: parsed.assetPrice.toString(),
-                actual: txData.cashAmount,
+                actual: txData.cashAmount.toString(),
               })
             }
-            if (parsed.fee && txData.feeCashAmount !== parsed.fee.toString()) {
+            if (parsed.fee && !txData.feeCashAmount.eq(parsed.fee)) {
               conflicts.push({
                 key: 'feeCashAmount',
                 expected: parsed.fee.toString(),
-                actual: txData.feeCashAmount,
+                actual: txData.feeCashAmount.toString(),
               })
             }
             if (
               parsed.type === 'assetSell' &&
               parsed.tax &&
               txData.type === 'assetSell' &&
-              txData.taxCashAmount !== parsed.tax.toString()
+              !txData.taxCashAmount.eq(parsed.tax)
             ) {
               conflicts.push({
                 key: 'taxCashAmount',
                 expected: parsed.tax.toString(),
-                actual: txData.taxCashAmount,
+                actual: txData.taxCashAmount.toString(),
               })
             }
             if (parsed.reference && txReference !== parsed.reference) {

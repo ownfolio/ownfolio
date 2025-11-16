@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js'
 import { expect, it } from 'vitest'
 
 import { currencies } from '../../shared/models/Currency'
@@ -42,7 +43,7 @@ it(
       data: {
         type: 'cashDeposit',
         cashAccountId: a1.id,
-        cashAmount: '1234567.89012345',
+        cashAmount: BigNumber('1234567.89012345'),
       },
       reference: 'ref1',
       comment: 'comment1',
@@ -56,10 +57,10 @@ it(
         type: 'assetBuy',
         assetAccountId: a2.id,
         assetId: s1.id,
-        assetAmount: '89012345.1234567',
+        assetAmount: BigNumber('89012345.1234567'),
         cashAccountId: a1.id,
-        cashAmount: '1234567.89012345',
-        feeCashAmount: '0',
+        cashAmount: BigNumber('1234567.89012345'),
+        feeCashAmount: BigNumber('0'),
       },
       reference: 'ref2',
       comment: 'comment2',

@@ -1,4 +1,5 @@
 // @vitest-environment node
+import BigNumber from 'bignumber.js'
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
@@ -58,7 +59,7 @@ describe('evaluatePlausibility', () => {
         data: {
           type: 'cashDeposit',
           cashAccountId: act1.id,
-          cashAmount: '1000',
+          cashAmount: BigNumber('1000'),
         },
         reference: '',
         comment: '',
@@ -71,10 +72,10 @@ describe('evaluatePlausibility', () => {
           type: 'assetBuy',
           assetAccountId: act2.id,
           assetId: ast1.id,
-          assetAmount: '10',
+          assetAmount: BigNumber('10'),
           cashAccountId: act1.id,
-          cashAmount: '100',
-          feeCashAmount: '0',
+          cashAmount: BigNumber('100'),
+          feeCashAmount: BigNumber('0'),
         },
         reference: '',
         comment: '',
@@ -138,11 +139,11 @@ describe('evaluatePlausibility', () => {
           type: 'assetSell',
           assetAccountId: act2.id,
           assetId: ast1.id,
-          assetAmount: '10',
+          assetAmount: BigNumber('10'),
           cashAccountId: act1.id,
-          cashAmount: '100',
-          feeCashAmount: '0',
-          taxCashAmount: '0',
+          cashAmount: BigNumber('100'),
+          feeCashAmount: BigNumber('0'),
+          taxCashAmount: BigNumber('0'),
         },
         reference: '',
         comment: '',
@@ -170,8 +171,8 @@ describe('evaluatePlausibility', () => {
               date: '2020-01-01',
               time: '00:00:00',
               currency: currencies.EUR.symbol,
-              assetAmount: '10',
-              assetPrice: '100',
+              assetAmount: BigNumber('10'),
+              assetPrice: BigNumber('100'),
             } as PdfParserResult),
             'utf-8'
           ),
@@ -194,10 +195,10 @@ describe('evaluatePlausibility', () => {
               date: '2020-01-02',
               time: '00:00:01',
               currency: currencies.EUR.symbol,
-              assetAmount: '11',
-              assetPrice: '101',
-              fee: '1',
-              tax: '1',
+              assetAmount: BigNumber('11'),
+              assetPrice: BigNumber('101'),
+              fee: BigNumber('1'),
+              tax: BigNumber('1'),
             } as PdfParserResult),
             'utf-8'
           ),

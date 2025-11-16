@@ -1,4 +1,5 @@
 // @vitest-environment node
+import BigNumber from 'bignumber.js'
 import { expect, it } from 'vitest'
 
 import { currencies } from '../../shared/models/Currency'
@@ -24,7 +25,7 @@ it(
       data: {
         type: 'cashDeposit',
         cashAccountId: a.id,
-        cashAmount: '1',
+        cashAmount: BigNumber('1'),
       },
       reference: '',
       comment: '',
@@ -36,7 +37,7 @@ it(
       data: {
         type: 'cashDeposit',
         cashAccountId: a.id,
-        cashAmount: '1',
+        cashAmount: BigNumber('1'),
       },
       reference: '',
       comment: '',

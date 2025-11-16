@@ -22,10 +22,10 @@ describe('evaluateBalance', () => {
           type: 'assetBuy',
           assetAccountId: 'crypto',
           assetId: 'btc',
-          assetAmount: '1',
+          assetAmount: BigNumber('1'),
           cashAccountId: 'eur',
-          cashAmount: '1000',
-          feeCashAmount: '0',
+          cashAmount: BigNumber('1000'),
+          feeCashAmount: BigNumber('0'),
         })
       )
       const sellDateStr = dateFormat(datePlus(date, 'day', 1), 'yyyy-MM-dd')
@@ -34,11 +34,11 @@ describe('evaluateBalance', () => {
           type: 'assetSell',
           assetAccountId: 'crypto',
           assetId: 'btc',
-          assetAmount: '0.5',
+          assetAmount: BigNumber('0.5'),
           cashAccountId: 'eur',
-          cashAmount: '500',
-          feeCashAmount: '0',
-          taxCashAmount: '0',
+          cashAmount: BigNumber('500'),
+          feeCashAmount: BigNumber('0'),
+          taxCashAmount: BigNumber('0'),
         })
       )
       quotes.push({
@@ -47,7 +47,7 @@ describe('evaluateBalance', () => {
         open: null,
         high: null,
         low: null,
-        close: BigNumber(Math.random() * 100).toString(),
+        close: BigNumber(Math.random() * 100),
       })
       date = datePlus(date, 'day', 2)
     }
