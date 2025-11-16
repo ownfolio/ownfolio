@@ -22,36 +22,89 @@ export const Input = React.forwardRef<HTMLInputElement, Props>(({ type, classNam
   )
 })
 
-export function calculatorInputProps(
-  value: string,
-  setValue: (value: string) => void
-): Pick<
-  React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>,
-  'value' | 'onChange' | 'onKeyDown' | 'onBlur'
-> {
-  return {
-    value,
-    onChange: event => {
-      setValue(event.target.value)
-    },
-    onKeyDown: event => {
-      if (event.key === 'Enter') {
-        const evaluatedValue = calculatorRecursion(value)
-        if (evaluatedValue && !evaluatedValue.eq(value)) {
-          event.preventDefault()
-          event.stopPropagation()
-          setValue(evaluatedValue.toString())
-        }
-      }
-    },
-    onBlur: () => {
-      const evaluatedValue = calculatorRecursion(value)
-      if (evaluatedValue && !evaluatedValue.eq(value)) {
-        setValue(evaluatedValue.toString())
-      }
-    },
-  }
+interface EnhancedInputProps<T> {
+  toString: (value: T) => string
+  fromString: (str: string) => T | undefined
+  baseType?: () => string
+  baseClassName?: () => string
 }
+
+export function EnhancedInput<T>(props: EnhancedInputProps<T>) {
+  const { toString, fromString, baseType, baseClassName } = props
+  return React.forwardRef<
+    HTMLInputElement,
+    Omit<Props, 'value' | 'onChange' | 'onKeyDown' | 'onBlur'> & { value: T; onValueChange: (value: T) => void }
+  >(({ type, className, value, onValueChange, ...other }, ref) => {
+    const [stringValue, setStringValue] = React.useState(toString(value))
+    React.useEffect(() => setStringValue(toString(value)), [value])
+    return (
+      <Input
+        ref={ref}
+        {...other}
+        type={type || baseType?.()}
+        className={clsx(baseClassName?.(), className)}
+        value={stringValue}
+        onChange={event => setStringValue(event.target.value)}
+        onKeyDown={event => {
+          if (event.key === 'Enter') {
+            event.preventDefault()
+            event.stopPropagation()
+            const nextValue = fromString(stringValue)
+            if (nextValue) {
+              onValueChange(nextValue)
+              setStringValue(toString(nextValue))
+            } else {
+              setStringValue(toString(value))
+            }
+          }
+        }}
+        onBlur={() => {
+          const nextValue = fromString(stringValue)
+          if (nextValue) {
+            onValueChange(nextValue)
+            setStringValue(toString(nextValue))
+          } else {
+            setStringValue(toString(value))
+          }
+        }}
+      />
+    )
+  })
+}
+
+export const StringInput = EnhancedInput<string>({
+  toString: str => str,
+  fromString: str => str,
+})
+
+export const BigNumberInput = EnhancedInput<BigNumber>({
+  toString: bn => bn.toString(),
+  fromString: str => {
+    const bn = calculatorRecursion(str)
+    if (!bn) {
+      return undefined
+    }
+    return bn
+  },
+  baseType: () => 'decimal',
+  baseClassName: () => stylesBigNumberField,
+})
+
+export const NullableBigNumberInput = EnhancedInput<BigNumber | null>({
+  toString: bn => (bn ? bn.toString() : ''),
+  fromString: str => {
+    if (str === '') {
+      return null
+    }
+    const bn = calculatorRecursion(str)
+    if (!bn) {
+      return undefined
+    }
+    return bn
+  },
+  baseType: () => 'decimal',
+  baseClassName: () => stylesBigNumberField,
+})
 
 function calculatorRecursion(str: string): BigNumber | undefined {
   try {
@@ -135,4 +188,8 @@ const stylesRootCheckbox = css`
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+`
+
+const stylesBigNumberField = css`
+  font-family: monospace;
 `

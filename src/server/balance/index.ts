@@ -400,14 +400,14 @@ function updateBalanceByTransactionAssetTransfer(
       assetAccountId: data.fromAssetAccountId,
       assetId: data.assetId,
       assetAmount: data.feeAssetAmount,
-      cashAmount: '0',
+      cashAmount: BigNumber('0'),
     })
     const b3 = updateBalanceByTransactionAssetWithdrawal(b2, transaction, {
       type: 'assetWithdrawal',
       assetAccountId: data.fromAssetAccountId,
       assetId: data.assetId,
       assetAmount: data.assetAmount,
-      cashAmount: '0',
+      cashAmount: BigNumber('0'),
     })
     const closedPositions = b3.assetPositions.closed.slice(b2.assetPositions.closed.length)
     const b4 = {
@@ -447,7 +447,7 @@ function updateBalanceByTransactionAssetBuy(
     const b2 = updateBalanceByTransactionCashDepositWithdrawal(b, transaction, {
       type: 'cashWithdrawal',
       cashAccountId: data.cashAccountId,
-      cashAmount: BigNumber(data.cashAmount).plus(data.feeCashAmount).toString(),
+      cashAmount: BigNumber(data.cashAmount).plus(data.feeCashAmount),
     })
     const b3 = updateBalanceByTransactionAssetDeposit(b2, transaction, {
       type: 'assetDeposit',
@@ -476,7 +476,7 @@ function updateBalanceByTransactionAssetSell(
     const b3 = updateBalanceByTransactionCashDepositWithdrawal(b2, transaction, {
       type: 'cashDeposit',
       cashAccountId: data.cashAccountId,
-      cashAmount: BigNumber(data.cashAmount).minus(data.feeCashAmount).minus(data.taxCashAmount).toString(),
+      cashAmount: BigNumber(data.cashAmount).minus(data.feeCashAmount).minus(data.taxCashAmount),
     })
     return b3
   })

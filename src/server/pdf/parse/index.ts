@@ -15,11 +15,11 @@ export type PdfParserResult =
       time?: string
       currency?: string
       asset?: string[]
-      assetAmount?: string
-      assetPrice?: string
+      assetAmount?: BigNumber
+      assetPrice?: BigNumber
       assetAccount?: string[]
-      fee?: string
-      total?: string
+      fee?: BigNumber
+      total?: BigNumber
       account?: string[]
       reference?: string
     }
@@ -29,12 +29,12 @@ export type PdfParserResult =
       time?: string
       currency?: string
       asset?: string[]
-      assetAmount?: string
-      assetPrice?: string
+      assetAmount?: BigNumber
+      assetPrice?: BigNumber
       assetAccount?: string[]
-      fee?: string
-      tax?: string
-      total?: string
+      fee?: BigNumber
+      tax?: BigNumber
+      total?: BigNumber
       account?: string[]
       reference?: string
     }

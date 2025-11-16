@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import { bigNumberFormat } from '../utils/bignumber'
 import { dateFormat } from '../utils/date'
+import { bigNumberSchema } from '../utils/schemas'
 import { formatInt } from '../utils/string'
 import { Account } from './Account'
 import { Asset } from './Asset'
@@ -12,85 +13,85 @@ export const transactionDataSchema = z.discriminatedUnion('type', [
   z.object({
     type: z.literal('cashDeposit'),
     cashAccountId: z.string(),
-    cashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    cashAmount: bigNumberSchema,
   }),
   z.object({
     type: z.literal('cashWithdrawal'),
     cashAccountId: z.string(),
-    cashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    cashAmount: bigNumberSchema,
   }),
   z.object({
     type: z.literal('cashTransfer'),
     fromCashAccountId: z.string(),
     toCashAccountId: z.string(),
-    cashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
-    feeCashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    cashAmount: bigNumberSchema,
+    feeCashAmount: bigNumberSchema,
   }),
   z.object({
     type: z.literal('assetBuy'),
     assetAccountId: z.string(),
     assetId: z.string(),
-    assetAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    assetAmount: bigNumberSchema,
     cashAccountId: z.string(),
-    cashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
-    feeCashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    cashAmount: bigNumberSchema,
+    feeCashAmount: bigNumberSchema,
   }),
   z.object({
     type: z.literal('assetSell'),
     assetAccountId: z.string(),
     assetId: z.string(),
-    assetAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    assetAmount: bigNumberSchema,
     cashAccountId: z.string(),
-    cashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
-    feeCashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
-    taxCashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    cashAmount: bigNumberSchema,
+    feeCashAmount: bigNumberSchema,
+    taxCashAmount: bigNumberSchema,
   }),
   z.object({
     type: z.literal('assetDeposit'),
     assetAccountId: z.string(),
     assetId: z.string(),
-    assetAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
-    cashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    assetAmount: bigNumberSchema,
+    cashAmount: bigNumberSchema,
   }),
   z.object({
     type: z.literal('assetWithdrawal'),
     assetId: z.string(),
     assetAccountId: z.string(),
-    assetAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
-    cashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    assetAmount: bigNumberSchema,
+    cashAmount: bigNumberSchema,
   }),
   z.object({
     type: z.literal('assetTransfer'),
     assetId: z.string(),
     fromAssetAccountId: z.string(),
     toAssetAccountId: z.string(),
-    assetAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
-    feeAssetAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    assetAmount: bigNumberSchema,
+    feeAssetAmount: bigNumberSchema,
   }),
   z.object({
     type: z.literal('interest'),
     cashAccountId: z.string(),
-    cashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
-    taxCashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    cashAmount: bigNumberSchema,
+    taxCashAmount: bigNumberSchema,
   }),
   z.object({
     type: z.literal('dividend'),
     cashAccountId: z.string(),
-    cashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    cashAmount: bigNumberSchema,
     assetId: z.string(),
     assetAccountId: z.string(),
-    assetAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
-    taxCashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    assetAmount: bigNumberSchema,
+    taxCashAmount: bigNumberSchema,
   }),
   z.object({
     type: z.literal('tax'),
     cashAccountId: z.string(),
-    taxCashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    taxCashAmount: bigNumberSchema,
   }),
   z.object({
     type: z.literal('fee'),
     cashAccountId: z.string(),
-    feeCashAmount: z.string().regex(/^\d+(?:\.\d+)?$/),
+    feeCashAmount: bigNumberSchema,
   }),
 ])
 
@@ -162,48 +163,50 @@ export function createEmptyTransaction(): Omit<Transaction, 'data'> {
 }
 
 export function createEmptyTransactionData(type: TransactionType, previousData?: TransactionData): TransactionData {
-  const prev = (key: string): string | undefined => (previousData as any)?.[key] || undefined
+  function prev<T>(key: string): T | undefined {
+    return ((previousData as any)?.[key] as T) || undefined
+  }
   switch (type) {
     case 'cashDeposit':
       return {
         type: 'cashDeposit',
         cashAccountId: prev('cashAccountId') || '',
-        cashAmount: prev('cashAmount') || '',
+        cashAmount: prev('cashAmount') || BigNumber(0),
       }
     case 'cashWithdrawal':
       return {
         type: 'cashWithdrawal',
         cashAccountId: prev('cashAccountId') || '',
-        cashAmount: prev('cashAmount') || '',
+        cashAmount: prev('cashAmount') || BigNumber(0),
       }
     case 'cashTransfer':
       return {
         type: 'cashTransfer',
         toCashAccountId: prev('toCashAccountId') || '',
         fromCashAccountId: prev('fromCashAccountId') || '',
-        cashAmount: prev('cashAmount') || '',
-        feeCashAmount: prev('feeCashAmount') || '',
+        cashAmount: prev('cashAmount') || BigNumber(0),
+        feeCashAmount: prev('feeCashAmount') || BigNumber(0),
       }
     case 'assetBuy':
       return {
         type: 'assetBuy',
         assetAccountId: prev('assetAccountId') || '',
         assetId: prev('assetId') || '',
-        assetAmount: prev('assetAmount') || '',
+        assetAmount: prev('assetAmount') || BigNumber(0),
         cashAccountId: prev('cashAccountId') || '',
-        cashAmount: prev('cashAmount') || '',
-        feeCashAmount: prev('feeCashAmount') || '',
+        cashAmount: prev('cashAmount') || BigNumber(0),
+        feeCashAmount: prev('feeCashAmount') || BigNumber(0),
       }
     case 'assetSell':
       return {
         type: 'assetSell',
         assetAccountId: prev('assetAccountId') || '',
         assetId: prev('assetId') || '',
-        assetAmount: prev('assetAmount') || '',
+        assetAmount: prev('assetAmount') || BigNumber(0),
         cashAccountId: prev('cashAccountId') || '',
-        cashAmount: prev('cashAmount') || '',
-        feeCashAmount: prev('feeCashAmount') || '',
-        taxCashAmount: prev('taxCashAmount') || '',
+        cashAmount: prev('cashAmount') || BigNumber(0),
+        feeCashAmount: prev('feeCashAmount') || BigNumber(0),
+        taxCashAmount: prev('taxCashAmount') || BigNumber(0),
       }
     case 'assetTransfer':
       return {
@@ -211,53 +214,53 @@ export function createEmptyTransactionData(type: TransactionType, previousData?:
         fromAssetAccountId: prev('fromAssetAccountId') || '',
         toAssetAccountId: prev('toAssetAccountId') || '',
         assetId: prev('assetId') || '',
-        assetAmount: prev('assetAmount') || '',
-        feeAssetAmount: prev('feeAssetAmount') || '',
+        assetAmount: prev('assetAmount') || BigNumber(0),
+        feeAssetAmount: prev('feeAssetAmount') || BigNumber(0),
       }
     case 'assetDeposit':
       return {
         type: 'assetDeposit',
         assetAccountId: prev('assetAccountId') || '',
         assetId: prev('assetId') || '',
-        assetAmount: prev('assetAmount') || '',
-        cashAmount: prev('cashAmount') || '',
+        assetAmount: prev('assetAmount') || BigNumber(0),
+        cashAmount: prev('cashAmount') || BigNumber(0),
       }
     case 'assetWithdrawal':
       return {
         type: 'assetWithdrawal',
         assetAccountId: prev('assetAccountId') || '',
         assetId: prev('assetId') || '',
-        assetAmount: prev('assetAmount') || '',
-        cashAmount: prev('cashAmount') || '',
+        assetAmount: prev('assetAmount') || BigNumber(0),
+        cashAmount: prev('cashAmount') || BigNumber(0),
       }
     case 'interest':
       return {
         type: 'interest',
         cashAccountId: prev('cashAccountId') || '',
-        cashAmount: prev('cashAmount') || '',
-        taxCashAmount: prev('taxCashAmount') || '',
+        cashAmount: prev('cashAmount') || BigNumber(0),
+        taxCashAmount: prev('taxCashAmount') || BigNumber(0),
       }
     case 'dividend':
       return {
         type: 'dividend',
         cashAccountId: prev('cashAccountId') || '',
-        cashAmount: prev('cashAmount') || '',
+        cashAmount: prev('cashAmount') || BigNumber(0),
         assetAccountId: prev('assetAccountId') || '',
         assetId: prev('assetId') || '',
-        assetAmount: prev('assetAmount') || '',
-        taxCashAmount: prev('taxCashAmount') || '',
+        assetAmount: prev('assetAmount') || BigNumber(0),
+        taxCashAmount: prev('taxCashAmount') || BigNumber(0),
       }
     case 'tax':
       return {
         type: 'tax',
         cashAccountId: prev('cashAccountId') || '',
-        taxCashAmount: prev('taxCashAmount') || prev('feeCashAmount') || '',
+        taxCashAmount: prev('taxCashAmount') || prev('feeCashAmount') || BigNumber(0),
       }
     case 'fee':
       return {
         type: 'fee',
         cashAccountId: prev('cashAccountId') || '',
-        feeCashAmount: prev('feeCashAmount') || prev('taxCashAmount') || '',
+        feeCashAmount: prev('feeCashAmount') || prev('taxCashAmount') || BigNumber(0),
       }
   }
 }

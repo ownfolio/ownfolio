@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { bigNumberSchema, dateStringSchema, timeStringSchema } from './utils'
+import { bigNumberSchema, dateStringSchema, timeStringSchema } from '../utils/schemas'
 
 export const openPositionSchema = z.object({
   state: z.literal('open'),

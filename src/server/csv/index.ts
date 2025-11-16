@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js'
 import { parse } from 'csv-parse/sync'
 
 import { rootCurrency } from '../../shared/models/Currency'
@@ -40,74 +41,74 @@ export async function exportTransactionsCsv(db: Database, userId: string): Promi
           return {
             FromCashAccount: getAccountName(data.fromCashAccountId),
             ToCashAccount: getAccountName(data.toCashAccountId),
-            CashAmount: data.cashAmount,
+            CashAmount: data.cashAmount.toString(),
             FeeCashAmount: data.feeCashAmount.toString(),
           }
         case 'assetBuy':
           return {
             AssetAccount: getAccountName(data.assetAccountId),
             Asset: getAssetName(data.assetId),
-            AssetAmount: data.assetAmount,
+            AssetAmount: data.assetAmount.toString(),
             CashAccount: getAccountName(data.cashAccountId),
-            CashAmount: data.cashAmount,
-            FeeCashAmount: data.feeCashAmount,
+            CashAmount: data.cashAmount.toString(),
+            FeeCashAmount: data.feeCashAmount.toString(),
           }
         case 'assetSell':
           return {
             AssetAccount: getAccountName(data.assetAccountId),
             Asset: getAssetName(data.assetId),
-            AssetAmount: data.assetAmount,
+            AssetAmount: data.assetAmount.toString(),
             CashAccount: getAccountName(data.cashAccountId),
-            CashAmount: data.cashAmount,
-            FeeCashAmount: data.feeCashAmount,
-            TaxCashAmount: data.taxCashAmount,
+            CashAmount: data.cashAmount.toString(),
+            FeeCashAmount: data.feeCashAmount.toString(),
+            TaxCashAmount: data.taxCashAmount.toString(),
           }
         case 'assetDeposit':
           return {
             AssetAccount: getAccountName(data.assetAccountId),
             Asset: getAssetName(data.assetId),
-            AssetAmount: data.assetAmount,
-            CashAmount: data.cashAmount,
+            AssetAmount: data.assetAmount.toString(),
+            CashAmount: data.cashAmount.toString(),
           }
         case 'assetWithdrawal':
           return {
             AssetAccount: getAccountName(data.assetAccountId),
             Asset: getAssetName(data.assetId),
-            AssetAmount: data.assetAmount,
-            CashAmount: data.cashAmount,
+            AssetAmount: data.assetAmount.toString(),
+            CashAmount: data.cashAmount.toString(),
           }
         case 'assetTransfer':
           return {
             FromAssetAccount: getAccountName(data.fromAssetAccountId),
             ToAssetAccount: getAccountName(data.toAssetAccountId),
             Asset: getAssetName(data.assetId),
-            AssetAmount: data.assetAmount,
-            FeeAssetAmount: data.feeAssetAmount,
+            AssetAmount: data.assetAmount.toString(),
+            FeeAssetAmount: data.feeAssetAmount.toString(),
           }
         case 'interest':
           return {
             CashAccount: getAccountName(data.cashAccountId),
-            CashAmount: data.cashAmount,
-            TaxCashAmount: data.taxCashAmount,
+            CashAmount: data.cashAmount.toString(),
+            TaxCashAmount: data.taxCashAmount.toString(),
           }
         case 'dividend':
           return {
             CashAccount: getAccountName(data.cashAccountId),
-            CashAmount: data.cashAmount,
+            CashAmount: data.cashAmount.toString(),
             AssetAccount: getAccountName(data.assetAccountId),
             Asset: getAssetName(data.assetId),
-            AssetAmount: data.assetAmount,
-            TaxCashAmount: data.taxCashAmount,
+            AssetAmount: data.assetAmount.toString(),
+            TaxCashAmount: data.taxCashAmount.toString(),
           }
         case 'tax':
           return {
             CashAccount: getAccountName(data.cashAccountId),
-            TaxCashAmount: data.taxCashAmount,
+            TaxCashAmount: data.taxCashAmount.toString(),
           }
         case 'fee':
           return {
             CashAccount: getAccountName(data.cashAccountId),
-            FeeCashAmount: data.feeCashAmount,
+            FeeCashAmount: data.feeCashAmount.toString(),
           }
       }
     })()
@@ -175,7 +176,7 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
           return {
             type: 'cashDeposit',
             cashAccountId: account.id,
-            cashAmount: csvDataRow.CashAmount,
+            cashAmount: BigNumber(csvDataRow.CashAmount),
           } as Extract<TransactionData, { type: 'cashDeposit' }>
         }
         case 'cashWithdrawal': {
@@ -183,7 +184,7 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
           return {
             type: 'cashWithdrawal',
             cashAccountId: account.id,
-            cashAmount: csvDataRow.CashAmount,
+            cashAmount: BigNumber(csvDataRow.CashAmount),
           } as Extract<TransactionData, { type: 'cashWithdrawal' }>
         }
         case 'cashTransfer': {
@@ -193,8 +194,8 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
             type: 'cashTransfer',
             fromCashAccountId: fromCashAccount.id,
             toCashAccountId: toCashAccount.id,
-            cashAmount: csvDataRow.CashAmount,
-            feeCashAmount: csvDataRow.FeeCashAmount,
+            cashAmount: BigNumber(csvDataRow.CashAmount),
+            feeCashAmount: BigNumber(csvDataRow.FeeCashAmount),
           } as Extract<TransactionData, { type: 'cashTransfer' }>
         }
         case 'assetBuy': {
@@ -205,10 +206,10 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
             type: 'assetBuy',
             assetAccountId: assetAccount.id,
             assetId: asset.id,
-            assetAmount: csvDataRow.AssetAmount,
+            assetAmount: BigNumber(csvDataRow.AssetAmount),
             cashAccountId: cashAccount.id,
-            cashAmount: csvDataRow.CashAmount,
-            feeCashAmount: csvDataRow.FeeCashAmount,
+            cashAmount: BigNumber(csvDataRow.CashAmount),
+            feeCashAmount: BigNumber(csvDataRow.FeeCashAmount),
           } as Extract<TransactionData, { type: 'assetBuy' }>
         }
         case 'assetSell': {
@@ -219,11 +220,11 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
             type: 'assetSell',
             assetAccountId: assetAccount.id,
             assetId: asset.id,
-            assetAmount: csvDataRow.AssetAmount,
+            assetAmount: BigNumber(csvDataRow.AssetAmount),
             cashAccountId: cashAccount.id,
-            cashAmount: csvDataRow.CashAmount,
-            feeCashAmount: csvDataRow.FeeCashAmount,
-            taxCashAmount: csvDataRow.TaxCashAmount,
+            cashAmount: BigNumber(csvDataRow.CashAmount),
+            feeCashAmount: BigNumber(csvDataRow.FeeCashAmount),
+            taxCashAmount: BigNumber(csvDataRow.TaxCashAmount),
           } as Extract<TransactionData, { type: 'assetSell' }>
         }
         case 'assetDeposit': {
@@ -233,8 +234,8 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
             type: 'assetDeposit',
             assetAccountId: assetAccount.id,
             assetId: asset.id,
-            assetAmount: csvDataRow.AssetAmount,
-            cashAmount: csvDataRow.CashAmount,
+            assetAmount: BigNumber(csvDataRow.AssetAmount),
+            cashAmount: BigNumber(csvDataRow.CashAmount),
           } as Extract<TransactionData, { type: 'assetDeposit' }>
         }
         case 'assetWithdrawal': {
@@ -244,8 +245,8 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
             type: 'assetWithdrawal',
             assetAccountId: assetAccount.id,
             assetId: asset.id,
-            assetAmount: csvDataRow.AssetAmount,
-            cashAmount: csvDataRow.CashAmount,
+            assetAmount: BigNumber(csvDataRow.AssetAmount),
+            cashAmount: BigNumber(csvDataRow.CashAmount),
           } as Extract<TransactionData, { type: 'assetWithdrawal' }>
         }
         case 'assetTransfer': {
@@ -257,8 +258,8 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
             fromAssetAccountId: fromAssetAccount.id,
             toAssetAccountId: toAssetAccount.id,
             assetId: asset.id,
-            assetAmount: csvDataRow.AssetAmount,
-            feeAssetAmount: csvDataRow.FeeAssetAmount,
+            assetAmount: BigNumber(csvDataRow.AssetAmount),
+            feeAssetAmount: BigNumber(csvDataRow.FeeAssetAmount),
           } as Extract<TransactionData, { type: 'assetTransfer' }>
         }
         case 'interest': {
@@ -266,8 +267,8 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
           return {
             type: 'interest',
             cashAccountId: cashAccount.id,
-            cashAmount: csvDataRow.CashAmount,
-            taxCashAmount: csvDataRow.TaxCashAmount,
+            cashAmount: BigNumber(csvDataRow.CashAmount),
+            taxCashAmount: BigNumber(csvDataRow.TaxCashAmount),
           } as Extract<TransactionData, { type: 'interest' }>
         }
         case 'dividend': {
@@ -277,11 +278,11 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
           return {
             type: 'dividend',
             cashAccountId: cashAccount.id,
-            cashAmount: csvDataRow.CashAmount,
+            cashAmount: BigNumber(csvDataRow.CashAmount),
             assetAccountId: assetAccount.id,
             assetId: asset.id,
-            assetAmount: csvDataRow.AssetAmount,
-            taxCashAmount: csvDataRow.TaxCashAmount,
+            assetAmount: BigNumber(csvDataRow.AssetAmount),
+            taxCashAmount: BigNumber(csvDataRow.TaxCashAmount),
           } as Extract<TransactionData, { type: 'dividend' }>
         }
         case 'tax': {
@@ -289,7 +290,7 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
           return {
             type: 'tax',
             cashAccountId: cashAccount.id,
-            taxCashAmount: csvDataRow.TaxCashAmount,
+            taxCashAmount: BigNumber(csvDataRow.TaxCashAmount),
           } as Extract<TransactionData, { type: 'tax' }>
         }
         case 'fee': {
@@ -297,7 +298,7 @@ export async function importTransactionsCsv(db: Database, userId: string, csvStr
           return {
             type: 'fee',
             cashAccountId: cashAccount.id,
-            feeCashAmount: csvDataRow.FeeCashAmount,
+            feeCashAmount: BigNumber(csvDataRow.FeeCashAmount),
           } as Extract<TransactionData, { type: 'fee' }>
         }
       }

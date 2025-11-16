@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js'
 import { expect, it } from 'vitest'
 
 import { currencies } from '../../shared/models/Currency'
@@ -31,95 +32,95 @@ it(
     await db.quotes.createOrUpdate({
       assetId: s1.id,
       date: '2020-01-01',
-      open: '20',
-      high: '40',
-      low: '10',
-      close: '30',
+      open: BigNumber('20'),
+      high: BigNumber('40'),
+      low: BigNumber('10'),
+      close: BigNumber('30'),
     })
     await db.quotes.createOrUpdate({
       assetId: s2.id,
       date: '2020-01-01',
-      open: '20',
-      high: '40',
-      low: '10',
-      close: '30',
+      open: BigNumber('20'),
+      high: BigNumber('40'),
+      low: BigNumber('10'),
+      close: BigNumber('30'),
     })
     await db.quotes.createOrUpdate({
       assetId: s1.id,
       date: '2020-02-01',
-      open: '30',
-      high: '50',
-      low: '20',
-      close: '40',
+      open: BigNumber('30'),
+      high: BigNumber('50'),
+      low: BigNumber('20'),
+      close: BigNumber('40'),
     })
     await db.quotes.createOrUpdate({
       assetId: s1.id,
       date: '2020-03-01',
-      open: '40',
-      high: '60',
-      low: '30',
-      close: '50',
+      open: BigNumber('40'),
+      high: BigNumber('60'),
+      low: BigNumber('30'),
+      close: BigNumber('50'),
     })
     await expect(db.quotes.listByAssetId(s1.id)).resolves.toEqual([
       {
         assetId: s1.id,
         date: '2020-01-01',
-        open: '20',
-        high: '40',
-        low: '10',
-        close: '30',
+        open: BigNumber('20'),
+        high: BigNumber('40'),
+        low: BigNumber('10'),
+        close: BigNumber('30'),
       },
       {
         assetId: s1.id,
         date: '2020-02-01',
-        open: '30',
-        high: '50',
-        low: '20',
-        close: '40',
+        open: BigNumber('30'),
+        high: BigNumber('50'),
+        low: BigNumber('20'),
+        close: BigNumber('40'),
       },
       {
         assetId: s1.id,
         date: '2020-03-01',
-        open: '40',
-        high: '60',
-        low: '30',
-        close: '50',
+        open: BigNumber('40'),
+        high: BigNumber('60'),
+        low: BigNumber('30'),
+        close: BigNumber('50'),
       },
     ])
     await db.quotes.createOrUpdate(
       {
         assetId: s1.id,
         date: '2020-03-01',
-        open: '41',
-        high: '61',
-        low: '31',
-        close: '51',
+        open: BigNumber('41'),
+        high: BigNumber('61'),
+        low: BigNumber('31'),
+        close: BigNumber('51'),
       },
       {
         assetId: s2.id,
         date: '2020-01-01',
-        open: '21',
-        high: '41',
-        low: '11',
-        close: '31',
+        open: BigNumber('21'),
+        high: BigNumber('41'),
+        low: BigNumber('11'),
+        close: BigNumber('31'),
       }
     )
     await expect(db.quotes.listLatestClosesByUserId(u.id)).resolves.toEqual([
       {
         assetId: s1.id,
         date: '2020-03-01',
-        open: '41',
-        high: '61',
-        low: '31',
-        close: '51',
+        open: BigNumber('41'),
+        high: BigNumber('61'),
+        low: BigNumber('31'),
+        close: BigNumber('51'),
       },
       {
         assetId: s2.id,
         date: '2020-01-01',
-        open: '21',
-        high: '41',
-        low: '11',
-        close: '31',
+        open: BigNumber('21'),
+        high: BigNumber('41'),
+        low: BigNumber('11'),
+        close: BigNumber('31'),
       },
     ])
     await expect(db.quotes.countForAssetId(s1.id)).resolves.toBe(3)
