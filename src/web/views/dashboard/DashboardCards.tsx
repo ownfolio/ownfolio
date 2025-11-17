@@ -1,7 +1,7 @@
 import { css } from '@linaria/core'
 import React from 'react'
 
-import { DashboardCard } from '../../../shared/models/DashboardCard'
+import { DashboardCard } from '../../../shared/models/Dashboard'
 import { Card } from '../../components/Card'
 import { LoadingCardSuspense } from '../../components/LoadingCardSuspense'
 import { DashboardCardChangeRenderer } from './cards/DashboardCardChangeRenderer'

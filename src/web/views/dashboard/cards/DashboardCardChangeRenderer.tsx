@@ -4,7 +4,7 @@ import BigNumber from 'bignumber.js'
 import React from 'react'
 
 import { rootCurrency } from '../../../../shared/models/Currency'
-import { DashboardCard } from '../../../../shared/models/DashboardCard'
+import { DashboardCard } from '../../../../shared/models/Dashboard'
 import { dateFormat, dateMinus, dateParse, dateStartOf } from '../../../../shared/utils/date'
 import { recordMap } from '../../../../shared/utils/record'
 import { rpcClient } from '../../../api'

@@ -2,7 +2,7 @@ import { css } from '@linaria/core'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
-import { DashboardCard } from '../../../../shared/models/DashboardCard'
+import { DashboardCard } from '../../../../shared/models/Dashboard'
 import { maxBy, minBy } from '../../../../shared/utils/array'
 import { dateMinus, dateParse, datePlus, dateStartOf, DateUnit } from '../../../../shared/utils/date'
 import { AutoSizer } from '../../../components/AutoSizer'
