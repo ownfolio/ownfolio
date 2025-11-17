@@ -5,6 +5,7 @@ import { logger } from '../logger'
 import { DatabaseAccounts } from './accounts'
 import { DatabaseAssets } from './assets'
 import { DatabaseAttachments } from './attachments'
+import { DatabaseDashboards } from './dashboards'
 import { DatabasePortfolios } from './portfolios'
 import { DatabaseQuotes } from './quotes'
 import { DatabaseTransactions } from './transactions'
@@ -20,6 +21,7 @@ export class Database {
   readonly transactions: DatabaseTransactions
   readonly quotes: DatabaseQuotes
   readonly attachments: DatabaseAttachments
+  readonly dashboards: DatabaseDashboards
 
   constructor(opts?: postgres.Options<{}>) {
     logger.info('Connecting to database')
@@ -62,6 +64,7 @@ export class Database {
     this.transactions = new DatabaseTransactions(this.sql)
     this.quotes = new DatabaseQuotes(this.sql)
     this.attachments = new DatabaseAttachments(this.sql)
+    this.dashboards = new DatabaseDashboards(this.sql)
   }
 
   async init(): Promise<void> {
@@ -91,6 +94,7 @@ export class Database {
       this.attachments.makeDerivationCacheExpiryOptional(sql)
     )
     await this.migrate('portfolios.addStatusColumn', sql => this.portfolios.addStatusColumn(sql))
+    await this.migrate('dashboards.init', sql => this.dashboards.init(sql))
     logger.info(`Finished database migrations`)
   }
 

@@ -1,7 +1,8 @@
 import { css } from '@linaria/core'
+import { useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
-import { DashboardCard } from '../../../shared/models/DashboardCard'
+import { rpcClient } from '../../api'
 import { Input } from '../../components/Input'
 import { LoadingCardSuspense } from '../../components/LoadingCardSuspense'
 import { ViewContainer } from '../../components/ViewContainer'
@@ -10,13 +11,10 @@ import { HoldingsTable } from './HoldingsTable'
 
 export const DashboardView: React.FC = () => {
   const [timetravel, setTimetravel] = React.useState<string | undefined>(undefined)
-  const cards: DashboardCard[] = [
-    { type: 'total' },
-    { type: 'chart', config: { type: 'profit', resolution: 'week', range: 'month', rangeAmount: 6 } },
-    { type: 'change', since: { type: 'toDate', interval: 'day' } },
-    { type: 'change', since: { type: 'toDate', interval: 'month' } },
-    { type: 'change', since: { type: 'toDate', interval: 'year' } },
-  ]
+  const { data: dashboard } = useSuspenseQuery({
+    queryKey: ['dashboard', 'default'],
+    queryFn: () => rpcClient.retrieveDefaultDashboard().then(r => r.data),
+  })
   return (
     <ViewContainer>
       <div className={stylesToolbar}>
@@ -27,11 +25,23 @@ export const DashboardView: React.FC = () => {
           onChange={event => setTimetravel(event.target.value || undefined)}
         />
       </div>
-      <DashboardCardsGrid cards={cards} timetravel={timetravel} />
-      <h2>Holdings</h2>
-      <LoadingCardSuspense>
-        <HoldingsTable timetravel={timetravel} />
-      </LoadingCardSuspense>
+      {dashboard.rows.map((row, rowIndex) => {
+        switch (row.type) {
+          case 'cards':
+            return <DashboardCardsGrid key={rowIndex} cards={row.cards} timetravel={timetravel} />
+          case 'holdings':
+            return (
+              <>
+                <h2>Holdings</h2>
+                <LoadingCardSuspense key={rowIndex}>
+                  <HoldingsTable timetravel={timetravel} />
+                </LoadingCardSuspense>
+              </>
+            )
+          default:
+            return null
+        }
+      })}
     </ViewContainer>
   )
 }

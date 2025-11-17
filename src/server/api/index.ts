@@ -11,6 +11,7 @@ import { createRpcV1Asset } from './asset'
 import { createRpcV1Attachment } from './attachment'
 import { createRpcV1Balance } from './balance'
 import { createRpcCtx, RpcCtx } from './context'
+import { createRpcV1Dashboard } from './dashboard'
 import { createRpcV1Evaluations } from './evaluations'
 import { createRpcV1Portfolio } from './portfolio'
 import { createRpcV1Quote } from './quote'
@@ -36,6 +37,7 @@ export function createRpcV1(database: Database, config: Config) {
     ...createRpcV1Attachment(database),
     ...createRpcV1Balance(database),
     ...createRpcV1Report(database),
+    ...createRpcV1Dashboard(database),
   }
 }
 
