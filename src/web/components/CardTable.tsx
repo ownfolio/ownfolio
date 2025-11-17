@@ -80,8 +80,8 @@ export const CardTable = React.forwardRef<HTMLTableElement, Props>(
       [expanded, expandedByDefault]
     )
     return (
-      <Card>
-        <table ref={ref} {...other} className={clsx(stylesRoot, className)}>
+      <Card className={stylesRoot}>
+        <table ref={ref} {...other} className={clsx(stylesTable, className)}>
           <thead>
             <tr>
               {showSubRows && <th className={stylesColumnExpandCollapse} />}
@@ -248,6 +248,11 @@ export const CardTableSubRow: React.FC<SubRowProps> = ({ columns, columnWidths, 
 }
 
 const stylesRoot = css`
+  container-type: inline-size;
+  container-name: card;
+`
+
+const stylesTable = css`
   width: 100%;
   border-collapse: collapse;
   border-radius: calc(var(--border-radius-small) + 2px);
@@ -308,7 +313,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 0,
       style: css`
-        @media only screen and (max-width: 99px) {
+        @container card (max-width: 99px) {
           display: none;
         }
       `,
@@ -316,7 +321,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 100,
       style: css`
-        @media only screen and (max-width: 199px) {
+        @container card (max-width: 199px) {
           display: none;
         }
       `,
@@ -324,7 +329,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 200,
       style: css`
-        @media only screen and (max-width: 299px) {
+        @container card (max-width: 299px) {
           display: none;
         }
       `,
@@ -332,7 +337,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 300,
       style: css`
-        @media only screen and (max-width: 399px) {
+        @container card (max-width: 399px) {
           display: none;
         }
       `,
@@ -340,7 +345,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 400,
       style: css`
-        @media only screen and (max-width: 499px) {
+        @container card (max-width: 499px) {
           display: none;
         }
       `,
@@ -348,7 +353,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 500,
       style: css`
-        @media only screen and (max-width: 599px) {
+        @container card (max-width: 599px) {
           display: none;
         }
       `,
@@ -356,7 +361,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 600,
       style: css`
-        @media only screen and (max-width: 699px) {
+        @container card (max-width: 699px) {
           display: none;
         }
       `,
@@ -364,7 +369,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 700,
       style: css`
-        @media only screen and (max-width: 799px) {
+        @container card (max-width: 799px) {
           display: none;
         }
       `,
@@ -372,7 +377,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 800,
       style: css`
-        @media only screen and (max-width: 899px) {
+        @container card (max-width: 899px) {
           display: none;
         }
       `,
@@ -380,7 +385,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 900,
       style: css`
-        @media only screen and (max-width: 999px) {
+        @container card (max-width: 999px) {
           display: none;
         }
       `,
@@ -388,7 +393,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 1000,
       style: css`
-        @media only screen and (max-width: 1099px) {
+        @container card (max-width: 1099px) {
           display: none;
         }
       `,
@@ -396,7 +401,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 1100,
       style: css`
-        @media only screen and (max-width: 1199px) {
+        @container card (max-width: 1199px) {
           display: none;
         }
       `,
@@ -404,7 +409,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 1200,
       style: css`
-        @media only screen and (max-width: 1299px) {
+        @container card (max-width: 1299px) {
           display: none;
         }
       `,
@@ -412,7 +417,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 1300,
       style: css`
-        @media only screen and (max-width: 1399px) {
+        @container card (max-width: 1399px) {
           display: none;
         }
       `,
@@ -420,7 +425,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 1400,
       style: css`
-        @media only screen and (max-width: 1499px) {
+        @container card (max-width: 1499px) {
           display: none;
         }
       `,
@@ -428,7 +433,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 1500,
       style: css`
-        @media only screen and (max-width: 1599px) {
+        @container card (max-width: 1599px) {
           display: none;
         }
       `,
@@ -436,7 +441,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 1600,
       style: css`
-        @media only screen and (max-width: 1699px) {
+        @container card (max-width: 1699px) {
           display: none;
         }
       `,
@@ -444,7 +449,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 1700,
       style: css`
-        @media only screen and (max-width: 1799px) {
+        @container card (max-width: 1799px) {
           display: none;
         }
       `,
@@ -452,7 +457,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 1800,
       style: css`
-        @media only screen and (max-width: 1899px) {
+        @container card (max-width: 1899px) {
           display: none;
         }
       `,
@@ -460,7 +465,7 @@ const stylesColumnHidden = (width: number) => {
     {
       width: 1900,
       style: css`
-        @media only screen and (max-width: 1999px) {
+        @container card (max-width: 1999px) {
           display: none;
         }
       `,

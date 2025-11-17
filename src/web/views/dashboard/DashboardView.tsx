@@ -31,12 +31,12 @@ export const DashboardView: React.FC = () => {
             return <DashboardCardsGrid key={rowIndex} cards={row.cards} timetravel={timetravel} />
           case 'holdings':
             return (
-              <>
+              <React.Fragment key={rowIndex}>
                 <h2>Holdings</h2>
-                <LoadingCardSuspense key={rowIndex}>
+                <LoadingCardSuspense>
                   <HoldingsTable timetravel={timetravel} />
                 </LoadingCardSuspense>
-              </>
+              </React.Fragment>
             )
           default:
             return null

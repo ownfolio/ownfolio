@@ -1,7 +1,7 @@
 const esbuild = require('esbuild')
-const esbuildLinaria = require('@linaria/esbuild')
 const fs = require('fs/promises')
 const path = require('path')
+const wyw = require('@wyw-in-js/esbuild')
 
 const environment = process.env.NODE_ENV || 'development'
 const production = environment === 'production'
@@ -25,7 +25,7 @@ const buildWeb = benchmark('buildWeb', async () => {
     sourcemap: true,
     minify: production,
     plugins: [
-      esbuildLinaria.default({
+      wyw.default({
         sourceMap: true,
         classNameSlug: !production ? (hash, title, args) => `${args.name}__${title}__${hash}` : undefined,
       }),
