@@ -1,12 +1,15 @@
 import postgres from 'postgres'
 
-import { Dashboard, dashboardSchema } from '../../shared/models/Dashboard'
+import { Dashboard, dashboardRowSchema, dashboardSchema } from '../../shared/models/Dashboard'
+import { arrayIgnoringErrorsSchema } from '../../shared/utils/schemas'
 import { DatabaseEntity } from './DatabaseEntity'
 import { randomId } from './id'
 
 export class DatabaseDashboards extends DatabaseEntity<Dashboard> {
   protected override table = 'dashboard'
-  protected override schema = dashboardSchema
+  protected override schema = dashboardSchema.extend({
+    rows: arrayIgnoringErrorsSchema(dashboardRowSchema),
+  })
 
   public async retriveUserIdAndKey(userId: string, key: string): Promise<Dashboard | undefined> {
     const rows = await this.sql`

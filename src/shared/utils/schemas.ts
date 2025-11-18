@@ -40,3 +40,19 @@ export const bigNumberSchema = z.codec(
     encode: bn => bn.toString(),
   }
 )
+
+export function arrayIgnoringErrorsSchema<S extends z.ZodTypeAny>(schema: S) {
+  return z.preprocess(elems => {
+    const result: z.infer<S>[] = []
+    if (!Array.isArray(elems)) {
+      return result
+    }
+    for (const elem of elems) {
+      const parsed = schema.safeParse(elem)
+      if (parsed.success) {
+        result.push(parsed.data)
+      }
+    }
+    return result
+  }, z.array(schema))
+}

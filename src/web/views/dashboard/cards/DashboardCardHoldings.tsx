@@ -2,21 +2,23 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import BigNumber from 'bignumber.js'
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { z } from 'zod'
 
-import { Balance } from '../../../shared/models/Balance'
-import { rootCurrency } from '../../../shared/models/Currency'
-import { dateFormat, dateParse, dateStartOf } from '../../../shared/utils/date'
-import { rpcClient } from '../../api'
-import { Amount } from '../../components/Amount'
-import { CardTable, TableDefinitionColumn, TableDefinitionRow, TableExpansionState } from '../../components/CardTable'
-import { useDialogs } from '../../components/DialogsContext'
-import { Percentage } from '../../components/Percentage'
-import { usePersistentState } from '../../hooks/usePersistentState'
-import { AccountDialog } from '../accounts/AccountDialog'
-import { PortfolioDialog } from '../portfolios/PortfolioDialog'
+import { Balance } from '../../../../shared/models/Balance'
+import { rootCurrency } from '../../../../shared/models/Currency'
+import { DashboardCardHoldings } from '../../../../shared/models/Dashboard'
+import { dateFormat, dateParse, dateStartOf } from '../../../../shared/utils/date'
+import { rpcClient } from '../../../api'
+import { Amount } from '../../../components/Amount'
+import { CardTable, TableDefinitionColumn, TableDefinitionRow } from '../../../components/CardTable'
+import { useDialogs } from '../../../components/DialogsContext'
+import { Percentage } from '../../../components/Percentage'
+import { AccountDialog } from '../../accounts/AccountDialog'
+import { PortfolioDialog } from '../../portfolios/PortfolioDialog'
+import type { DashboardCardFieldsProps, DashboardCardRendererProps } from './index'
 
-export const HoldingsTable: React.FC<{ timetravel?: string }> = ({ timetravel }) => {
+export const DashboardCardHoldingsRenderer: React.FC<DashboardCardRendererProps<DashboardCardHoldings>> = ({
+  timetravel,
+}) => {
   const navigate = useNavigate()
   const { openDialog } = useDialogs()
   const { data: portfolios } = useSuspenseQuery({
@@ -321,11 +323,9 @@ export const HoldingsTable: React.FC<{ timetravel?: string }> = ({ timetravel })
         }),
     ]
   }, [balances])
+  return <CardTable columns={columns} rows={rows} expandedByDefault />
+}
 
-  const expansion = usePersistentState<TableExpansionState>(
-    'dashboard.totalTable.expansion',
-    z.record(z.union([z.string(), z.number()]), z.boolean()),
-    {}
-  )
-  return <CardTable columns={columns} rows={rows} expansion={expansion} expandedByDefault />
+export const DashboardCardHoldingsFields: React.FC<DashboardCardFieldsProps<DashboardCardHoldings>> = () => {
+  return null
 }

@@ -35,13 +35,18 @@ function defaultDashboard(userId: string): Dashboard {
         type: 'cards',
         cards: [
           { type: 'total' },
-          { type: 'chart', config: { type: 'profit', resolution: 'week', range: 'month', rangeAmount: 6 } },
           { type: 'change', since: { type: 'toDate', interval: 'day' } },
           { type: 'change', since: { type: 'toDate', interval: 'month' } },
-          { type: 'change', since: { type: 'toDate', interval: 'year' } },
         ],
       },
-      { type: 'holdings' },
+      {
+        type: 'cards',
+        cards: [{ type: 'chart', config: { type: 'profit', resolution: 'week', range: 'month', rangeAmount: 6 } }],
+      },
+      {
+        type: 'cards',
+        cards: [{ type: 'holdings' }],
+      },
     ],
   }
 }

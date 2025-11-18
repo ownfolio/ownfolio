@@ -4,17 +4,20 @@ import BigNumber from 'bignumber.js'
 import React from 'react'
 
 import { rootCurrency } from '../../../../shared/models/Currency'
-import { DashboardCard } from '../../../../shared/models/Dashboard'
-import { dateFormat, dateMinus, dateParse, dateStartOf } from '../../../../shared/utils/date'
+import { DashboardCardChange } from '../../../../shared/models/Dashboard'
+import { dateFormat, dateMinus, dateParse, dateStartOf, DateUnit } from '../../../../shared/utils/date'
 import { recordMap } from '../../../../shared/utils/record'
 import { rpcClient } from '../../../api'
 import { Amount } from '../../../components/Amount'
+import { Label } from '../../../components/Label'
 import { Percentage } from '../../../components/Percentage'
+import { SelectDateUnit } from '../../../components/SelectDateUnit'
+import type { DashboardCardFieldsProps, DashboardCardRendererProps } from './index'
 
-export const DashboardCardChangeRenderer: React.FC<{
-  card: Extract<DashboardCard, { type: 'change' }>
-  timetravel?: string
-}> = ({ card, timetravel }) => {
+export const DashboardCardChangeRenderer: React.FC<DashboardCardRendererProps<DashboardCardChange>> = ({
+  card,
+  timetravel,
+}) => {
   const { data: evaluations } = useSuspenseQuery({
     queryKey: ['dashboardCardChange', JSON.stringify(card), timetravel],
     queryFn: async () => {
@@ -81,6 +84,24 @@ export const DashboardCardChangeRenderer: React.FC<{
         <Percentage percentage={changePercentage} decimals={2} signChar signColor signIcon />
       </div>
     </div>
+  )
+}
+
+export const DashboardCardChangeFields: React.FC<DashboardCardFieldsProps<DashboardCardChange>> = ({
+  value,
+  onChange,
+}) => {
+  return (
+    <>
+      <Label text="Since">
+        <SelectDateUnit
+          value={value.since.interval}
+          onChange={event =>
+            onChange({ ...value, since: { ...value.since, interval: event.target.value as DateUnit } })
+          }
+        />
+      </Label>
+    </>
   )
 }
 

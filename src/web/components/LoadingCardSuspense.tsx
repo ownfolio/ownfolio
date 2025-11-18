@@ -1,18 +1,20 @@
 import { css } from '@linaria/core'
+import clsx from 'clsx'
 import React from 'react'
 
 import { Card } from './Card'
 import { Loading } from './Loading'
 
 interface Props {
+  className?: string
   children: React.ReactNode
 }
 
-export const LoadingCardSuspense: React.FC<Props> = ({ children }) => {
+export const LoadingCardSuspense: React.FC<Props> = ({ className, children }) => {
   return (
     <React.Suspense
       fallback={
-        <Card className={styles}>
+        <Card className={clsx(styles, className)}>
           <Loading />
         </Card>
       }

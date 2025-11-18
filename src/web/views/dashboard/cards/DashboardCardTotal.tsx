@@ -4,17 +4,18 @@ import BigNumber from 'bignumber.js'
 import React from 'react'
 
 import { rootCurrency } from '../../../../shared/models/Currency'
-import { DashboardCard } from '../../../../shared/models/Dashboard'
+import { DashboardCardTotal } from '../../../../shared/models/Dashboard'
 import { dateFormat, dateParse, dateStartOf } from '../../../../shared/utils/date'
 import { recordMap } from '../../../../shared/utils/record'
 import { rpcClient } from '../../../api'
 import { Amount } from '../../../components/Amount'
 import { Percentage } from '../../../components/Percentage'
+import type { DashboardCardFieldsProps, DashboardCardRendererProps } from './index'
 
-export const DashboardCardTotalRenderer: React.FC<{
-  card: Extract<DashboardCard, { type: 'total' }>
-  timetravel?: string
-}> = ({ card, timetravel }) => {
+export const DashboardCardTotalRenderer: React.FC<DashboardCardRendererProps<DashboardCardTotal>> = ({
+  card,
+  timetravel,
+}) => {
   const { data: evaluations } = useSuspenseQuery({
     queryKey: ['dashboardCardTotal', JSON.stringify(card), timetravel],
     queryFn: async () => {
@@ -70,6 +71,10 @@ export const DashboardCardTotalRenderer: React.FC<{
       </div>
     </div>
   )
+}
+
+export const DashboardCardTotalFields: React.FC<DashboardCardFieldsProps<DashboardCardTotal>> = () => {
+  return null
 }
 
 const stylesCardTitle = css`
