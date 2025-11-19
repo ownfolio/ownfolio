@@ -1,4 +1,3 @@
-import { css } from '@linaria/core'
 import React from 'react'
 
 import { Account } from '../../../shared/models/Account'
@@ -31,7 +30,6 @@ export const DashboardRowDialog: React.FC<Props> = ({ row: _row, onChangeRow, cl
           setState(undefined)
         }
       }}
-      className={stylesRoot}
     >
       <Label text="Type">
         <SelectDashboardRowType
@@ -49,7 +47,3 @@ export const DashboardRowDialog: React.FC<Props> = ({ row: _row, onChangeRow, cl
     </Form>
   )
 }
-
-const stylesRoot = css`
-  min-width: 400px;
-`

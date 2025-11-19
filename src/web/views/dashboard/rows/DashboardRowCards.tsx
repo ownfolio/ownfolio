@@ -126,7 +126,7 @@ export const DashboardRowCardsFields: React.FC<DashboardRowFieldsProps<Dashboard
 const stylesGrid = css`
   display: grid;
   gap: var(--spacing-large);
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(calc(min(350px, calc(100vw - var(--spacing-large) * 2))), 1fr));
 `
 
 const stylesCard = css`

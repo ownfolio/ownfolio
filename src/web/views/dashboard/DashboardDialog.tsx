@@ -43,7 +43,6 @@ export const DashboardDialog: React.FC<Props> = ({ dashboard: _dashboard, onChan
           setState(undefined)
         }
       }}
-      className={stylesRoot}
     >
       {rowsAndAdders.map(rowOrAdder => {
         switch (rowOrAdder.type) {
@@ -114,10 +113,6 @@ export const DashboardDialog: React.FC<Props> = ({ dashboard: _dashboard, onChan
     </Form>
   )
 }
-
-const stylesRoot = css`
-  min-width: 400px;
-`
 
 const stylesRow = css`
   border-radius: var(--border-radius-small);
