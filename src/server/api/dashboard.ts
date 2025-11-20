@@ -32,20 +32,19 @@ function defaultDashboard(userId: string): Dashboard {
     key: 'default',
     rows: [
       {
-        type: 'cards',
-        cards: [
-          { type: 'total' },
-          { type: 'change', since: { type: 'toDate', interval: 'day' } },
-          { type: 'change', since: { type: 'toDate', interval: 'month' } },
+        columns: [
+          { type: 'totalCard' },
+          { type: 'changeCard', since: { type: 'toDate', interval: 'day' } },
+          { type: 'changeCard', since: { type: 'toDate', interval: 'month' } },
         ],
       },
       {
-        type: 'cards',
-        cards: [{ type: 'chart', config: { type: 'profit', resolution: 'week', range: 'month', rangeAmount: 6 } }],
+        columns: [
+          { type: 'chartCard', config: { type: 'profit', resolution: 'week', range: 'month', rangeAmount: 6 } },
+        ],
       },
       {
-        type: 'cards',
-        cards: [{ type: 'holdings' }],
+        columns: [{ type: 'holdingsTableCard' }],
       },
     ],
   }

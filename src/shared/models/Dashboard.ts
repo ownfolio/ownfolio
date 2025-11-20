@@ -1,17 +1,18 @@
 import { z } from 'zod'
 
 import { dateUnitSchema } from '../utils/date'
+import { arrayIgnoringErrorsSchema } from '../utils/schemas'
 
-export const dashboardCardSchema = z.discriminatedUnion('type', [
+export const dashboardElementSchema = z.discriminatedUnion('type', [
   z.object({
-    type: z.literal('total'),
+    type: z.literal('totalCard'),
   }),
   z.object({
-    type: z.literal('change'),
+    type: z.literal('changeCard'),
     since: z.discriminatedUnion('type', [z.object({ type: z.literal('toDate'), interval: dateUnitSchema })]),
   }),
   z.object({
-    type: z.literal('chart'),
+    type: z.literal('chartCard'),
     config: z.discriminatedUnion('type', [
       z.object({
         type: z.literal('total'),
@@ -28,46 +29,41 @@ export const dashboardCardSchema = z.discriminatedUnion('type', [
     ]),
   }),
   z.object({
-    type: z.literal('holdings'),
+    type: z.literal('holdingsTableCard'),
   }),
 ])
 
-export type DashboardCard = z.infer<typeof dashboardCardSchema>
+export type DashboardElement = z.infer<typeof dashboardElementSchema>
 
-export type DashboardCardType = DashboardCard['type']
+export type DashboardElementType = DashboardElement['type']
 
-export type DashboardCardTotal = Extract<DashboardCard, { type: 'total' }>
+export type DashboardElementTotalCard = Extract<DashboardElement, { type: 'totalCard' }>
 
-export type DashboardCardChange = Extract<DashboardCard, { type: 'change' }>
+export type DashboardElementChangeCard = Extract<DashboardElement, { type: 'changeCard' }>
 
-export type DashboardCardChart = Extract<DashboardCard, { type: 'chart' }>
+export type DashboardElementChartCard = Extract<DashboardElement, { type: 'chartCard' }>
 
-export type DashboardCardHoldings = Extract<DashboardCard, { type: 'holdings' }>
+export type DashboardElementHoldingsTableCard = Extract<DashboardElement, { type: 'holdingsTableCard' }>
 
-export const dashboardRowSchema = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('headline'),
-    content: z.string(),
-  }),
-  z.object({
-    type: z.literal('cards'),
-    cards: z.array(dashboardCardSchema),
-  }),
-])
+export const dashboardRowSchema = z.object({
+  columns: z.array(dashboardElementSchema).max(4),
+})
 
 export type DashboardRow = z.infer<typeof dashboardRowSchema>
-
-export type DashboardRowType = DashboardRow['type']
-
-export type DashboardRowHeadline = Extract<DashboardRow, { type: 'headline' }>
-
-export type DashboardRowCards = Extract<DashboardRow, { type: 'cards' }>
 
 export const dashboardSchema = z.object({
   id: z.string(),
   userId: z.string(),
   key: z.string(),
   rows: z.array(dashboardRowSchema),
+})
+
+export const dashboardSchemaForgiving = dashboardSchema.extend({
+  rows: arrayIgnoringErrorsSchema(
+    dashboardRowSchema.extend({
+      columns: arrayIgnoringErrorsSchema(dashboardElementSchema),
+    })
+  ),
 })
 
 export type Dashboard = z.infer<typeof dashboardSchema>
@@ -81,24 +77,19 @@ export function createEmptyDashboard(): Dashboard {
   }
 }
 
-export function createEmptyDashboardRow(type: DashboardRowType): DashboardRow {
-  switch (type) {
-    case 'headline':
-      return { type: 'headline', content: '' }
-    case 'cards':
-      return { type: 'cards', cards: [] }
-  }
+export function createEmptyDashboardRow(): DashboardRow {
+  return { columns: [] }
 }
 
-export function createEmptyDashboardCard(type: DashboardCardType): DashboardCard {
+export function createEmptyDashboardElement(type: DashboardElementType = 'totalCard'): DashboardElement {
   switch (type) {
-    case 'total':
-      return { type: 'total' }
-    case 'change':
-      return { type: 'change', since: { type: 'toDate', interval: 'year' } }
-    case 'chart':
-      return { type: 'chart', config: { type: 'total', resolution: 'week', range: 'year', rangeAmount: 1 } }
-    case 'holdings':
-      return { type: 'holdings' }
+    case 'totalCard':
+      return { type: 'totalCard' }
+    case 'changeCard':
+      return { type: 'changeCard', since: { type: 'toDate', interval: 'year' } }
+    case 'chartCard':
+      return { type: 'chartCard', config: { type: 'total', resolution: 'week', range: 'year', rangeAmount: 1 } }
+    case 'holdingsTableCard':
+      return { type: 'holdingsTableCard' }
   }
 }

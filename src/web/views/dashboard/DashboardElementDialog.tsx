@@ -1,29 +1,30 @@
 import React from 'react'
 
 import { Account } from '../../../shared/models/Account'
-import { createEmptyDashboardRow, DashboardRow, DashboardRowType } from '../../../shared/models/Dashboard'
+import { createEmptyDashboardElement, DashboardElement, DashboardElementType } from '../../../shared/models/Dashboard'
 import { Button } from '../../components/Button'
 import { DialogContentProps } from '../../components/DialogsContext'
 import { Form } from '../../components/Form'
 import { Label } from '../../components/Label'
-import { SelectDashboardRowType } from '../../components/SelectDashboardRowType'
-import { DashboardRowFields } from './rows'
+import { SelectDashboardElementType } from '../../components/SelectDashboardElementType'
+import { DashboardElementFieldsRenderer } from './elements'
 
 interface Props extends DialogContentProps<Account> {
-  row: DashboardRow
-  onChangeRow: (row: DashboardRow) => Promise<void> | void
+  element: DashboardElement
+  onChangeElement: (element: DashboardElement) => Promise<void> | void
 }
 
-export const DashboardRowDialog: React.FC<Props> = ({ row: _row, onChangeRow, closeDialog }) => {
-  const [row, setRow] = React.useState(_row)
+export const DashboardElementDialog: React.FC<Props> = ({ element: _element, onChangeElement, closeDialog }) => {
+  const [element, setElement] = React.useState(_element)
   const [state, setState] = React.useState<'busy' | 'done' | undefined>(undefined)
+
   return (
     <Form
       onSubmit={async event => {
         event.preventDefault()
         try {
           setState('busy')
-          await onChangeRow(row)
+          await onChangeElement(element)
           setState('done')
           closeDialog(undefined)
         } finally {
@@ -31,13 +32,16 @@ export const DashboardRowDialog: React.FC<Props> = ({ row: _row, onChangeRow, cl
         }
       }}
     >
-      <Label text="Type">
-        <SelectDashboardRowType
-          value={row.type}
-          onChange={event => setRow(createEmptyDashboardRow(event.target.value as DashboardRowType))}
+      <Label text="Type" htmlFor="type">
+        <SelectDashboardElementType
+          id="type"
+          value={element.type}
+          onChange={event => setElement(createEmptyDashboardElement(event.target.value as DashboardElementType))}
+          required
+          autoFocus
         />
       </Label>
-      <DashboardRowFields row={row} onChangeRow={setRow} />
+      <DashboardElementFieldsRenderer element={element} onChangeElement={setElement} />
       <Button type="submit" variant="primary" busy={state === 'busy'} check={state === 'done'} disabled={!!state}>
         Save
       </Button>
