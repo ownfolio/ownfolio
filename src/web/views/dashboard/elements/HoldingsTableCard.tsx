@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { Balance } from '../../../../shared/models/Balance'
 import { rootCurrency } from '../../../../shared/models/Currency'
-import { DashboardCardHoldings } from '../../../../shared/models/Dashboard'
+import { DashboardElementHoldingsTableCard } from '../../../../shared/models/Dashboard'
 import { dateFormat, dateParse, dateStartOf } from '../../../../shared/utils/date'
 import { rpcClient } from '../../../api'
 import { Amount } from '../../../components/Amount'
@@ -14,9 +14,9 @@ import { useDialogs } from '../../../components/DialogsContext'
 import { Percentage } from '../../../components/Percentage'
 import { AccountDialog } from '../../accounts/AccountDialog'
 import { PortfolioDialog } from '../../portfolios/PortfolioDialog'
-import type { DashboardCardFieldsProps, DashboardCardRendererProps } from './index'
+import type { DashboardElementFieldsRendererProps, DashboardElementRendererProps } from './index'
 
-export const DashboardCardHoldingsRenderer: React.FC<DashboardCardRendererProps<DashboardCardHoldings>> = ({
+export const HoldingsTableCardRenderer: React.FC<DashboardElementRendererProps<DashboardElementHoldingsTableCard>> = ({
   timetravel,
 }) => {
   const navigate = useNavigate()
@@ -326,6 +326,8 @@ export const DashboardCardHoldingsRenderer: React.FC<DashboardCardRendererProps<
   return <CardTable columns={columns} rows={rows} expandedByDefault />
 }
 
-export const DashboardCardHoldingsFields: React.FC<DashboardCardFieldsProps<DashboardCardHoldings>> = () => {
+export const HoldingsTableCardFieldsRenderer: React.FC<
+  DashboardElementFieldsRendererProps<DashboardElementHoldingsTableCard>
+> = () => {
   return null
 }

@@ -4,20 +4,20 @@ import BigNumber from 'bignumber.js'
 import React from 'react'
 
 import { rootCurrency } from '../../../../shared/models/Currency'
-import { DashboardCardTotal } from '../../../../shared/models/Dashboard'
+import { DashboardElementTotalCard } from '../../../../shared/models/Dashboard'
 import { dateFormat, dateParse, dateStartOf } from '../../../../shared/utils/date'
 import { recordMap } from '../../../../shared/utils/record'
 import { rpcClient } from '../../../api'
 import { Amount } from '../../../components/Amount'
+import { Card } from '../../../components/Card'
 import { Percentage } from '../../../components/Percentage'
-import type { DashboardCardFieldsProps, DashboardCardRendererProps } from './index'
+import type { DashboardElementFieldsRendererProps, DashboardElementRendererProps } from './index'
 
-export const DashboardCardTotalRenderer: React.FC<DashboardCardRendererProps<DashboardCardTotal>> = ({
-  card,
+export const TotalCardRenderer: React.FC<DashboardElementRendererProps<DashboardElementTotalCard>> = ({
   timetravel,
 }) => {
   const { data: evaluations } = useSuspenseQuery({
-    queryKey: ['dashboardCardTotal', JSON.stringify(card), timetravel],
+    queryKey: ['dashboardElementTotalCard', timetravel],
     queryFn: async () => {
       const now = !timetravel ? new Date() : dateParse(timetravel)
       const raw = await rpcClient
@@ -50,30 +50,32 @@ export const DashboardCardTotalRenderer: React.FC<DashboardCardRendererProps<Das
   const profitPercentage = profit.dividedBy(deposit).multipliedBy(100)
 
   return (
-    <div className={stylesCardContent}>
-      <div className={stylesCardTitle}>Total</div>
-      <div>
-        <Amount amount={total} denomination={rootCurrency.denomination} symbol={rootCurrency.symbol} abbreviate />
+    <Card>
+      <div className={stylesCardContent}>
+        <div className={stylesCardTitle}>Total</div>
+        <div>
+          <Amount amount={total} denomination={rootCurrency.denomination} symbol={rootCurrency.symbol} abbreviate />
+        </div>
+        <div>
+          <Amount
+            amount={profit}
+            denomination={rootCurrency.denomination}
+            symbol={rootCurrency.symbol}
+            abbreviate
+            signColor
+            signChar
+            signIcon
+          />
+        </div>
+        <div>
+          <Percentage percentage={profitPercentage} decimals={2} signChar signColor signIcon />
+        </div>
       </div>
-      <div>
-        <Amount
-          amount={profit}
-          denomination={rootCurrency.denomination}
-          symbol={rootCurrency.symbol}
-          abbreviate
-          signColor
-          signChar
-          signIcon
-        />
-      </div>
-      <div>
-        <Percentage percentage={profitPercentage} decimals={2} signChar signColor signIcon />
-      </div>
-    </div>
+    </Card>
   )
 }
 
-export const DashboardCardTotalFields: React.FC<DashboardCardFieldsProps<DashboardCardTotal>> = () => {
+export const TotalCardFieldsRenderer: React.FC<DashboardElementFieldsRendererProps<DashboardElementTotalCard>> = () => {
   return null
 }
 

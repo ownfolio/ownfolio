@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { DashboardCardType } from '../../shared/models/Dashboard'
+import { DashboardElementType } from '../../shared/models/Dashboard'
 import { Select } from './Select'
 
 type Props = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement> & {
@@ -8,32 +8,32 @@ type Props = React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElemen
   clearable?: boolean
 }
 
-export const SelectDashboardCardType = React.forwardRef<HTMLSelectElement, Props>(
+export const SelectDashboardElementType = React.forwardRef<HTMLSelectElement, Props>(
   ({ value, onChange, emptyLabel = '-', clearable, className, ...other }, ref: any) => {
     const selectProps = React.useMemo(() => {
       return {
         optionGroups: [
           {
             id: 'all',
-            label: 'Card type',
+            label: 'Element type',
             options: [
               {
-                value: 'total',
-                label: 'Total',
+                value: 'totalCard',
+                label: 'Total card',
               },
               {
-                value: 'change',
-                label: 'Change',
+                value: 'changeCard',
+                label: 'Change card',
               },
               {
-                value: 'chart',
-                label: 'Chart',
+                value: 'chartCard',
+                label: 'Chart card',
               },
               {
-                value: 'holdings',
-                label: 'Holdings',
+                value: 'holdingsTableCard',
+                label: 'Holdings table card',
               },
-            ] satisfies { value: DashboardCardType; label: string }[],
+            ] satisfies { value: DashboardElementType; label: string }[],
           },
         ],
         emptyLabel,

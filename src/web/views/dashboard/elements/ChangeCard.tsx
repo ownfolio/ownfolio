@@ -4,29 +4,30 @@ import BigNumber from 'bignumber.js'
 import React from 'react'
 
 import { rootCurrency } from '../../../../shared/models/Currency'
-import { DashboardCardChange } from '../../../../shared/models/Dashboard'
+import { DashboardElementChangeCard } from '../../../../shared/models/Dashboard'
 import { dateFormat, dateMinus, dateParse, dateStartOf, DateUnit } from '../../../../shared/utils/date'
 import { recordMap } from '../../../../shared/utils/record'
 import { rpcClient } from '../../../api'
 import { Amount } from '../../../components/Amount'
+import { Card } from '../../../components/Card'
 import { Label } from '../../../components/Label'
 import { Percentage } from '../../../components/Percentage'
 import { SelectDateUnit } from '../../../components/SelectDateUnit'
-import type { DashboardCardFieldsProps, DashboardCardRendererProps } from './index'
+import type { DashboardElementFieldsRendererProps, DashboardElementRendererProps } from './index'
 
-export const DashboardCardChangeRenderer: React.FC<DashboardCardRendererProps<DashboardCardChange>> = ({
-  card,
+export const ChangeCardRenderer: React.FC<DashboardElementRendererProps<DashboardElementChangeCard>> = ({
+  element,
   timetravel,
 }) => {
   const { data: evaluations } = useSuspenseQuery({
-    queryKey: ['dashboardCardChange', JSON.stringify(card), timetravel],
+    queryKey: ['dashboardElementChangeCard', JSON.stringify(element), timetravel],
     queryFn: async () => {
       const now = !timetravel ? new Date() : dateParse(timetravel)
       const raw = await rpcClient
         .evaluateSummary({
           when: {
             type: 'dates',
-            dates: [dateMinus(dateStartOf(now, card.since.interval), 'day', 1), dateStartOf(now, 'day')].map(str =>
+            dates: [dateMinus(dateStartOf(now, element.since.interval), 'day', 1), dateStartOf(now, 'day')].map(str =>
               dateFormat(str, 'yyyy-MM-dd')
             ),
           },
@@ -54,7 +55,7 @@ export const DashboardCardChangeRenderer: React.FC<DashboardCardRendererProps<Da
   const change = total.minus(deposit).minus(totalToday.minus(depositToday))
   const changePercentage = change.dividedBy(totalToday).multipliedBy(100)
   const title = (() => {
-    switch (card.since.interval) {
+    switch (element.since.interval) {
       case 'day':
         return 'Today'
       case 'week':
@@ -67,37 +68,39 @@ export const DashboardCardChangeRenderer: React.FC<DashboardCardRendererProps<Da
   })()
 
   return (
-    <div className={stylesCardContent}>
-      <div className={stylesCardTitle}>{`Change (${title})`}</div>
-      <div>
-        <Amount
-          amount={change}
-          denomination={rootCurrency.denomination}
-          symbol={rootCurrency.symbol}
-          abbreviate
-          signColor
-          signChar
-          signIcon
-        />
+    <Card>
+      <div className={stylesCardContent}>
+        <div className={stylesCardTitle}>{`Change (${title})`}</div>
+        <div>
+          <Amount
+            amount={change}
+            denomination={rootCurrency.denomination}
+            symbol={rootCurrency.symbol}
+            abbreviate
+            signColor
+            signChar
+            signIcon
+          />
+        </div>
+        <div>
+          <Percentage percentage={changePercentage} decimals={2} signChar signColor signIcon />
+        </div>
       </div>
-      <div>
-        <Percentage percentage={changePercentage} decimals={2} signChar signColor signIcon />
-      </div>
-    </div>
+    </Card>
   )
 }
 
-export const DashboardCardChangeFields: React.FC<DashboardCardFieldsProps<DashboardCardChange>> = ({
-  value,
-  onChange,
+export const ChangeCardFieldRenderer: React.FC<DashboardElementFieldsRendererProps<DashboardElementChangeCard>> = ({
+  element,
+  onChangeElement,
 }) => {
   return (
     <>
       <Label text="Since">
         <SelectDateUnit
-          value={value.since.interval}
+          value={element.since.interval}
           onChange={event =>
-            onChange({ ...value, since: { ...value.since, interval: event.target.value as DateUnit } })
+            onChangeElement({ ...element, since: { ...element.since, interval: event.target.value as DateUnit } })
           }
         />
       </Label>
