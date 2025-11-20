@@ -10,6 +10,7 @@ import { recordMap } from '../../../../shared/utils/record'
 import { rpcClient } from '../../../api'
 import { Amount } from '../../../components/Amount'
 import { Card } from '../../../components/Card'
+import { Input } from '../../../components/Input'
 import { Label } from '../../../components/Label'
 import { Percentage } from '../../../components/Percentage'
 import { SelectDateUnit } from '../../../components/SelectDateUnit'
@@ -70,7 +71,7 @@ export const ChangeCardRenderer: React.FC<DashboardElementRendererProps<Dashboar
   return (
     <Card>
       <div className={stylesCardContent}>
-        <div className={stylesCardTitle}>{`Change (${title})`}</div>
+        {!element.hideTitle && <div className={stylesCardTitle}>{`Change (${title})`}</div>}
         <div>
           <Amount
             amount={change}
@@ -82,9 +83,11 @@ export const ChangeCardRenderer: React.FC<DashboardElementRendererProps<Dashboar
             signIcon
           />
         </div>
-        <div>
-          <Percentage percentage={changePercentage} decimals={2} signChar signColor signIcon />
-        </div>
+        {!element.hideRelativeChange && (
+          <div>
+            <Percentage percentage={changePercentage} decimals={2} signChar signColor signIcon />
+          </div>
+        )}
       </div>
     </Card>
   )
@@ -96,12 +99,30 @@ export const ChangeCardFieldRenderer: React.FC<DashboardElementFieldsRendererPro
 }) => {
   return (
     <>
-      <Label text="Since">
+      <Label text="Since" htmlFor="since">
         <SelectDateUnit
+          id="since"
           value={element.since.interval}
           onChange={event =>
             onChangeElement({ ...element, since: { ...element.since, interval: event.target.value as DateUnit } })
           }
+          required
+        />
+      </Label>
+      <Label text="Hide title" htmlFor="hideTitle" position="right">
+        <Input
+          id="hideTitle"
+          type="checkbox"
+          checked={element.hideTitle}
+          onChange={event => onChangeElement({ ...element, hideTitle: event.target.checked })}
+        />
+      </Label>
+      <Label text="Hide relative change" htmlFor="hideRelativeChange" position="right">
+        <Input
+          id="hideRelativeChange"
+          type="checkbox"
+          checked={element.hideRelativeChange}
+          onChange={event => onChangeElement({ ...element, hideRelativeChange: event.target.checked })}
         />
       </Label>
     </>

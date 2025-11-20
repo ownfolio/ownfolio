@@ -10,6 +10,7 @@ import { Card } from '../../../components/Card'
 import { Input } from '../../../components/Input'
 import { Label } from '../../../components/Label'
 import { Select } from '../../../components/Select'
+import { SelectAsset } from '../../../components/SelectAsset'
 import { SelectDateUnit } from '../../../components/SelectDateUnit'
 import { StockChart, StockChartViewport } from '../../../components/StockChart'
 import { usePrivacy } from '../../../privacy'
@@ -20,7 +21,7 @@ export const ChartCardRenderer: React.FC<DashboardElementRendererProps<Dashboard
   element,
   timetravel,
 }) => {
-  const config: ChartViewSeriesConfig = { type: element.config.type }
+  const config: ChartViewSeriesConfig = element.config
   const { data: baseSeries } = useSuspenseQuery({
     queryKey: ['dashboardElementChartCard', JSON.stringify(element), timetravel],
     queryFn: async () => {
@@ -74,10 +75,11 @@ export const ChartCardRenderer: React.FC<DashboardElementRendererProps<Dashboard
               height={height}
               showGrid
               enableMouseOver
-              showAxesInline
               privacy={privacy}
               series={series}
               viewport={viewport}
+              showLabels={!element.hideTitle}
+              showAxesInline={!element.hideAxis}
             />
           )}
         </AutoSizer>
@@ -113,6 +115,10 @@ const SelectDashboardElementChartCardConfigType = React.forwardRef<
               value: 'profit',
               label: 'Profit',
             },
+            {
+              value: 'asset',
+              label: 'Asset',
+            },
           ] satisfies { value: DashboardElementChartCard['config']['type']; label: string }[],
         },
       ],
@@ -129,8 +135,9 @@ export const ChartCardFieldsRenderer: React.FC<DashboardElementFieldsRendererPro
 }) => {
   return (
     <>
-      <Label text="Chart type">
+      <Label text="Chart type" htmlFor="type">
         <SelectDashboardElementChartCardConfigType
+          id="type"
           value={element.config.type}
           onChange={event =>
             onChangeElement({
@@ -140,6 +147,22 @@ export const ChartCardFieldsRenderer: React.FC<DashboardElementFieldsRendererPro
               ),
             })
           }
+        />
+      </Label>
+      <Label text="Hide title" htmlFor="hideTitle" position="right">
+        <Input
+          id="hideTitle"
+          type="checkbox"
+          checked={element.hideTitle}
+          onChange={event => onChangeElement({ ...element, hideTitle: event.target.checked })}
+        />
+      </Label>
+      <Label text="Hide axis" htmlFor="hideAxis" position="right">
+        <Input
+          id="hideAxis"
+          type="checkbox"
+          checked={element.hideAxis}
+          onChange={event => onChangeElement({ ...element, hideAxis: event.target.checked })}
         />
       </Label>
       <ChartCardFieldsConfigRenderer
@@ -159,24 +182,68 @@ const ChartCardFieldsConfigRenderer: React.FC<{
     case 'profit':
       return (
         <>
-          <Label text="Resolution">
+          <Label text="Resolution" htmlFor="resolution">
             <SelectDateUnit
+              id="resolution"
               value={config.resolution}
               onChange={event => onConfigChange({ ...config, resolution: event.target.value as DateUnit })}
+              required
             />
           </Label>
-          <Label text="Range">
+          <Label text="Range" htmlFor="range">
             <SelectDateUnit
+              id="range"
               value={config.range}
               onChange={event => onConfigChange({ ...config, range: event.target.value as DateUnit })}
+              required
             />
           </Label>
-          <Label text="Range amount">
+          <Label text="Range amount" htmlFor="rangeAmount">
             <Input
+              id="rangeAmount"
               type="number"
               min={1}
               value={config.rangeAmount}
               onChange={event => onConfigChange({ ...config, rangeAmount: event.target.valueAsNumber })}
+              required
+            />
+          </Label>
+        </>
+      )
+    case 'asset':
+      return (
+        <>
+          <Label text="Asset" htmlFor="assetId">
+            <SelectAsset
+              value={config.assetId}
+              onChange={event => onConfigChange({ ...config, assetId: event.target.value })}
+              required
+            />
+          </Label>
+          <Label text="Resolution" htmlFor="resolution">
+            <SelectDateUnit
+              id="resolution"
+              value={config.resolution}
+              onChange={event => onConfigChange({ ...config, resolution: event.target.value as DateUnit })}
+              required
+            />
+          </Label>
+          <Label text="Range" htmlFor="range">
+            <SelectDateUnit
+              id="range"
+              value={config.range}
+              onChange={event => onConfigChange({ ...config, range: event.target.value as DateUnit })}
+              required
+            />
+          </Label>
+          <Label text="Range amount" htmlFor="rangeAmount">
+            <Input
+              id="rangeAmount"
+              type="number"
+              min={1}
+              value={config.rangeAmount}
+              onChange={event => onConfigChange({ ...config, rangeAmount: event.target.valueAsNumber })}
+              required
             />
           </Label>
         </>
@@ -198,6 +265,14 @@ function createEmptyDashboardElementChartCardConfig(
     case 'profit':
       return {
         type: 'profit',
+        resolution: 'week',
+        range: 'year',
+        rangeAmount: 1,
+      }
+    case 'asset':
+      return {
+        type: 'asset',
+        assetId: '',
         resolution: 'week',
         range: 'year',
         rangeAmount: 1,

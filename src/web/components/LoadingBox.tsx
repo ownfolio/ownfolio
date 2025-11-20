@@ -17,6 +17,10 @@ const stylesRoot = css`
   animation-timing-function: ease-in-out;
   animation-delay: 1s;
 
+  display: grid;
+  align-items: center;
+  justify-content: center;
+
   @keyframes changeColor {
     from {
       background-color: var(--color-neutral-dark);

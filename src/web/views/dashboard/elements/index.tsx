@@ -5,6 +5,7 @@ import { DashboardElement } from '../../../../shared/models/Dashboard'
 import { ChangeCardFieldRenderer, ChangeCardRenderer } from './ChangeCard'
 import { ChartCardFieldsRenderer, ChartCardRenderer } from './ChartCard'
 import { HoldingsTableCardFieldsRenderer, HoldingsTableCardRenderer } from './HoldingsTableCard'
+import { TextFieldsRenderer, TextRenderer } from './Text'
 import { TotalCardFieldsRenderer, TotalCardRenderer } from './TotalCard'
 
 export type DashboardElementRendererProps<E extends DashboardElement> = { element: E; timetravel?: string }
@@ -14,6 +15,8 @@ export const DashboardElementRenderer: React.FC<DashboardElementRendererProps<Da
   timetravel,
 }) => {
   switch (element.type) {
+    case 'text':
+      return <TextRenderer element={element} timetravel={timetravel} />
     case 'totalCard':
       return <TotalCardRenderer element={element} timetravel={timetravel} />
     case 'changeCard':
@@ -37,6 +40,8 @@ export const DashboardElementFieldsRenderer: React.FC<DashboardElementFieldsRend
   onChangeElement,
 }) => {
   switch (element.type) {
+    case 'text':
+      return <TextFieldsRenderer element={element} onChangeElement={onChangeElement} />
     case 'totalCard':
       return <TotalCardFieldsRenderer element={element} onChangeElement={onChangeElement} />
     case 'changeCard':
