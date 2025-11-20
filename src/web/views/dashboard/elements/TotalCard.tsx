@@ -10,10 +10,13 @@ import { recordMap } from '../../../../shared/utils/record'
 import { rpcClient } from '../../../api'
 import { Amount } from '../../../components/Amount'
 import { Card } from '../../../components/Card'
+import { Input } from '../../../components/Input'
+import { Label } from '../../../components/Label'
 import { Percentage } from '../../../components/Percentage'
 import type { DashboardElementFieldsRendererProps, DashboardElementRendererProps } from './index'
 
 export const TotalCardRenderer: React.FC<DashboardElementRendererProps<DashboardElementTotalCard>> = ({
+  element,
   timetravel,
 }) => {
   const { data: evaluations } = useSuspenseQuery({
@@ -52,31 +55,65 @@ export const TotalCardRenderer: React.FC<DashboardElementRendererProps<Dashboard
   return (
     <Card>
       <div className={stylesCardContent}>
-        <div className={stylesCardTitle}>Total</div>
+        {!element.hideTitle && <div className={stylesCardTitle}>Total</div>}
         <div>
           <Amount amount={total} denomination={rootCurrency.denomination} symbol={rootCurrency.symbol} abbreviate />
         </div>
-        <div>
-          <Amount
-            amount={profit}
-            denomination={rootCurrency.denomination}
-            symbol={rootCurrency.symbol}
-            abbreviate
-            signColor
-            signChar
-            signIcon
-          />
-        </div>
-        <div>
-          <Percentage percentage={profitPercentage} decimals={2} signChar signColor signIcon />
-        </div>
+        {!element.hideAbsoluteChange && (
+          <div>
+            <Amount
+              amount={profit}
+              denomination={rootCurrency.denomination}
+              symbol={rootCurrency.symbol}
+              abbreviate
+              signColor
+              signChar
+              signIcon
+            />
+          </div>
+        )}
+        {!element.hideRelativeChange && (
+          <div>
+            <Percentage percentage={profitPercentage} decimals={2} signChar signColor signIcon />
+          </div>
+        )}
       </div>
     </Card>
   )
 }
 
-export const TotalCardFieldsRenderer: React.FC<DashboardElementFieldsRendererProps<DashboardElementTotalCard>> = () => {
-  return null
+export const TotalCardFieldsRenderer: React.FC<DashboardElementFieldsRendererProps<DashboardElementTotalCard>> = ({
+  element,
+  onChangeElement,
+}) => {
+  return (
+    <>
+      <Label text="Hide title" htmlFor="hideTitle" position="right">
+        <Input
+          id="hideTitle"
+          type="checkbox"
+          checked={element.hideTitle}
+          onChange={event => onChangeElement({ ...element, hideTitle: event.target.checked })}
+        />
+      </Label>
+      <Label text="Hide absolute change" htmlFor="hideAbsoluteChange" position="right">
+        <Input
+          id="hideAbsoluteChange"
+          type="checkbox"
+          checked={element.hideAbsoluteChange}
+          onChange={event => onChangeElement({ ...element, hideAbsoluteChange: event.target.checked })}
+        />
+      </Label>
+      <Label text="Hide relative change" htmlFor="hideRelativeChange" position="right">
+        <Input
+          id="hideRelativeChange"
+          type="checkbox"
+          checked={element.hideRelativeChange}
+          onChange={event => onChangeElement({ ...element, hideRelativeChange: event.target.checked })}
+        />
+      </Label>
+    </>
+  )
 }
 
 const stylesCardTitle = css`

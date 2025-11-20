@@ -33,14 +33,29 @@ function defaultDashboard(userId: string): Dashboard {
     rows: [
       {
         columns: [
-          { type: 'totalCard' },
-          { type: 'changeCard', since: { type: 'toDate', interval: 'day' } },
-          { type: 'changeCard', since: { type: 'toDate', interval: 'month' } },
+          { type: 'totalCard', hideTitle: false, hideAbsoluteChange: false, hideRelativeChange: false },
+          {
+            type: 'changeCard',
+            since: { type: 'toDate', interval: 'day' },
+            hideTitle: false,
+            hideRelativeChange: false,
+          },
+          {
+            type: 'changeCard',
+            since: { type: 'toDate', interval: 'month' },
+            hideTitle: false,
+            hideRelativeChange: false,
+          },
         ],
       },
       {
         columns: [
-          { type: 'chartCard', config: { type: 'profit', resolution: 'week', range: 'month', rangeAmount: 6 } },
+          {
+            type: 'chartCard',
+            config: { type: 'profit', resolution: 'week', range: 'month', rangeAmount: 6 },
+            hideTitle: false,
+            hideAxis: false,
+          },
         ],
       },
       {

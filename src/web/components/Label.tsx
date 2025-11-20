@@ -8,7 +8,7 @@ type Props = React.DetailedHTMLProps<React.LabelHTMLAttributes<HTMLLabelElement>
   text: string
   addition?: React.ReactNode
   position?: LabelPosition
-  htmlFor?: string
+  htmlFor: string
 }
 
 export const Label = React.forwardRef<HTMLLabelElement, Props>(

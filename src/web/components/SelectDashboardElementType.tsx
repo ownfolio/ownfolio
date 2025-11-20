@@ -18,6 +18,10 @@ export const SelectDashboardElementType = React.forwardRef<HTMLSelectElement, Pr
             label: 'Element type',
             options: [
               {
+                value: 'text',
+                label: 'Text',
+              },
+              {
                 value: 'totalCard',
                 label: 'Total card',
               },

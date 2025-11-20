@@ -8,6 +8,7 @@ import { createEmptyDashboardElement, DashboardElement, DashboardRow } from '../
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
 import { useDialogs } from '../../components/DialogsContext'
+import { ErrorBoundary } from '../../components/ErrorBoundary'
 import { Input } from '../../components/Input'
 import { LoadingBox } from '../../components/LoadingBox'
 import { ViewContainer } from '../../components/ViewContainer'
@@ -213,7 +214,15 @@ const Columns: React.FC<ColumnsProps> = ({ columns, onChangeColumns, editing, ti
                         />
                       </div>
                     )}
-                    <DashboardElementRenderer element={columnOrAdder.column} timetravel={timetravel} />
+                    <ErrorBoundary
+                      renderError={() => (
+                        <LoadingBox>
+                          <div>Error</div>
+                        </LoadingBox>
+                      )}
+                    >
+                      <DashboardElementRenderer element={columnOrAdder.column} timetravel={timetravel} />
+                    </ErrorBoundary>
                   </div>
                 </React.Suspense>
               )
@@ -315,18 +324,23 @@ const stylesElement = css`
 const stylesElementEdit = css`
   position: absolute;
   z-index: 1;
-  top: var(--spacing-small);
-  right: var(--spacing-small);
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: var(--spacing-small);
   padding: var(--spacing-small);
-  background-color: var(--color-neutral);
 `
 
 const stylesAction = css`
   display: block;
-  padding: 2px;
+  padding: var(--spacing-small);
   cursor: pointer;
   align-self: center;
   justify-self: center;
+  background-color: var(--color-neutral);
+  border-radius: var(--border-radius-small);
 `

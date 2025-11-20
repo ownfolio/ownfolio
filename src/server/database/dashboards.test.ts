@@ -30,7 +30,7 @@ it(
     await expect(db.dashboards.listByUserId('user_???')).resolves.toHaveLength(0)
     await db.dashboards.delete(d2.id)
     await expect(db.dashboards.retrieve(d2.id)).rejects.toThrow()
-    const d1b = await db.dashboards.update({ ...d1, rows: [{ columns: [{ type: 'totalCard' }] }] })
+    const d1b = await db.dashboards.update({ ...d1, rows: [{ columns: [{ type: 'text', text: 'Text' }] }] })
     await expect(db.dashboards.retrieve(d1.id)).resolves.toEqual(d1b)
   }),
   60000
