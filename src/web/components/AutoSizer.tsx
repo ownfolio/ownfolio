@@ -2,8 +2,10 @@ import { css } from '@linaria/core'
 import clsx from 'clsx'
 import React from 'react'
 
-interface Props
-  extends Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, 'children'> {
+interface Props extends Omit<
+  React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>,
+  'children'
+> {
   children: (width: number, height: number) => React.ReactNode
 }
 
