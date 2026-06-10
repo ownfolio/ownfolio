@@ -1,7 +1,6 @@
 import { css } from '@linaria/core'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
-import { useNavigate } from 'react-router-dom'
 
 import { filterNotFalse } from '../../../shared/utils/array'
 import { rpcClient } from '../../api'
@@ -9,10 +8,10 @@ import { Button } from '../../components/Button'
 import { CardTable, TableDefinitionColumn, TableDefinitionRow } from '../../components/CardTable'
 import { useDialogs } from '../../components/DialogsContext'
 import { ViewContainer } from '../../components/ViewContainer'
+import { ClassificationDetailDialog } from './ClassificationDetailDialog'
 import { ClassificationDialog } from './ClassificationDialog'
 
 export const ClassificationsView: React.FC = () => {
-  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
 
@@ -29,6 +28,11 @@ export const ClassificationsView: React.FC = () => {
     []
   )
 
+  const openDetail = React.useCallback(
+    (classificationId: string) => openDialog(ClassificationDetailDialog, { classificationId }),
+    [openDialog]
+  )
+
   const rows = React.useMemo<TableDefinitionRow[]>(
     () =>
       classifications.map(classification => ({
@@ -39,7 +43,7 @@ export const ClassificationsView: React.FC = () => {
               href="#"
               onClick={event => {
                 event.preventDefault()
-                navigate(`/classifications/${classification.id}`)
+                openDetail(classification.id)
               }}
             >
               {classification.name}
@@ -50,7 +54,7 @@ export const ClassificationsView: React.FC = () => {
         menuItems: filterNotFalse([
           {
             label: 'Open',
-            onClick: () => navigate(`/classifications/${classification.id}`),
+            onClick: () => openDetail(classification.id),
           },
           null,
           {
@@ -62,7 +66,7 @@ export const ClassificationsView: React.FC = () => {
           },
         ]),
       })),
-    [classifications]
+    [classifications, openDetail]
   )
 
   return (
@@ -73,7 +77,7 @@ export const ClassificationsView: React.FC = () => {
           onClick={async () => {
             const result = await openDialog(ClassificationDialog, { mode: { type: 'create' } })
             if (result) {
-              navigate(`/classifications/${result.id}`)
+              await openDetail(result.id)
             }
           }}
         >

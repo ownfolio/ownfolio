@@ -21,7 +21,6 @@ import { AssetDialog } from '../assets/AssetDialog'
 import { AssetsView } from '../assets/AssetsView'
 import { AttachmentsView } from '../attachments/AttachmentsView'
 import { ChartView } from '../chart/ChartView'
-import { ClassificationDetailView } from '../classifications/ClassificationDetailView'
 import { ClassificationsView } from '../classifications/ClassificationsView'
 import { DashboardView } from '../dashboard/DashboardView'
 import { ErrorView } from '../error/ErrorView'
@@ -206,7 +205,6 @@ export const HomeView: React.FC = () => {
                   <Route path="trades" element={<TradesView />} />
                   <Route path="attachments" element={<AttachmentsView />} />
                   <Route path="classifications" element={<ClassificationsView />} />
-                  <Route path="classifications/:classificationId" element={<ClassificationDetailView />} />
                   <Route path="plausibility" element={<PlausibilityView />} />
                   <Route path="chart/:type/:id?" element={<ChartView />} />
                   <Route path="test" element={<TestView />} />

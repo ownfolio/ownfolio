@@ -1,20 +1,20 @@
 import { css } from '@linaria/core'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
 
 import { buildBucketTree, ClassificationBucket, ClassificationBucketTree } from '../../../shared/models/Classification'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
 import { ConfirmationDialog } from '../../components/ConfirmationDialog'
-import { useDialogs } from '../../components/DialogsContext'
-import { ViewContainer } from '../../components/ViewContainer'
+import { DialogContentProps, useDialogs } from '../../components/DialogsContext'
 import { ClassificationBucketDialog } from './ClassificationBucketDialog'
 import { ClassificationDialog } from './ClassificationDialog'
 
-export const ClassificationDetailView: React.FC = () => {
-  const { classificationId } = useParams<{ classificationId: string }>()
-  const navigate = useNavigate()
+interface Props extends DialogContentProps<void> {
+  classificationId: string
+}
+
+export const ClassificationDetailDialog: React.FC<Props> = ({ classificationId, dialogId, closeDialog }) => {
   const queryClient = useQueryClient()
   const { openDialog } = useDialogs()
   const [selectedBucketId, setSelectedBucketId] = React.useState<string | null>(null)
@@ -25,11 +25,11 @@ export const ClassificationDetailView: React.FC = () => {
   })
   const { data: buckets } = useSuspenseQuery({
     queryKey: ['classificationBuckets', classificationId],
-    queryFn: () => rpcClient.listClassificationBuckets({ classificationId: classificationId! }).then(r => r.data),
+    queryFn: () => rpcClient.listClassificationBuckets({ classificationId }).then(r => r.data),
   })
   const { data: assignments } = useSuspenseQuery({
     queryKey: ['classificationAssignments', classificationId],
-    queryFn: () => rpcClient.listClassificationAssignments({ classificationId: classificationId! }).then(r => r.data),
+    queryFn: () => rpcClient.listClassificationAssignments({ classificationId }).then(r => r.data),
   })
   const { data: assets } = useSuspenseQuery({
     queryKey: ['assets'],
@@ -41,15 +41,18 @@ export const ClassificationDetailView: React.FC = () => {
   })
 
   const classification = classifications.find(c => c.id === classificationId)
-  if (!classification) {
-    return <ViewContainer>Classification not found.</ViewContainer>
-  }
+
+  // Auto-close if classification was deleted from within the edit sub-dialog
+  React.useEffect(() => {
+    if (!classification) closeDialog(undefined)
+  }, [classification])
+
+  if (!classification) return null
 
   const tree = buildBucketTree(buckets)
   const selectedBucket = buckets.find(b => b.id === selectedBucketId) ?? null
 
   const bucketAssignments = selectedBucketId ? assignments.filter(a => a.bucketId === selectedBucketId) : []
-
   const assignedAssetIds = bucketAssignments.filter(a => a.entityType === 'asset').map(a => a.entityId)
   const assignedAccountIds = bucketAssignments.filter(a => a.entityType === 'account').map(a => a.entityId)
 
@@ -68,10 +71,11 @@ export const ClassificationDetailView: React.FC = () => {
         : assignmentCount > 0
           ? `Sure you want to delete "${bucket.name}"? It has ${assignmentCount} assignment(s) that will be removed.`
           : `Sure you want to delete "${bucket.name}"?`
-    const confirmed = await openDialog(ConfirmationDialog, {
-      question,
-      yesText: `Yes, delete "${bucket.name}"!`,
-    })
+    const confirmed = await openDialog(
+      ConfirmationDialog,
+      { question, yesText: `Yes, delete "${bucket.name}"!` },
+      dialogId
+    )
     if (confirmed) {
       if (selectedBucketId === bucket.id) setSelectedBucketId(null)
       await rpcClient.deleteClassificationBucket({ id: bucket.id })
@@ -82,48 +86,36 @@ export const ClassificationDetailView: React.FC = () => {
   const handleAssign = async (entityType: 'asset' | 'account', entityId: string) => {
     if (!selectedBucketId) return
     await rpcClient.setClassificationBucketAssignment({
-      classificationId: classificationId!,
+      classificationId,
       entityType,
       entityId,
       bucketId: selectedBucketId,
     })
     await queryClient.invalidateQueries({ queryKey: ['classificationAssignments', classificationId] })
+    await queryClient.invalidateQueries({ queryKey: ['allClassificationAssignments'] })
   }
 
   const handleUnassign = async (entityType: 'asset' | 'account', entityId: string) => {
-    await rpcClient.setClassificationBucketAssignment({
-      classificationId: classificationId!,
-      entityType,
-      entityId,
-      bucketId: null,
-    })
+    await rpcClient.setClassificationBucketAssignment({ classificationId, entityType, entityId, bucketId: null })
     await queryClient.invalidateQueries({ queryKey: ['classificationAssignments', classificationId] })
+    await queryClient.invalidateQueries({ queryKey: ['allClassificationAssignments'] })
   }
 
   return (
-    <ViewContainer>
+    <div className={stylesRoot}>
       <div className={stylesHeader}>
-        <div className={stylesHeaderLeft}>
-          <a
-            href="#"
-            onClick={event => {
-              event.preventDefault()
-              navigate('/classifications')
+        <h2 className={stylesTitle}>{classification.name}</h2>
+        <div className={stylesHeaderActions}>
+          <Button
+            onClick={async () => {
+              await openDialog(ClassificationDialog, { mode: { type: 'edit', classification } }, dialogId)
+              await queryClient.invalidateQueries()
             }}
-            className={stylesBackLink}
           >
-            ← Classifications
-          </a>
-          <h2 className={stylesTitle}>{classification.name}</h2>
+            Edit
+          </Button>
+          <Button onClick={() => closeDialog(undefined)}>Close</Button>
         </div>
-        <Button
-          onClick={async () => {
-            await openDialog(ClassificationDialog, { mode: { type: 'edit', classification } })
-            await queryClient.invalidateQueries()
-          }}
-        >
-          Edit
-        </Button>
       </div>
 
       <div className={stylesContent}>
@@ -133,9 +125,11 @@ export const ClassificationDetailView: React.FC = () => {
             <Button
               variant="primary"
               onClick={async () => {
-                await openDialog(ClassificationBucketDialog, {
-                  mode: { type: 'create', classificationId: classificationId!, parentBucketId: null },
-                })
+                await openDialog(
+                  ClassificationBucketDialog,
+                  { mode: { type: 'create', classificationId, parentBucketId: null } },
+                  dialogId
+                )
               }}
             >
               Add bucket
@@ -149,7 +143,8 @@ export const ClassificationDetailView: React.FC = () => {
                 node={node}
                 depth={0}
                 selectedBucketId={selectedBucketId}
-                classificationId={classificationId!}
+                classificationId={classificationId}
+                dialogId={dialogId}
                 onSelect={setSelectedBucketId}
                 onDelete={handleDeleteBucket}
               />
@@ -181,9 +176,7 @@ export const ClassificationDetailView: React.FC = () => {
                     className={stylesAssignSelect}
                     value=""
                     onChange={async event => {
-                      if (event.target.value) {
-                        await handleAssign('asset', event.target.value)
-                      }
+                      if (event.target.value) await handleAssign('asset', event.target.value)
                     }}
                   >
                     <option value="">Assign asset…</option>
@@ -213,9 +206,7 @@ export const ClassificationDetailView: React.FC = () => {
                     className={stylesAssignSelect}
                     value=""
                     onChange={async event => {
-                      if (event.target.value) {
-                        await handleAssign('account', event.target.value)
-                      }
+                      if (event.target.value) await handleAssign('account', event.target.value)
                     }}
                   >
                     <option value="">Assign account…</option>
@@ -233,7 +224,7 @@ export const ClassificationDetailView: React.FC = () => {
           )}
         </div>
       </div>
-    </ViewContainer>
+    </div>
   )
 }
 
@@ -242,6 +233,7 @@ interface BucketTreeNodeProps {
   depth: number
   selectedBucketId: string | null
   classificationId: string
+  dialogId: number
   onSelect: (id: string) => void
   onDelete: (bucket: ClassificationBucket) => void
 }
@@ -251,6 +243,7 @@ const BucketTreeNode: React.FC<BucketTreeNodeProps> = ({
   depth,
   selectedBucketId,
   classificationId,
+  dialogId,
   onSelect,
   onDelete,
 }) => {
@@ -268,18 +261,18 @@ const BucketTreeNode: React.FC<BucketTreeNodeProps> = ({
         <div className={stylesBucketNodeActions} onClick={e => e.stopPropagation()}>
           <Button
             onClick={async () => {
-              await openDialog(ClassificationBucketDialog, {
-                mode: { type: 'create', classificationId, parentBucketId: node.id },
-              })
+              await openDialog(
+                ClassificationBucketDialog,
+                { mode: { type: 'create', classificationId, parentBucketId: node.id } },
+                dialogId
+              )
             }}
           >
             + Child
           </Button>
           <Button
             onClick={async () => {
-              await openDialog(ClassificationBucketDialog, {
-                mode: { type: 'edit', bucket: node },
-              })
+              await openDialog(ClassificationBucketDialog, { mode: { type: 'edit', bucket: node } }, dialogId)
             }}
           >
             Rename
@@ -294,6 +287,7 @@ const BucketTreeNode: React.FC<BucketTreeNodeProps> = ({
           depth={depth + 1}
           selectedBucketId={selectedBucketId}
           classificationId={classificationId}
+          dialogId={dialogId}
           onSelect={onSelect}
           onDelete={onDelete}
         />
@@ -302,22 +296,16 @@ const BucketTreeNode: React.FC<BucketTreeNodeProps> = ({
   )
 }
 
+const stylesRoot = css`
+  min-width: min(700px, calc(100vw - 4 * var(--spacing-large)));
+`
+
 const stylesHeader = css`
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-medium);
-`
-
-const stylesHeaderLeft = css`
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-small);
-`
-
-const stylesBackLink = css`
-  font-size: 0.875rem;
-  color: var(--color-text-lite);
+  margin-bottom: var(--spacing-large);
 `
 
 const stylesTitle = css`
@@ -326,12 +314,17 @@ const stylesTitle = css`
   font-weight: bold;
 `
 
+const stylesHeaderActions = css`
+  display: flex;
+  gap: var(--spacing-small);
+`
+
 const stylesContent = css`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-large);
 
-  @media (max-width: 800px) {
+  @media (max-width: 600px) {
     grid-template-columns: 1fr;
   }
 `
@@ -340,18 +333,12 @@ const stylesBucketPanel = css`
   display: flex;
   flex-direction: column;
   gap: var(--spacing-medium);
-  background-color: var(--color-card);
-  border-radius: var(--border-radius-small);
-  padding: var(--spacing-medium);
 `
 
 const stylesAssignmentPanel = css`
   display: flex;
   flex-direction: column;
   gap: var(--spacing-medium);
-  background-color: var(--color-card);
-  border-radius: var(--border-radius-small);
-  padding: var(--spacing-medium);
 `
 
 const stylesPanelHeader = css`
