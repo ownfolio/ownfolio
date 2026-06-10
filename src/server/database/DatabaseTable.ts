@@ -7,5 +7,5 @@ export abstract class DatabaseTable<E> {
 
   public constructor(protected sql: postgres.Sql<{}>) {}
 
-  public abstract init(sql: postgres.Sql<{}>): Promise<void>
+  public abstract init(sql: postgres.TransactionSql<{}>): Promise<void>
 }

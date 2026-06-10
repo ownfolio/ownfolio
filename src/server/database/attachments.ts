@@ -20,7 +20,7 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
   protected override table = 'attachment'
   protected override schema = attachmentSchema
 
-  public override async init(sql: postgres.Sql<{}>): Promise<void> {
+  public override async init(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`
       CREATE TABLE "attachment" (
         "id" VARCHAR(32) NOT NULL,
@@ -52,7 +52,7 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
     `
   }
 
-  public async addContentTable(sql: postgres.Sql<{}>): Promise<void> {
+  public async addContentTable(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`
       CREATE TABLE "attachment_content" (
         "attachmentId" VARCHAR(32) NOT NULL,
@@ -64,7 +64,7 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
     `
   }
 
-  public async addDerivationCacheTable(sql: postgres.Sql<{}>): Promise<void> {
+  public async addDerivationCacheTable(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`
       CREATE TABLE "attachment_derivation_cache" (
         "attachmentId" VARCHAR(32) NOT NULL,
@@ -77,16 +77,16 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
     `
   }
 
-  public async dropContentTable(sql: postgres.Sql<{}>): Promise<void> {
+  public async dropContentTable(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`DROP TABLE "attachment_content"`
   }
 
-  public async addDerivationCacheMimeTypeColumn(sql: postgres.Sql<{}>): Promise<void> {
+  public async addDerivationCacheMimeTypeColumn(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`TRUNCATE TABLE "attachment_derivation_cache"`
     await sql`ALTER TABLE "attachment_derivation_cache" ADD COLUMN "mimeType" VARCHAR(128) NOT NULL`
   }
 
-  public async makeDerivationCacheExpiryOptional(sql: postgres.Sql<{}>): Promise<void> {
+  public async makeDerivationCacheExpiryOptional(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`ALTER TABLE "attachment_derivation_cache" ALTER COLUMN "expiresAt" DROP NOT NULL`
   }
 

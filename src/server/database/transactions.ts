@@ -93,7 +93,7 @@ export class DatabaseTransactions extends DatabaseEntity<Transaction, 'createdAt
     return count
   }
 
-  public override async init(sql: postgres.Sql<{}>): Promise<void> {
+  public override async init(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`
       CREATE TABLE "transaction" (
         "id" VARCHAR(32) NOT NULL,

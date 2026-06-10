@@ -18,7 +18,7 @@ export class DatabasePortfolios extends DatabaseEntity<Portfolio, 'createdAt'> {
     return rows.map(row => this.schema.parse(row))
   }
 
-  public override async init(sql: postgres.Sql<{}>): Promise<void> {
+  public override async init(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`
       CREATE TABLE "portfolio" (
         "id" VARCHAR(32) NOT NULL,
@@ -31,7 +31,7 @@ export class DatabasePortfolios extends DatabaseEntity<Portfolio, 'createdAt'> {
     `
   }
 
-  public async addStatusColumn(sql: postgres.Sql<{}>): Promise<void> {
+  public async addStatusColumn(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`ALTER TABLE "portfolio" ADD COLUMN "status" VARCHAR(16) NOT NULL CHECK ("status" = 'active' OR "status" = 'inactive' OR "status" = 'hidden') DEFAULT 'active'`
   }
 

@@ -26,7 +26,7 @@ export class DatabaseDashboards extends DatabaseEntity<Dashboard> {
     return rows.map(row => this.schema.parse(row))
   }
 
-  public override async init(sql: postgres.Sql<{}>): Promise<void> {
+  public override async init(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`
       CREATE TABLE "dashboard" (
         "id" VARCHAR(32) NOT NULL,

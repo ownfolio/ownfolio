@@ -11,7 +11,7 @@ export class DatabaseUsers extends DatabaseTable<User> {
   protected override table = 'user'
   protected override schema = userSchema
 
-  async init(sql: postgres.Sql<{}>): Promise<void> {
+  async init(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`
         CREATE TABLE "user" (
           "id" VARCHAR(32) NOT NULL,

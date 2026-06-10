@@ -9,7 +9,7 @@ export class DatabaseQuotes extends DatabaseTable<Quote> {
   protected override table = 'quote'
   protected override schema = quoteSchema
 
-  async init(sql: postgres.Sql<{}>): Promise<void> {
+  async init(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`
       CREATE TABLE "quote" (
         "assetId" VARCHAR(32) NOT NULL,

@@ -22,7 +22,7 @@ export class DatabaseAssets extends DatabaseEntity<Asset, 'createdAt'> {
     await this.sql`UPDATE "asset" SET ${this.sql({ quoteProvider })} WHERE "id" = ${assetId}`
   }
 
-  public override async init(sql: postgres.Sql<{}>): Promise<void> {
+  public override async init(sql: postgres.TransactionSql<{}>): Promise<void> {
     await sql`
       CREATE TABLE "asset" (
         "id" VARCHAR(32) NOT NULL,

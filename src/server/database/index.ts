@@ -98,7 +98,7 @@ export class Database {
     logger.info(`Finished database migrations`)
   }
 
-  private async migrate(id: string, fn: (sql: postgres.Sql<{}>) => Promise<void>) {
+  private async migrate(id: string, fn: (sql: postgres.TransactionSql<{}>) => Promise<void>) {
     await this.sql.begin(async sql => {
       const [{ count }] = await sql<{ count: number }[]>`SELECT count(1)::int FROM "_migrations" WHERE "id" = ${id}`
       if (count === 0) {
