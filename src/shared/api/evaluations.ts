@@ -15,6 +15,7 @@ export const evaluateSummaryRequestSchema = z.object({
       z.object({ type: z.literal('all') }),
       z.object({ type: z.literal('portfolio'), portfolioId: z.string() }),
       z.object({ type: z.literal('account'), accountId: z.string() }),
+      z.object({ type: z.literal('classificationBucket'), bucketId: z.string() }),
     ])
   ),
   values: z

@@ -9,6 +9,7 @@ import { CardTable, TableDefinitionColumn, TableDefinitionRow } from '../../comp
 import { ConfirmationDialog } from '../../components/ConfirmationDialog'
 import { useDialogs } from '../../components/DialogsContext'
 import { ViewContainer } from '../../components/ViewContainer'
+import { useClassificationBadges } from '../../hooks/useClassificationBadges'
 import { AccountDialog } from './AccountDialog'
 
 export const AccountsView: React.FC = () => {
@@ -23,6 +24,7 @@ export const AccountsView: React.FC = () => {
     queryFn: () => rpcClient.listAccounts({}).then(r => r.data),
   })
   const [showHidden, setShowHidden] = React.useState(false)
+  const { getBadges } = useClassificationBadges()
 
   const columns = React.useMemo<TableDefinitionColumn[]>(
     () => [
@@ -30,6 +32,7 @@ export const AccountsView: React.FC = () => {
       { id: 'name', title: 'Name', minWidth: 200 },
       { id: 'number', title: 'Number', width: 200, priority: 1, className: stylesNumberColumn },
       { id: 'currency', title: 'Currency', align: 'right', width: 150, priority: 3 },
+      { id: 'classifications', title: 'Classifications', width: 200, priority: 5 },
       { id: 'status', title: 'Status', align: 'right', width: 150, priority: 4 },
     ],
     []
@@ -48,6 +51,7 @@ export const AccountsView: React.FC = () => {
               name: account.name,
               number: account.number,
               currency: account.currency,
+              classifications: getBadges('account', account.id),
               status: account.status,
             },
             menuItems: filterNotFalse([
@@ -102,7 +106,7 @@ export const AccountsView: React.FC = () => {
             ]),
           }
         }),
-    [accounts, portfolios, showHidden]
+    [accounts, portfolios, showHidden, getBadges]
   )
 
   return (

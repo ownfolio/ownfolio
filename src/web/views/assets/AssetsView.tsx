@@ -15,6 +15,7 @@ import { ConfirmationDialog } from '../../components/ConfirmationDialog'
 import { useDialogs } from '../../components/DialogsContext'
 import { Percentage } from '../../components/Percentage'
 import { ViewContainer } from '../../components/ViewContainer'
+import { useClassificationBadges } from '../../hooks/useClassificationBadges'
 import { AssetDialog } from './AssetDialog'
 
 export const AssetsView: React.FC = () => {
@@ -51,6 +52,7 @@ export const AssetsView: React.FC = () => {
     queryFn: () => rpcClient.listLatestQuotes({}).then(r => r.data),
   })
   const [showHidden, setShowHidden] = React.useState(false)
+  const { getBadges } = useClassificationBadges()
 
   const columns = React.useMemo<TableDefinitionColumn[]>(
     () => [
@@ -61,6 +63,7 @@ export const AssetsView: React.FC = () => {
       { id: 'lastMonthQuote', title: '1M', align: 'right', width: 150, priority: 4 },
       { id: 'yesterdayQuote', title: '1D', align: 'right', width: 150, priority: 3 },
       { id: 'latestQuote', title: 'Now', align: 'right', width: 150, priority: 1 },
+      { id: 'classifications', title: 'Classifications', width: 200, priority: 8 },
       { id: 'status', title: 'Status', align: 'right', width: 150, priority: 7 },
     ],
     []
@@ -167,6 +170,7 @@ export const AssetsView: React.FC = () => {
                   />
                 </div>
               ),
+              classifications: getBadges('asset', asset.id),
               status: asset.status,
             },
             menuItems: filterNotFalse([
@@ -230,7 +234,7 @@ export const AssetsView: React.FC = () => {
             ]),
           }
         }),
-    [assets, lastYearQuotes, lastMonthQuotes, yesterdayQuotes, latestQuotes, showHidden]
+    [assets, lastYearQuotes, lastMonthQuotes, yesterdayQuotes, latestQuotes, showHidden, getBadges]
   )
 
   return (

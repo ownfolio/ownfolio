@@ -20,6 +20,9 @@ export function createRpcV1Evaluations(database: Database) {
         if (!ctx.user) throw RpcError.unauthorized()
         const accounts = await database.accounts.listByUserId(ctx.user.id)
         const transactions = await database.transactions.listByUserId(ctx.user.id, {}, 'asc')
+        const classificationAssignments = input.buckets.some(b => b.type === 'classificationBucket')
+          ? await database.classifications.listAllAssignmentsByUserId(ctx.user.id)
+          : []
         const quotes = await database.quotes.listAllClosesByUserId(ctx.user.id)
         const now = new Date()
         const dates: string[] = (() => {
@@ -44,19 +47,39 @@ export function createRpcV1Evaluations(database: Database) {
         const result = evaluateBalances(dates, transactions, { quotes })
         const data = {
           value: input.buckets.reduce((acc, bucket) => {
-            const [key, accountFilter] = (() => {
+            const [key, accountFilter, assetFilter] = (() => {
               switch (bucket.type) {
                 case 'all':
-                  return ['all', undefined] as const
+                  return ['all', undefined, undefined] as const
                 case 'portfolio':
                   return [
                     bucket.portfolioId,
                     (aid: string) => accounts.find(a => a.id === aid)?.portfolioId === bucket.portfolioId,
+                    undefined,
                   ] as const
                 case 'account':
-                  return [bucket.accountId, (aid: string) => aid === bucket.accountId] as const
+                  return [bucket.accountId, (aid: string) => aid === bucket.accountId, undefined] as const
+                case 'classificationBucket': {
+                  const bucketAssignments = classificationAssignments.filter(a => a.bucketId === bucket.bucketId)
+                  const assignedAccountIds = new Set(
+                    bucketAssignments.filter(a => a.entityType === 'account').map(a => a.entityId)
+                  )
+                  const assignedAssetIds = new Set(
+                    bucketAssignments.filter(a => a.entityType === 'asset').map(a => a.entityId)
+                  )
+                  return [
+                    bucket.bucketId,
+                    assignedAccountIds.size > 0 ? (aid: string) => assignedAccountIds.has(aid) : undefined,
+                    assignedAssetIds.size > 0 ? (assetId: string) => assignedAssetIds.has(assetId) : undefined,
+                  ] as const
+                }
               }
             })()
+            const matchCash = (p: { accountId: string }) => !accountFilter || accountFilter(p.accountId)
+            const matchAsset = (p: { accountId: string; assetId: string }) =>
+              (!accountFilter && !assetFilter) ||
+              !!(accountFilter && accountFilter(p.accountId)) ||
+              !!(assetFilter && assetFilter(p.assetId))
             return {
               ...acc,
               [key]: result.map(r => {
@@ -66,44 +89,42 @@ export function createRpcV1Evaluations(database: Database) {
                     switch (value) {
                       case 'total': {
                         const cash = r.cashPositions.open
-                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .filter(matchCash)
                           .reduce((sum, p) => sum.plus(p.amount), BigNumber(0))
-                        const assets = r.assetPositions.open
-                          .filter(p => !accountFilter || accountFilter(p.accountId))
-                          .reduce((sum, p) => {
-                            const quote = r.quotes[p.assetId]
-                            return sum.plus(quote ? BigNumber(quote).multipliedBy(p.amount) : p.openPrice)
-                          }, BigNumber(0))
+                        const assets = r.assetPositions.open.filter(matchAsset).reduce((sum, p) => {
+                          const quote = r.quotes[p.assetId]
+                          return sum.plus(quote ? BigNumber(quote).multipliedBy(p.amount) : p.openPrice)
+                        }, BigNumber(0))
                         return cash.plus(assets).toString()
                       }
                       case 'deposit': {
                         const cash = r.cashPositions.open
-                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .filter(matchCash)
                           .reduce((sum, p) => sum.plus(p.amount), BigNumber(0))
                         const assetOpenPrices = r.assetPositions.open
-                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .filter(matchAsset)
                           .reduce((sum, p) => sum.plus(p.openPrice), BigNumber(0))
                         const realizedProfits = r.assetPositions.closed
-                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .filter(matchAsset)
                           .reduce((sum, p) => sum.plus(p.closePrice).minus(p.openPrice), BigNumber(0))
                           .toString()
                         return cash.plus(assetOpenPrices).minus(realizedProfits).toString()
                       }
                       case 'cash': {
                         return r.cashPositions.open
-                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .filter(matchCash)
                           .reduce((sum, p) => sum.plus(p.amount), BigNumber(0))
                           .toString()
                       }
                       case 'assetsOpenPrice': {
                         return r.assetPositions.open
-                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .filter(matchAsset)
                           .reduce((sum, p) => sum.plus(p.openPrice), BigNumber(0))
                           .toString()
                       }
                       case 'assetsCurrentPrice': {
                         return r.assetPositions.open
-                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .filter(matchAsset)
                           .reduce((sum, p) => {
                             const quote = r.quotes[p.assetId]
                             return sum.plus(quote ? BigNumber(quote).multipliedBy(p.amount) : p.openPrice)
@@ -112,7 +133,7 @@ export function createRpcV1Evaluations(database: Database) {
                       }
                       case 'realizedProfits': {
                         return r.assetPositions.closed
-                          .filter(p => !accountFilter || accountFilter(p.accountId))
+                          .filter(matchAsset)
                           .reduce((sum, p) => sum.plus(p.closePrice).minus(p.openPrice), BigNumber(0))
                           .toString()
                       }
