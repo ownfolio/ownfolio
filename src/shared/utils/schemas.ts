@@ -32,11 +32,12 @@ export const dateStringSchema = z.string().regex(/^(\d{4}-\d{2}-\d{2})$/)
 
 export const timeStringSchema = z.string().regex(/^(\d{2}:\d{2}(?::\d{2}(?:\.\d{3})?)?)$/)
 
+const BigNumberNonStrict = BigNumber.clone({ STRICT: false })
 export const bigNumberSchema = z.codec(
   z.coerce.string(),
   z.custom<BigNumber>(raw => BigNumber.isBigNumber(raw)),
   {
-    decode: str => BigNumber(str),
+    decode: str => BigNumberNonStrict(str),
     encode: bn => bn.toString(),
   }
 )

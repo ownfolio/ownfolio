@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js'
+
 import { selectionSortBy } from '../../../shared/utils/array'
 import { logger } from '../../logger'
 import { dkbPdfParser } from './dkb'

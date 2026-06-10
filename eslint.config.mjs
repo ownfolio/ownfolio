@@ -45,6 +45,7 @@ export default [
       '@typescript-eslint/no-non-null-assertion': 'warn',
       '@typescript-eslint/no-require-imports': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
+      'no-useless-assignment': 'off',
       'simple-import-sort/imports': 'error',
     },
   },

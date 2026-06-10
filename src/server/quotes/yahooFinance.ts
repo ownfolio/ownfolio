@@ -1,6 +1,8 @@
 import axios from 'axios'
 import BigNumber from 'bignumber.js'
 
+const BigNumberNonStrict = BigNumber.clone({ STRICT: false })
+
 type YahooFinanceJsonFormat = {
   chart: {
     result: {
@@ -40,19 +42,19 @@ export async function fetchYahooFinanceQuotes(symbol: string): Promise<YahooFina
   resJson.data.chart.result[0].timestamp.forEach((ts, idx) => {
     const date = new Date(ts * 1000).toISOString().substring(0, 10)
     const resultLine = {
-      open: BigNumber(
+      open: BigNumberNonStrict(
         resJson.data.chart.result[0].indicators.quote[0].open[idx] ||
           resJson.data.chart.result[0].indicators.quote[0].close[idx]
       ),
-      high: BigNumber(
+      high: BigNumberNonStrict(
         resJson.data.chart.result[0].indicators.quote[0].high[idx] ||
           resJson.data.chart.result[0].indicators.quote[0].close[idx]
       ),
-      low: BigNumber(
+      low: BigNumberNonStrict(
         resJson.data.chart.result[0].indicators.quote[0].low[idx] ||
           resJson.data.chart.result[0].indicators.quote[0].close[idx]
       ),
-      close: BigNumber(resJson.data.chart.result[0].indicators.quote[0].close[idx]),
+      close: BigNumberNonStrict(resJson.data.chart.result[0].indicators.quote[0].close[idx]),
     }
     if (
       BigNumber.isBigNumber(resultLine.open) &&
