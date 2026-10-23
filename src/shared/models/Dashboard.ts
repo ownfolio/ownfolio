@@ -3,53 +3,56 @@ import { z } from 'zod'
 import { dateUnitSchema } from '../utils/date'
 import { arrayIgnoringErrorsSchema } from '../utils/schemas'
 
-export const dashboardElementSchema = z.discriminatedUnion('type', [
-  z.object({
-    type: z.literal('text'),
-    text: z.string(),
-  }),
-  z.object({
-    type: z.literal('totalCard'),
-    hideTitle: z.boolean().default(false),
-    hideAbsoluteChange: z.boolean().default(false),
-    hideRelativeChange: z.boolean().default(false),
-  }),
-  z.object({
-    type: z.literal('changeCard'),
-    since: z.discriminatedUnion('type', [z.object({ type: z.literal('toDate'), interval: dateUnitSchema })]),
-    hideTitle: z.boolean().default(false),
-    hideRelativeChange: z.boolean().default(false),
-  }),
-  z.object({
-    type: z.literal('chartCard'),
-    hideTitle: z.boolean().default(false),
-    hideAxis: z.boolean().default(false),
-    config: z.discriminatedUnion('type', [
-      z.object({
-        type: z.literal('total'),
-        resolution: dateUnitSchema,
-        range: dateUnitSchema,
-        rangeAmount: z.number().min(1),
-      }),
-      z.object({
-        type: z.literal('profit'),
-        resolution: dateUnitSchema,
-        range: dateUnitSchema,
-        rangeAmount: z.number().min(1),
-      }),
-      z.object({
-        type: z.literal('asset'),
-        assetId: z.string().min(1),
-        resolution: dateUnitSchema,
-        range: dateUnitSchema,
-        rangeAmount: z.number().min(1),
-      }),
-    ]),
-  }),
-  z.object({
-    type: z.literal('holdingsTableCard'),
-  }),
-])
+const chartRangeShape = {
+  resolution: dateUnitSchema.describe('Distance between two data points'),
+  range: dateUnitSchema.describe('Unit of the time range shown, counted back from today'),
+  rangeAmount: z.number().min(1).describe('Number of range units shown, e.g. range month and rangeAmount 6'),
+}
+
+export const dashboardElementSchema = z
+  .discriminatedUnion('type', [
+    z.object({
+      type: z.literal('text').describe('Static text'),
+      text: z.string().describe('Text to show'),
+    }),
+    z.object({
+      type: z.literal('totalCard').describe('Current total value of all portfolios'),
+      hideTitle: z.boolean().default(false),
+      hideAbsoluteChange: z.boolean().default(false),
+      hideRelativeChange: z.boolean().default(false),
+    }),
+    z.object({
+      type: z.literal('changeCard').describe('Change of the total value over a period'),
+      since: z
+        .discriminatedUnion('type', [
+          z.object({
+            type: z.literal('toDate'),
+            interval: dateUnitSchema.describe('Period to date, e.g. year for year-to-date'),
+          }),
+        ])
+        .describe('Start of the period'),
+      hideTitle: z.boolean().default(false),
+      hideRelativeChange: z.boolean().default(false),
+    }),
+    z.object({
+      type: z.literal('chartCard').describe('Line chart over time'),
+      hideTitle: z.boolean().default(false),
+      hideAxis: z.boolean().default(false),
+      config: z.discriminatedUnion('type', [
+        z.object({ type: z.literal('total').describe('Total value of all portfolios'), ...chartRangeShape }),
+        z.object({ type: z.literal('profit').describe('Total value minus deposits'), ...chartRangeShape }),
+        z.object({
+          type: z.literal('asset').describe('Quotes of a single asset'),
+          assetId: z.string().min(1).describe('ID of the asset to chart'),
+          ...chartRangeShape,
+        }),
+      ]),
+    }),
+    z.object({
+      type: z.literal('holdingsTableCard').describe('Table of all current holdings'),
+    }),
+  ])
+  .describe('A card on the dashboard')
 
 export type DashboardElement = z.infer<typeof dashboardElementSchema>
 
@@ -66,17 +69,19 @@ export type DashboardElementChartCard = Extract<DashboardElement, { type: 'chart
 export type DashboardElementHoldingsTableCard = Extract<DashboardElement, { type: 'holdingsTableCard' }>
 
 export const dashboardRowSchema = z.object({
-  columns: z.array(dashboardElementSchema).max(4),
+  columns: z.array(dashboardElementSchema).max(4).describe('Cards shown side by side, at most 4'),
 })
 
 export type DashboardRow = z.infer<typeof dashboardRowSchema>
 
-export const dashboardSchema = z.object({
-  id: z.string(),
-  userId: z.string(),
-  key: z.string(),
-  rows: z.array(dashboardRowSchema),
-})
+export const dashboardSchema = z
+  .object({
+    id: z.string().describe('ID of the dashboard'),
+    userId: z.string().describe('ID of the owning user'),
+    key: z.string().describe('Key of the dashboard, always "default"'),
+    rows: z.array(dashboardRowSchema).describe('Rows shown from top to bottom'),
+  })
+  .describe('Layout of the start page of the web app')
 
 export const dashboardSchemaForgiving = dashboardSchema.extend({
   rows: arrayIgnoringErrorsSchema(

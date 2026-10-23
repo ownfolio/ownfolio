@@ -10,6 +10,7 @@ import type { createRpcV1, RpcCtx } from '../api'
 import { Config } from '../config'
 import { Database } from '../database'
 import { logger } from '../logger'
+import { mcpServerInstructions, mcpToolDescriptions } from './descriptions'
 import { OwnfolioOAuthProvider } from './oauthProvider'
 
 type RpcV1 = ReturnType<typeof createRpcV1>
@@ -26,7 +27,7 @@ export const mcpExcludedRpcCalls: Partial<Record<keyof RpcV1, string>> = {
 const readOnlyRpcCallPattern = /^(list|retrieve|download|export|generate|evaluate|me$|ping$|version$)/
 
 export function createMcpServer(rpcV1: RpcV1, ctx: RpcCtx): McpServer {
-  const server = new McpServer({ name: 'ownfolio', version: 'dev' })
+  const server = new McpServer({ name: 'ownfolio', version: 'dev' }, { instructions: mcpServerInstructions })
   for (const [name, call] of Object.entries(rpcV1) as [string, AnyRpcCall<RpcCtx>][]) {
     if (name in mcpExcludedRpcCalls) {
       continue
@@ -34,6 +35,7 @@ export function createMcpServer(rpcV1: RpcV1, ctx: RpcCtx): McpServer {
     const run = (input: unknown) => runRpcCall(name, call, ctx, input)
     const config = {
       title: rpcCallNameToTitle(name),
+      description: mcpToolDescriptions[name],
       annotations: { readOnlyHint: readOnlyRpcCallPattern.test(name) },
     }
     if (isRpcVoid(call.inputSchema)) {

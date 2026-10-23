@@ -13,6 +13,7 @@ import { Config } from '../config'
 import { Database } from '../database'
 import { databaseTest } from '../database/databaseTest'
 import { createMcpServer, mcpExcludedRpcCalls } from '.'
+import { mcpToolDescriptions } from './descriptions'
 
 const config: Config = {
   httpPort: 3000,
@@ -40,6 +41,10 @@ describe('mcp', () => {
     expect(tools.map(t => t.name).sort()).toEqual(expectedToolNames.sort())
     for (const tool of tools) {
       expect(tool.inputSchema.type).toBe('object')
+      expect(tool.description, `tool ${tool.name} has no description`).toBeTruthy()
+    }
+    for (const name of Object.keys(mcpToolDescriptions)) {
+      expect(expectedToolNames, `described tool ${name} does not exist`).toContain(name)
     }
   })
 

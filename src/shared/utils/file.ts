@@ -5,10 +5,12 @@ import { Attachment } from '../models/Attachment'
 
 const dataUrlRegex = /^data:([^;]+);base64,(.*)$/
 
-export const fileSchema = z.object({
-  fileName: z.string(),
-  dataUrl: z.string(),
-})
+export const fileSchema = z
+  .object({
+    fileName: z.string().describe('File name including extension, e.g. "statement.pdf"'),
+    dataUrl: z.string().describe('File content as base64 data URL, e.g. "data:application/pdf;base64,JVBERi0x..."'),
+  })
+  .describe('A file transferred inline as data URL')
 
 export function fileAsDataUrl(file: File): Promise<string> {
   return new Promise<string>((resolve, reject) => {

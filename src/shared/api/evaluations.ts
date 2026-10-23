@@ -5,21 +5,53 @@ import { dateUnitSchema } from '../utils/date'
 import { dateStringSchema, listResponseSchema, responseSchema } from '../utils/schemas'
 
 export const evaluateSummaryRequestSchema = z.object({
-  when: z.discriminatedUnion('type', [
-    z.object({ type: z.literal('now') }),
-    z.object({ type: z.literal('dates'), dates: z.array(dateStringSchema).min(1) }),
-    z.object({ type: z.literal('historical'), resolution: dateUnitSchema.optional() }),
-  ]),
-  buckets: z.array(
-    z.discriminatedUnion('type', [
-      z.object({ type: z.literal('all') }),
-      z.object({ type: z.literal('portfolio'), portfolioId: z.string() }),
-      z.object({ type: z.literal('account'), accountId: z.string() }),
+  when: z
+    .discriminatedUnion('type', [
+      z.object({ type: z.literal('now').describe('A single evaluation for today') }),
+      z.object({
+        type: z.literal('dates').describe('One evaluation per given date'),
+        dates: z.array(dateStringSchema).min(1).describe('Dates (YYYY-MM-DD) to evaluate at, in ascending order'),
+      }),
+      z.object({
+        type: z
+          .literal('historical')
+          .describe('A time series from the date of the first transaction until today, always including today'),
+        resolution: dateUnitSchema.optional().describe('Distance between two evaluated dates, defaults to day'),
+      }),
     ])
-  ),
+    .describe('Dates to evaluate at. Each evaluation includes all transactions up to the end of its date'),
+  buckets: z
+    .array(
+      z.discriminatedUnion('type', [
+        z.object({ type: z.literal('all').describe('All accounts, keyed as "all" in the result') }),
+        z.object({
+          type: z.literal('portfolio').describe('All accounts of a portfolio, keyed by the portfolio ID'),
+          portfolioId: z.string().describe('ID of the portfolio'),
+        }),
+        z.object({
+          type: z.literal('account').describe('A single account, keyed by the account ID'),
+          accountId: z.string().describe('ID of the account'),
+        }),
+      ])
+    )
+    .describe('Groups of accounts to evaluate separately'),
   values: z
-    .array(z.enum(['total', 'deposit', 'cash', 'assetsOpenPrice', 'assetsCurrentPrice', 'realizedProfits']))
-    .min(1),
+    .array(
+      z
+        .enum(['total', 'deposit', 'cash', 'assetsOpenPrice', 'assetsCurrentPrice', 'realizedProfits'])
+        .describe(
+          [
+            'total: cash plus assetsCurrentPrice',
+            'deposit: cash plus assetsOpenPrice minus realizedProfits, i.e. money paid in including received interest and dividends and minus paid fees and taxes (total minus deposit is the price gain, realized and unrealized)',
+            'cash: cash balance',
+            'assetsOpenPrice: cost basis of all held asset units',
+            'assetsCurrentPrice: market value of all held asset units based on the latest close quote, falling back to the cost basis for assets without quotes',
+            'realizedProfits: sum of sale proceeds minus cost basis of all sold units, before fees and taxes',
+          ].join('; ')
+        )
+    )
+    .min(1)
+    .describe('Values to compute, in the order they appear in each result row'),
 })
 export const evaluateSummaryResponseSchema = responseSchema(
   z.object({
@@ -29,10 +61,15 @@ export const evaluateSummaryResponseSchema = responseSchema(
 )
 
 export const evaluatePositionsRequestSchema = z.object({
-  when: z.discriminatedUnion('type', [
-    z.object({ type: z.literal('now') }),
-    z.object({ type: z.literal('date'), date: dateStringSchema }),
-  ]),
+  when: z
+    .discriminatedUnion('type', [
+      z.object({ type: z.literal('now').describe('Positions as of today') }),
+      z.object({
+        type: z.literal('date').describe('Positions at the end of the given date'),
+        date: dateStringSchema.describe('Date (YYYY-MM-DD) to evaluate at'),
+      }),
+    ])
+    .describe('Date to evaluate at'),
 })
 export const evaluatePositionsResponseSchema = responseSchema(
   z.object({
