@@ -1,4 +1,3 @@
-import crypto from 'crypto'
 import postgres from 'postgres'
 
 import { User, userSchema } from '../../shared/models/User'
@@ -6,6 +5,7 @@ import { hashPassword, verifyPassword } from '../password'
 import { DatabaseError } from './DatabaseError'
 import { DatabaseTable } from './DatabaseTable'
 import { randomId } from './id'
+import { hashToken, randomToken } from './token'
 
 export class DatabaseUsers extends DatabaseTable<User> {
   protected override table = 'user'
@@ -41,6 +41,12 @@ export class DatabaseUsers extends DatabaseTable<User> {
           CONSTRAINT "fk__user_session__userId__user__id" FOREIGN KEY("userId") REFERENCES "user"("id") ON DELETE CASCADE
         )
       `
+  }
+
+  // Sessions used to be stored with their plain ID. Hashing them in place keeps existing sessions valid, since
+  // sha256 in Postgres produces the same value as hashToken.
+  async hashSessionIds(sql: postgres.TransactionSql<{}>): Promise<void> {
+    await sql`UPDATE "user_session" SET "session_id" = encode(sha256(convert_to("session_id", 'UTF8')), 'hex')`
   }
 
   async count(): Promise<number> {
@@ -127,26 +133,25 @@ export class DatabaseUsers extends DatabaseTable<User> {
   }
 
   async createSession(userId: string, rememberMe: boolean): Promise<string> {
-    const sessionIdNonce = crypto.randomBytes(32)
-    const sessionId = 'sess_' + sessionIdNonce.toString('hex')
+    const sessionId = randomToken('sess')
     const createdAt = new Date()
     const expiresAt = rememberMe
       ? new Date(createdAt.valueOf() + 30 * 24 * 60 * 60 * 1000)
       : new Date(createdAt.valueOf() + 60 * 60 * 1000)
     await this.sql`
       INSERT INTO "user_session" ("session_id", "userId", "remember_me", "createdAt", "expires_at")
-      VALUES (${sessionId}, ${userId}, ${rememberMe}, ${createdAt.toISOString()}, ${expiresAt.toISOString()})
+      VALUES (${hashToken(sessionId)}, ${userId}, ${rememberMe}, ${createdAt.toISOString()}, ${expiresAt.toISOString()})
     `
     return sessionId
   }
 
   async clearSession(sessionId: string): Promise<void> {
-    await this.sql`DELETE FROM "user_session" WHERE "session_id" = ${sessionId}`
+    await this.sql`DELETE FROM "user_session" WHERE "session_id" = ${hashToken(sessionId)}`
   }
 
   async renewSession(sessionId: string): Promise<boolean | undefined> {
     await this.sql`DELETE FROM "user_session" WHERE "expires_at" < now()`
-    const raw = await this.sql`SELECT "remember_me" FROM "user_session" WHERE "session_id" = ${sessionId}`
+    const raw = await this.sql`SELECT "remember_me" FROM "user_session" WHERE "session_id" = ${hashToken(sessionId)}`
     if (!raw[0]) {
       return undefined
     }
@@ -155,7 +160,7 @@ export class DatabaseUsers extends DatabaseTable<User> {
       ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
       : new Date(Date.now() + 60 * 60 * 1000)
     await this
-      .sql`UPDATE "user_session" SET "expires_at" = ${expiresAt.toISOString()} WHERE "session_id" = ${sessionId}`
+      .sql`UPDATE "user_session" SET "expires_at" = ${expiresAt.toISOString()} WHERE "session_id" = ${hashToken(sessionId)}`
     return rememberMe
   }
 
@@ -164,7 +169,7 @@ export class DatabaseUsers extends DatabaseTable<User> {
     const rows = await this.sql`
       SELECT u.* FROM "user" u
       LEFT JOIN "user_session" s ON s."userId" = u."id"
-      WHERE s."session_id" = ${sessionId}
+      WHERE s."session_id" = ${hashToken(sessionId)}
     `
     return rows[0] ? this.schema.parse(rows[0]) : undefined
   }
