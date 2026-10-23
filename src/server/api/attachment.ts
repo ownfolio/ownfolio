@@ -36,11 +36,21 @@ export function createRpcV1Attachment(database: Database) {
     },
     linkAttachmentToTransaction: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
+      const attachment = await database.attachments.find(input.id)
+      if (!attachment || attachment.userId !== ctx.user.id) throw RpcError.badRequest(`Unknown attachment ${input.id}`)
+      const transaction = await database.transactions.find(input.transactionId)
+      if (!transaction || transaction.userId !== ctx.user.id)
+        throw RpcError.badRequest(`Unknown transaction ${input.transactionId}`)
       await database.attachments.linkToTransaction(input.id, input.transactionId)
       return { data: undefined }
     },
     unlinkAttachmentFromTransaction: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
+      const attachment = await database.attachments.find(input.id)
+      if (!attachment || attachment.userId !== ctx.user.id) throw RpcError.badRequest(`Unknown attachment ${input.id}`)
+      const transaction = await database.transactions.find(input.transactionId)
+      if (!transaction || transaction.userId !== ctx.user.id)
+        throw RpcError.badRequest(`Unknown transaction ${input.transactionId}`)
       await database.attachments.unlinkFromTransaction(input.id, input.transactionId)
       return { data: undefined }
     },

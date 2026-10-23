@@ -21,6 +21,9 @@ export function createRpcV1Account(database: Database) {
     },
     createAccount: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
+      const portfolio = await database.portfolios.find(input.portfolioId)
+      if (!portfolio || portfolio.userId !== ctx.user.id)
+        throw RpcError.badRequest(`Unknown portfolio ${input.portfolioId}`)
       const account = await database.accounts.create({ ...input })
       return { data: account }
     },
@@ -30,6 +33,11 @@ export function createRpcV1Account(database: Database) {
       const portfolio = await database.portfolios.find(account?.portfolioId || '')
       if (!account || !portfolio || portfolio.userId !== ctx.user.id)
         throw RpcError.badRequest(`Unknown account ${input.id}`)
+      if (input.portfolioId !== account.portfolioId) {
+        const newPortfolio = await database.portfolios.find(input.portfolioId)
+        if (!newPortfolio || newPortfolio.userId !== ctx.user.id)
+          throw RpcError.badRequest(`Unknown portfolio ${input.portfolioId}`)
+      }
       if (input.currency !== account.currency) {
         const transactionCount = await database.transactions.countForAccountId(input.id)
         if (transactionCount > 0) {
