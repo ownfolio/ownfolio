@@ -1,7 +1,6 @@
 import { createRpcCall } from '@ownfolio/rpc-core'
 import { createRpcExpressServer } from '@ownfolio/rpc-express'
 import express from 'express'
-import { rateLimit } from 'express-rate-limit'
 import { z } from 'zod'
 
 import { responseSchema } from '../../shared/utils/schemas'
@@ -51,18 +50,6 @@ export async function createApi(database: Database, config: Config): Promise<exp
   const router = express.Router()
 
   const rpcV1 = createRpcV1(database, config)
-  // limits password guessing per client IP, successful logins do not count
-  router.use(
-    ['/api/v1/login', '/api/v1/register'],
-    rateLimit({
-      windowMs: 15 * 60 * 1000,
-      limit: 10,
-      skipSuccessfulRequests: true,
-      standardHeaders: 'draft-8',
-      legacyHeaders: false,
-      message: { error: 'Too many failed attempts, try again later' },
-    })
-  )
   router.use(createAttachmentUpload(database))
   router.use(
     '/api/v1',
