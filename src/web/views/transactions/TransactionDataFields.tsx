@@ -269,7 +269,7 @@ const AssetBuyTransactionDataFields: React.FC<{
                   if (!content || !content.parsed || !['assetBuy', 'assetSell'].includes(content.parsed.type)) {
                     return undefined
                   }
-                  return content.parsed.assetAmount
+                  return content.parsed.assetAmount?.toString()
                 },
                 deps: [previewedAttachment],
               },
@@ -310,7 +310,7 @@ const AssetBuyTransactionDataFields: React.FC<{
                   if (!content || !content.parsed || content.parsed.type !== 'assetBuy') {
                     return undefined
                   }
-                  return content.parsed.assetPrice
+                  return content.parsed.assetPrice?.toString()
                 },
                 deps: [previewedAttachment],
               },
@@ -356,7 +356,7 @@ const AssetBuyTransactionDataFields: React.FC<{
                   if (!content || !content.parsed || content.parsed.type !== 'assetBuy') {
                     return undefined
                   }
-                  return content.parsed.fee
+                  return content.parsed.fee?.toString()
                 },
                 deps: [previewedAttachment],
               },
@@ -416,7 +416,7 @@ const AssetSellTransactionDataFields: React.FC<{
                   if (!content || !content.parsed || !['assetBuy', 'assetSell'].includes(content.parsed.type)) {
                     return undefined
                   }
-                  return content.parsed.assetAmount
+                  return content.parsed.assetAmount?.toString()
                 },
                 deps: [previewedAttachment],
               },
@@ -457,7 +457,7 @@ const AssetSellTransactionDataFields: React.FC<{
                   if (!content || !content.parsed || content.parsed.type !== 'assetSell') {
                     return undefined
                   }
-                  return content.parsed.assetPrice
+                  return content.parsed.assetPrice?.toString()
                 },
                 deps: [previewedAttachment],
               },
@@ -508,7 +508,7 @@ const AssetSellTransactionDataFields: React.FC<{
                   if (!content || !content.parsed || content.parsed.type !== 'assetSell') {
                     return undefined
                   }
-                  return content.parsed.fee
+                  return content.parsed.fee?.toString()
                 },
                 deps: [previewedAttachment],
               },
@@ -541,7 +541,7 @@ const AssetSellTransactionDataFields: React.FC<{
                   if (!content || !content.parsed || content.parsed.type !== 'assetSell') {
                     return undefined
                   }
-                  return content.parsed.tax
+                  return content.parsed.tax?.toString()
                 },
                 deps: [previewedAttachment],
               },
@@ -602,7 +602,7 @@ const AssetDepositTransactionDataFields: React.FC<{
                   if (!content || !content.parsed || !['assetBuy', 'assetSell'].includes(content.parsed.type)) {
                     return undefined
                   }
-                  return content.parsed.assetAmount
+                  return content.parsed.assetAmount?.toString()
                 },
                 deps: [previewedAttachment],
               },
@@ -700,7 +700,7 @@ const AssetWithdrawalTransactionDataFields: React.FC<{
                   if (!content || !content.parsed || !['assetBuy', 'assetSell'].includes(content.parsed.type)) {
                     return undefined
                   }
-                  return content.parsed.assetAmount
+                  return content.parsed.assetAmount?.toString()
                 },
                 deps: [previewedAttachment],
               },
@@ -806,7 +806,7 @@ const AssetTransferTransactionDataFields: React.FC<{
                   if (!content || !content.parsed || !['assetBuy', 'assetSell'].includes(content.parsed.type)) {
                     return undefined
                   }
-                  return content.parsed.assetAmount
+                  return content.parsed.assetAmount?.toString()
                 },
                 deps: [previewedAttachment],
               },

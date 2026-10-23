@@ -1,5 +1,4 @@
-import BigNumber from 'bignumber.js'
-
+import { AttachmentParsed } from '../../../shared/models/Attachment'
 import { selectionSortBy } from '../../../shared/utils/array'
 import { logger } from '../../logger'
 import { dkbPdfParser } from './dkb'
@@ -10,36 +9,7 @@ export type PdfParser = (text: string) => PdfParserResult | null
 
 const allPdfParsers: PdfParser[] = [dkbPdfParser, flatexPdfParser, ingDiBaPdfParser]
 
-export type PdfParserResult =
-  | {
-      type: 'assetBuy'
-      date?: string
-      time?: string
-      currency?: string
-      asset?: string[]
-      assetAmount?: BigNumber
-      assetPrice?: BigNumber
-      assetAccount?: string[]
-      fee?: BigNumber
-      total?: BigNumber
-      account?: string[]
-      reference?: string
-    }
-  | {
-      type: 'assetSell'
-      date?: string
-      time?: string
-      currency?: string
-      asset?: string[]
-      assetAmount?: BigNumber
-      assetPrice?: BigNumber
-      assetAccount?: string[]
-      fee?: BigNumber
-      tax?: BigNumber
-      total?: BigNumber
-      account?: string[]
-      reference?: string
-    }
+export type PdfParserResult = AttachmentParsed
 
 export function pdfParse(text: string): PdfParserResult | null {
   const results: PdfParserResult[] = []

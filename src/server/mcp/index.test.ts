@@ -4,15 +4,20 @@ import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js'
 import crypto from 'crypto'
 import express from 'express'
+import fs from 'fs/promises'
 import http from 'http'
 import { AddressInfo } from 'net'
+import path from 'path'
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
+import { applyAxiosMock } from '../../../test/axiosMock'
 import { createApi, createRpcV1 } from '../api'
 import { Config } from '../config'
 import { Database } from '../database'
 import { databaseTest } from '../database/databaseTest'
+import { generateDemoPortfolio } from '../demo'
+import { yahooFinanceAxios } from '../quotes/yahooFinance'
 import { createMcpServer, mcpExcludedRpcCalls } from '.'
 import { mcpToolDescriptions } from './descriptions'
 
@@ -54,7 +59,157 @@ describe('mcp', () => {
     for (const name of Object.keys(mcpToolDescriptions)) {
       expect(expectedToolNames, `described tool ${name} does not exist`).toContain(name)
     }
+    // only calls without result data have no output schema
+    expect(tools.filter(t => !t.outputSchema).map(t => t.name)).toEqual([
+      'ping',
+      'deleteAccount',
+      'deleteAsset',
+      'deletePortfolio',
+      'updateQuoteForAsset',
+      'deleteQuoteForAsset',
+      'deleteTransaction',
+      'changePassword',
+      'importUserTransactionsFromCsv',
+      'linkAttachmentToTransaction',
+      'unlinkAttachmentFromTransaction',
+      'deleteAttachment',
+    ])
   })
+
+  it(
+    'returns results matching the output schemas',
+    databaseTest(async db => {
+      await db.init()
+      const user = await db.users.create({ email: 'user@domain.com' }, 'password')
+      // reuses the quotes recorded for the report test, the mock data is never saved from here
+      await applyAxiosMock(yahooFinanceAxios, path.resolve(__dirname, '../api/report.test.mock.json'))
+      await generateDemoPortfolio(db, user.id)
+      const rpcV1 = createRpcV1(db, config)
+      const server = createMcpServer(rpcV1, { user, setSessionId: async () => {}, unsetSessionId: async () => {} })
+      const client = new Client({ name: 'test', version: '0.0.0' })
+      const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair()
+      await Promise.all([server.connect(serverTransport), client.connect(clientTransport)])
+      // the client only validates structured content against output schemas it has seen
+      await client.listTools()
+      const called = new Set<string>()
+      const call = async (name: string, args?: Record<string, unknown>): Promise<any> => {
+        called.add(name)
+        const result = await client.callTool({ name, arguments: args })
+        expect(result.isError, `${name}: ${JSON.stringify(result.content)}`).toBeFalsy()
+        return (result.structuredContent as { data: unknown } | undefined)?.data
+      }
+
+      try {
+        await call('ping')
+        await call('version')
+        await call('me')
+        await call('changeEmail', { newEmail: 'user2@domain.com' })
+
+        const [portfolio] = await call('listPortfolios')
+        await call('retrievePortfolio', { id: portfolio.id })
+        const portfolio2 = await call('createPortfolio', { name: 'Second' })
+        await call('updatePortfolio', { ...portfolio2, name: 'Second renamed' })
+        await call('updatePortfolioStatus', { id: portfolio2.id, status: 'inactive' })
+
+        const accounts = await call('listAccounts')
+        await call('retrieveAccount', { id: accounts[0].id })
+        const account = await call('createAccount', { portfolioId: portfolio2.id, name: 'Account', currency: 'EUR' })
+        await call('updateAccount', { ...account, name: 'Account renamed' })
+        await call('updateAccountStatus', { id: account.id, status: 'hidden' })
+
+        const assets = await call('listAssets')
+        await call('retrieveAsset', { id: assets[0].id })
+        const asset = await call('createAsset', { name: 'Asset', symbol: 'AST', currency: 'EUR' })
+        await call('updateAsset', { ...asset, denomination: 2 })
+        await call('updateAssetStatus', { id: asset.id, status: 'inactive' })
+
+        // the demo portfolio just fetched its quotes, so the providers are paused and nothing is requested
+        await call('updateQuotes')
+        await call('updateQuoteForAsset', { assetId: asset.id, date: '2020-01-01', close: '10.5' })
+        await call('listLatestQuotes')
+        await call('listLatestQuotes', { date: '2020-01-01' })
+        await call('listQuotesForAsset', { id: asset.id })
+        expect(await call('retrieveQuoteForAsset', { id: asset.id, date: '2019-01-01' })).toBeNull()
+        expect(await call('retrieveQuoteForAsset', { id: asset.id, date: '2020-06-01' })).toMatchObject({
+          close: '10.5',
+          open: null,
+        })
+
+        const transactions = await call('listTransactions')
+        expect(transactions.length).toBeGreaterThan(0)
+        await call('listTransactions', { accountId: accounts[0].id, top: 5 })
+        await call('retrieveTransaction', { id: transactions[0].id })
+        const transaction = await call('createTransaction', {
+          date: '2020-01-02',
+          time: '10:00:00',
+          reference: '',
+          comment: '',
+          data: {
+            type: 'assetBuy',
+            assetAccountId: account.id,
+            assetId: asset.id,
+            assetAmount: '3',
+            cashAccountId: account.id,
+            cashAmount: '31.5',
+            feeCashAmount: '1',
+          },
+        })
+        expect(transaction.data.cashAmount).toBe('31.5')
+        await call('updateTransaction', { ...transaction, comment: 'Updated' })
+
+        for (const when of [{ type: 'now' }, { type: 'dates', dates: ['2020-01-02'] }]) {
+          await call('evaluateBalances', { when })
+        }
+        await call('evaluateBalances', { when: { type: 'historical', resolution: 'month' } })
+        await call('evaluateSummary', {
+          when: { type: 'historical', resolution: 'month' },
+          buckets: [
+            { type: 'all' },
+            { type: 'portfolio', portfolioId: portfolio.id },
+            { type: 'account', accountId: account.id },
+          ],
+          values: ['total', 'deposit', 'cash', 'assetsOpenPrice', 'assetsCurrentPrice', 'realizedProfits'],
+        })
+        await call('evaluatePositions', { when: { type: 'now' } })
+        await call('evaluatePositions', { when: { type: 'date', date: '2020-01-02' } })
+        await call('evaluatePlausibility')
+
+        const dashboard = await call('retrieveDefaultDashboard')
+        await call('updateDefaultDashboard', { ...dashboard, rows: dashboard.rows.slice(0, 1) })
+
+        const csv = await call('exportUserTransactionsAsCsv')
+        expect(csv.dataUrl).toMatch(/^data:text\/csv;base64,/)
+        const report = await call('generateReport', { type: 'yearly' })
+        const attachment = await call('uploadAttachment', { fileName: 'report.pdf', dataUrl: report.dataUrl })
+        await call('listAttachments')
+        await call('retrieveAttachment', { id: attachment.id })
+        expect(await call('retrieveAttachmentContent', { id: attachment.id })).toEqual({ parsed: null })
+        const statementPdf = await fs.readFile(path.resolve(__dirname, '../pdf/parse/ingDiBa/test-sell.pdf'))
+        const statement = await call('uploadAttachment', {
+          fileName: 'statement.pdf',
+          dataUrl: `data:application/pdf;base64,${statementPdf.toString('base64')}`,
+        })
+        expect(await call('retrieveAttachmentContent', { id: statement.id })).toMatchObject({
+          parsed: { type: 'assetSell', assetAmount: expect.any(String), tax: expect.any(String) },
+        })
+        await call('downloadAttachment', { id: attachment.id })
+        await call('downloadPdfAttachmentAsText', { id: attachment.id })
+        await call('downloadPdfAttachmentAsPngs', { id: attachment.id })
+        await call('linkAttachmentToTransaction', { id: attachment.id, transactionId: transaction.id })
+        await call('listAttachments', { transactionId: transaction.id })
+        await call('unlinkAttachmentFromTransaction', { id: attachment.id, transactionId: transaction.id })
+
+        const toolsWithOutputSchema = (await client.listTools()).tools.filter(t => t.outputSchema).map(t => t.name)
+        expect(
+          toolsWithOutputSchema.filter(name => !called.has(name)),
+          'tools with output schema not called'
+        ).toEqual([])
+      } finally {
+        await client.close()
+      }
+    }),
+    120000
+  )
 
   it(
     'authorizes via OAuth and calls tools',

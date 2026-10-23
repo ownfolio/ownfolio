@@ -1,7 +1,12 @@
 import { createRpcCallDefinition } from '@ownfolio/rpc-core'
 import { z } from 'zod'
 
-import { attachmentSchema, attachmentSearchResultSchema, attachmentSearchSchema } from '../models/Attachment'
+import {
+  attachmentParsedSchema,
+  attachmentSchema,
+  attachmentSearchResultSchema,
+  attachmentSearchSchema,
+} from '../models/Attachment'
 import { fileSchema } from '../utils/file'
 import { byIdSchemaFor, listResponseSchema, pagingParamsSchema, responseSchema } from '../utils/schemas'
 
@@ -13,7 +18,11 @@ export const rpcV1AttachmentDefinition = {
   retrieveAttachment: createRpcCallDefinition(byIdSchemaFor('attachment'), responseSchema(attachmentSchema)),
   retrieveAttachmentContent: createRpcCallDefinition(
     byIdSchemaFor('attachment'),
-    responseSchema(z.object({ parsed: z.any().nullable() }))
+    responseSchema(
+      z.object({
+        parsed: attachmentParsedSchema.nullable().describe('null if the document is not a recognized broker statement'),
+      })
+    )
   ),
   linkAttachmentToTransaction: createRpcCallDefinition(
     byIdSchemaFor('attachment').extend({ transactionId: z.string().describe('ID of the transaction') }),

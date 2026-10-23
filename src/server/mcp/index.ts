@@ -5,6 +5,7 @@ import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js'
 import { AnyRpcCall, isRpcError, isRpcVoid, RpcError } from '@ownfolio/rpc-core'
 import express from 'express'
+import { z } from 'zod'
 
 import type { createRpcV1, RpcCtx } from '../api'
 import { Config } from '../config'
@@ -32,10 +33,12 @@ export function createMcpServer(rpcV1: RpcV1, ctx: RpcCtx): McpServer {
     if (name in mcpExcludedRpcCalls) {
       continue
     }
-    const run = (input: unknown) => runRpcCall(name, call, ctx, input)
+    const outputSchema = rpcOutputSchemaToMcp(call.outputSchema)
+    const run = (input: unknown) => runRpcCall(name, call, ctx, input, !!outputSchema)
     const config = {
       title: rpcCallNameToTitle(name),
       description: mcpToolDescriptions[name],
+      outputSchema,
       annotations: { readOnlyHint: readOnlyRpcCallPattern.test(name) },
     }
     if (isRpcVoid(call.inputSchema)) {
@@ -45,6 +48,18 @@ export function createMcpServer(rpcV1: RpcV1, ctx: RpcCtx): McpServer {
     }
   }
   return server
+}
+
+const mcpOutputSchemas = new WeakMap<z.ZodType, z.ZodType | undefined>()
+
+// Tool results are sent JSON encoded (e.g. BigNumber values become strings), so the MCP output schema has to describe
+// the input side of codecs. It is rebuilt from the JSON schema of that side, which also keeps all descriptions.
+function rpcOutputSchemaToMcp(schema: z.ZodType): z.ZodType | undefined {
+  if (!mcpOutputSchemas.has(schema)) {
+    const isVoid = isRpcVoid(schema) || (schema instanceof z.ZodObject && schema.shape.data instanceof z.ZodVoid)
+    mcpOutputSchemas.set(schema, isVoid ? undefined : z.fromJSONSchema(z.toJSONSchema(schema, { io: 'input' })))
+  }
+  return mcpOutputSchemas.get(schema)
 }
 
 export function createMcp(database: Database, config: Config, rpcV1: RpcV1): express.Router {
@@ -105,13 +120,18 @@ async function runRpcCall(
   name: string,
   call: AnyRpcCall<RpcCtx>,
   ctx: RpcCtx,
-  input: unknown
+  input: unknown,
+  structured: boolean
 ): Promise<CallToolResult> {
   // the input is not logged, since it can contain secrets (e.g. changePassword)
   logger.info(`MCP tool call ${name}`, { userId: ctx.user?.id })
   try {
     const output = await call.handler(ctx, input)
     const text = isRpcVoid(call.outputSchema) ? 'OK' : JSON.stringify(output)
+    if (structured) {
+      // the text content is kept for clients without support for structured content
+      return { content: [{ type: 'text', text }], structuredContent: JSON.parse(text) }
+    }
     return { content: [{ type: 'text', text }] }
   } catch (error) {
     if (isRpcError(error)) {
