@@ -37,6 +37,7 @@ const EmailForm: React.FC<{ email: string }> = ({ email }) => {
   })
   const [form, updateForm] = useMultiState({
     email,
+    password: '',
   })
   const pristine = form.email === email
 
@@ -46,7 +47,8 @@ const EmailForm: React.FC<{ email: string }> = ({ email }) => {
         event.preventDefault()
         updateState({ busy: true })
         try {
-          await rpcClient.changeEmail({ newEmail: form.email })
+          await rpcClient.changeEmail({ newEmail: form.email, password: form.password })
+          updateForm({ password: '' })
           await queryClient.invalidateQueries()
           updateState({ message: { text: 'Email has been changed', kind: 'info' } })
         } catch (err) {
@@ -72,6 +74,22 @@ const EmailForm: React.FC<{ email: string }> = ({ email }) => {
           autoFocus
         />
       </Label>
+      {!pristine && (
+        <Label text="Password" htmlFor="emailPassword">
+          <Input
+            type="password"
+            name="emailPassword"
+            id="emailPassword"
+            placeholder="••••••••"
+            required
+            value={form.password}
+            onChange={event => {
+              updateForm({ password: event.target.value })
+              updateState({ message: undefined })
+            }}
+          />
+        </Label>
+      )}
       <Button type="submit" variant={!pristine ? 'primary' : undefined} disabled={pristine || state.busy}>
         Change email
       </Button>

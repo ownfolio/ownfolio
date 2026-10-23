@@ -64,8 +64,17 @@ export function createRpcV1User(database: Database, config: Config) {
     },
     changeEmail: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
+      if (!(await database.users.verifyPassword(ctx.user.id, input.password))) {
+        throw RpcError.badRequest('Password is incorrect')
+      }
       const user = await database.users.retrieve(ctx.user.id)
-      const user2 = await database.users.update({ ...user, email: input.newEmail })
+      const user2 = await database.users.update({ ...user, email: input.newEmail }).catch(err => {
+        if (err instanceof postgres.PostgresError && err.constraint_name === 'idx__user__email') {
+          throw RpcError.conflict('Email already taken')
+        } else {
+          throw err
+        }
+      })
       return { data: user2 }
     },
     changePassword: async (ctx, input) => {
@@ -74,6 +83,9 @@ export function createRpcV1User(database: Database, config: Config) {
         throw RpcError.badRequest('Old password is incorrect')
       }
       await database.users.setPassword(ctx.user.id, input.newPassword)
+      // whoever might know the old password loses access, only the session doing the change stays logged in
+      await database.users.clearOtherSessions(ctx.user.id, ctx.sessionId)
+      await database.oauth.revokeAllForUser(ctx.user.id)
       return { data: undefined }
     },
     exportUserTransactionsAsCsv: async ctx => {

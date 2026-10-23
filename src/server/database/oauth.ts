@@ -170,6 +170,13 @@ export class DatabaseOAuth extends DatabaseTable<OAuthClientInformationFull> {
   async revokeToken(clientId: string, value: string): Promise<void> {
     await this.sql`DELETE FROM "oauth_token" WHERE "token_hash" = ${hashToken(value)} AND "client_id" = ${clientId}`
   }
+
+  async revokeAllForUser(userId: string): Promise<void> {
+    await this.sql.begin(async sql => {
+      await sql`DELETE FROM "oauth_authorization_code" WHERE "userId" = ${userId}`
+      await sql`DELETE FROM "oauth_token" WHERE "userId" = ${userId}`
+    })
+  }
 }
 
 function rowToGrant(row: postgres.Row): OAuthGrant {

@@ -104,7 +104,7 @@ describe('mcp', () => {
         await call('ping')
         await call('version')
         await call('me')
-        await call('changeEmail', { newEmail: 'user2@domain.com' })
+        await call('changeEmail', { newEmail: 'user2@domain.com', password: 'password' })
 
         const [portfolio] = await call('listPortfolios')
         await call('retrievePortfolio', { id: portfolio.id })

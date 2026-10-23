@@ -30,9 +30,10 @@ export const mcpToolDescriptions: Record<string, string> = {
   version: 'Return the version of the ownfolio server.',
 
   me: 'Return the authenticated user (ID, email, registration date).',
-  changeEmail: 'Change the email address of the authenticated user. Returns the updated user.',
+  changeEmail:
+    'Change the email address of the authenticated user. Requires the current password. Only use when the user explicitly asks for it. Returns the updated user.',
   changePassword:
-    'Change the password of the authenticated user. Requires the current password. Only use when the user explicitly asks for it.',
+    'Change the password of the authenticated user. Requires the current password. Only use when the user explicitly asks for it. Logs out all web sessions and revokes the access of all MCP clients, including this one, which then has to be authorized again.',
   exportUserTransactionsAsCsv:
     'Export all transactions of the user as CSV file (data URL). Accounts and assets are referenced by name. Columns: Date, Time, Type, AssetAccount, Asset, AssetAmount, FromAssetAccount, ToAssetAccount, CashAccount, CashAmount, FromCashAccount, ToCashAccount, FeeCashAmount, TaxCashAmount, FeeAssetAmount, Reference, Comment.',
   importUserTransactionsFromCsv:

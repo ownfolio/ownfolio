@@ -25,7 +25,10 @@ export const rpcV1UserDefinition = {
   logout: createRpcCallDefinition(z.void(), responseSchema(z.void())),
   me: createRpcCallDefinition(z.void(), responseSchema(userSchema)),
   changeEmail: createRpcCallDefinition(
-    z.object({ newEmail: z.string().trim().toLowerCase().email().describe('New email address to log in with') }),
+    z.object({
+      newEmail: z.string().trim().toLowerCase().email().describe('New email address to log in with'),
+      password: z.string().describe('Current password, required for verification'),
+    }),
     responseSchema(userSchema)
   ),
   changePassword: createRpcCallDefinition(

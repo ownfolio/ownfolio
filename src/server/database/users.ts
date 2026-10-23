@@ -149,6 +149,11 @@ export class DatabaseUsers extends DatabaseTable<User> {
     await this.sql`DELETE FROM "user_session" WHERE "session_id" = ${hashToken(sessionId)}`
   }
 
+  async clearOtherSessions(userId: string, keepSessionId?: string): Promise<void> {
+    const keepFilter = keepSessionId ? this.sql`AND "session_id" <> ${hashToken(keepSessionId)}` : this.sql``
+    await this.sql`DELETE FROM "user_session" WHERE "userId" = ${userId} ${keepFilter}`
+  }
+
   async renewSession(sessionId: string): Promise<boolean | undefined> {
     await this.sql`DELETE FROM "user_session" WHERE "expires_at" < now()`
     const raw = await this.sql`SELECT "remember_me" FROM "user_session" WHERE "session_id" = ${hashToken(sessionId)}`
