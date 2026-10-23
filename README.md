@@ -38,6 +38,8 @@ services:
       PGUSER: 'ownfolio'
       PGPASSWORD: 'ownfolio'
       USER_REGISTRATION_ENABLED: '1'
+      # externally visible URL, required for MCP (must be https unless localhost)
+      PUBLIC_URL: 'https://ownfolio.example.com'
     depends_on:
       - postgres
   postgres:
@@ -49,6 +51,11 @@ services:
       POSTGRES_USER: 'ownfolio'
       POSTGRES_PASSWORD: 'ownfolio'
 ```
+
+## MCP
+
+ownfolio exposes all of its API operations as an [MCP](https://modelcontextprotocol.io) server at `<PUBLIC_URL>/mcp`.
+Clients authenticate via OAuth: add the URL to your MCP client and approve the client in the browser when asked.
 
 ## Changelog
 

@@ -4,6 +4,7 @@ import { rpcV1AttachmentDefinition } from './attachment'
 import { rpcV1BalanceDefinition } from './balance'
 import { rpcV1DashboardDefinition } from './dashboard'
 import { rpcV1EvaluationsDefinition } from './evaluations'
+import { rpcV1OAuthDefinition } from './oauth'
 import { rpcV1PortfolioDefinition } from './portfolio'
 import { rpcV1QuoteDefinition } from './quote'
 import { rpcV1ReportDefinition } from './report'
@@ -22,4 +23,5 @@ export const rpcV1Definition = {
   ...rpcV1TransactionDefinition,
   ...rpcV1UserDefinition,
   ...rpcV1DashboardDefinition,
+  ...rpcV1OAuthDefinition,
 }

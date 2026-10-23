@@ -6,6 +6,8 @@ import { z } from 'zod'
 import { responseSchema } from '../../shared/utils/schemas'
 import { Config } from '../config'
 import { Database } from '../database'
+import { logger } from '../logger'
+import { createMcp } from '../mcp'
 import { createRpcV1Account } from './account'
 import { createRpcV1Asset } from './asset'
 import { createRpcV1Attachment } from './attachment'
@@ -13,6 +15,7 @@ import { createRpcV1Balance } from './balance'
 import { createRpcCtx, RpcCtx } from './context'
 import { createRpcV1Dashboard } from './dashboard'
 import { createRpcV1Evaluations } from './evaluations'
+import { createRpcV1OAuth } from './oauth'
 import { createRpcV1Portfolio } from './portfolio'
 import { createRpcV1Quote } from './quote'
 import { createRpcV1Report } from './report'
@@ -38,6 +41,7 @@ export function createRpcV1(database: Database, config: Config) {
     ...createRpcV1Balance(database),
     ...createRpcV1Report(database),
     ...createRpcV1Dashboard(database),
+    ...createRpcV1OAuth(database),
   }
 }
 
@@ -52,6 +56,12 @@ export async function createApi(database: Database, config: Config): Promise<exp
       requestBodyLimit: '10mb',
     })
   )
+
+  try {
+    router.use(createMcp(database, config, rpcV1))
+  } catch (error) {
+    logger.error('Unable to set up MCP endpoint, PUBLIC_URL must use https (except for localhost)', { error })
+  }
 
   return router
 }

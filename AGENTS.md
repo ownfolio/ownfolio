@@ -12,6 +12,7 @@ in TypeScript and bundled with esbuild.
 - `src/server` – backend
   - `index.ts` – CLI entry point (`server`, `create-user`, `regenerate-attachment-derivations`) via `commander`
   - `api/` – RPC handlers, one module per domain (`portfolio.ts`, `account.ts`, …)
+  - `mcp/` – MCP endpoint at `/mcp` exposing the RPC handlers as tools, plus its OAuth 2.1 authorization server
   - `database/` – one `Database*` class per table plus `index.ts`, which owns the connection and migrations
   - `balance/`, `reports/`, `quotes/`, `csv/`, `pdf/` – domain logic, quote providers, imports, PDF handling and
     broker statement parsers (`pdf/parse/<broker>`)
@@ -65,6 +66,23 @@ are unrelated to your change.
 3. Implement the handler in `src/server/api/<domain>.ts`. Every handler must check `ctx.user` (throw
    `RpcError.unauthorized()`) and verify that loaded entities belong to `ctx.user.id`.
 4. Call it from the frontend through `rpcClient` in `src/web/api.ts`.
+5. Make sure it works via MCP as well (see below).
+
+### MCP
+
+**Every operation supported by the normal API must also be supported via MCP at `/mcp`.** `src/server/mcp/index.ts`
+turns every call of the `createRpcV1()` router into an MCP tool with the same name, input schema and handler, so a call
+added there is exposed automatically. Do not add API operations outside of that router (e.g. as plain express routes),
+since they would not reach MCP.
+
+The only exceptions are listed in `mcpExcludedRpcCalls`, each with a reason. Only calls that cannot work for an MCP
+client belong there (cookie session handling, the interactive OAuth consent). `src/server/mcp/index.test.ts` fails if
+the tool list and the router diverge or an exclusion refers to a call that no longer exists.
+
+MCP clients authenticate with OAuth 2.1 (`mcpAuthRouter` from `@modelcontextprotocol/sdk` with the Postgres-backed
+provider in `src/server/mcp/oauthProvider.ts`). Users approve clients on the `/oauth/authorize` page of the web app.
+`PUBLIC_URL` must be the externally visible URL of the server and use https (except for localhost); otherwise the MCP
+endpoint is disabled.
 
 ### Changing the database schema
 

@@ -6,13 +6,16 @@ export interface WebConfig {
 
 export interface Config {
   httpPort: number
+  publicUrl: string
   userRegistrationEnabled: boolean
   publicDirectory: string
 }
 
 export function createConfig(): Config {
+  const httpPort = getEnvNumber('HTTP_PORT', 3000)
   return {
-    httpPort: getEnvNumber('HTTP_PORT', 3000),
+    httpPort,
+    publicUrl: getEnvString('PUBLIC_URL', `http://localhost:${httpPort}`).replace(/\/+$/, ''),
     userRegistrationEnabled: getEnvBoolean('USER_REGISTRATION_ENABLED', false),
     publicDirectory: path.resolve(__dirname, 'public'),
   }
