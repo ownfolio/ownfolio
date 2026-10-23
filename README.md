@@ -40,6 +40,8 @@ services:
       USER_REGISTRATION_ENABLED: '1'
       # externally visible URL, required for MCP (must be https unless localhost)
       PUBLIC_URL: 'https://ownfolio.example.com'
+      # number of reverse proxies in front of ownfolio, so login rate limits apply per client IP
+      # TRUST_PROXY_HOPS: '1'
     depends_on:
       - postgres
   postgres:

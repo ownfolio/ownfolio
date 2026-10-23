@@ -12,6 +12,9 @@ import { logger } from './logger'
 export async function createServer(database: Database, config: Config): Promise<express.Express> {
   const app = express()
   app.disable('x-powered-by')
+  if (config.trustProxyHops > 0) {
+    app.set('trust proxy', config.trustProxyHops)
+  }
   app.use(compression())
   app.use((req, _res, next) => {
     logger.info(`Request ${req.method} ${req.url}`)

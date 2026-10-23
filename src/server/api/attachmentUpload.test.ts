@@ -97,6 +97,7 @@ async function withServer(
       httpPort: 0,
       publicUrl: `http://localhost:${(server.address() as AddressInfo).port}`,
       userRegistrationEnabled: false,
+      trustProxyHops: 0,
       publicDirectory: '',
     }
     app.use(await createApi(database, config))

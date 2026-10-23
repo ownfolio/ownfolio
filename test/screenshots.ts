@@ -108,6 +108,7 @@ async function prepare(
       httpPort: port,
       publicUrl: baseUrl,
       userRegistrationEnabled: false,
+      trustProxyHops: 0,
       publicDirectory: path.resolve(__dirname, '..', 'dist', 'public'),
     })
     await usingInstance(

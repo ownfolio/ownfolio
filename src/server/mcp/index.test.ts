@@ -25,6 +25,7 @@ const config: Config = {
   httpPort: 3000,
   publicUrl: 'http://localhost:3000',
   userRegistrationEnabled: false,
+  trustProxyHops: 0,
   publicDirectory: '',
 }
 

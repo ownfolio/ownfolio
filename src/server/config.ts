@@ -8,6 +8,8 @@ export interface Config {
   httpPort: number
   publicUrl: string
   userRegistrationEnabled: boolean
+  // number of reverse proxies in front of the server whose X-Forwarded-For entries are trusted for the client IP
+  trustProxyHops: number
   publicDirectory: string
 }
 
@@ -17,6 +19,7 @@ export function createConfig(): Config {
     httpPort,
     publicUrl: getEnvString('PUBLIC_URL', `http://localhost:${httpPort}`).replace(/\/+$/, ''),
     userRegistrationEnabled: getEnvBoolean('USER_REGISTRATION_ENABLED', false),
+    trustProxyHops: getEnvNumber('TRUST_PROXY_HOPS', 0),
     publicDirectory: path.resolve(__dirname, 'public'),
   }
 }

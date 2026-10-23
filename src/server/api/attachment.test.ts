@@ -17,6 +17,7 @@ describe('attachment', () => {
         httpPort: 0,
         publicUrl: 'http://localhost',
         userRegistrationEnabled: false,
+        trustProxyHops: 0,
         publicDirectory: '',
       })
       const ctx1 = { user: u1, setSessionId: async () => {}, unsetSessionId: async () => {} }
