@@ -14,8 +14,7 @@ import { SelectPortfolio } from '../../components/SelectPortfolio'
 import { LoadingView } from '../loading/LoadingView'
 
 type Mode =
-  | { type: 'create'; accountTemplate?: Omit<Account, 'id' | 'createdAt'> }
-  | { type: 'edit'; accountId: string }
+  { type: 'create'; accountTemplate?: Omit<Account, 'id' | 'createdAt'> } | { type: 'edit'; accountId: string }
 
 interface Props extends DialogContentProps<Account> {
   mode: Mode

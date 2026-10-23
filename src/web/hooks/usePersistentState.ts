@@ -2,13 +2,7 @@ import React from 'react'
 import { z } from 'zod'
 
 type PersistentStateValueType =
-  | undefined
-  | null
-  | boolean
-  | string
-  | number
-  | Array<any>
-  | Record<string | number | symbol, any>
+  undefined | null | boolean | string | number | Array<any> | Record<string | number | symbol, any>
 
 export function usePersistentState<T extends PersistentStateValueType>(
   key: string,

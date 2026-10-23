@@ -11,8 +11,7 @@ import { Label } from '../../components/Label'
 import { LoadingView } from '../loading/LoadingView'
 
 type Mode =
-  | { type: 'create'; portfolioTemplate?: Omit<Portfolio, 'id' | 'createdAt'> }
-  | { type: 'edit'; portfolioId: string }
+  { type: 'create'; portfolioTemplate?: Omit<Portfolio, 'id' | 'createdAt'> } | { type: 'edit'; portfolioId: string }
 
 interface Props extends DialogContentProps<Portfolio> {
   mode: Mode
