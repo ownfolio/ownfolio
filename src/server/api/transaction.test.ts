@@ -60,7 +60,8 @@ describe('transaction', () => {
         api.updateTransaction.handler(ctx, { ...transaction, data: assetBuy(act1.id, ast2.id, act1.id).data })
       ).rejects.toThrow(`Unknown asset ${ast2.id}`)
       await expect(db.transactions.find(transaction.id)).resolves.toMatchObject({ data: { assetId: ast1.id } })
-    })
+    }),
+    60000
   )
 })
 

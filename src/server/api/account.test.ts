@@ -28,6 +28,7 @@ describe('account', () => {
         `Unknown portfolio ${port2.id}`
       )
       await expect(db.accounts.find(account.id)).resolves.toMatchObject({ portfolioId: port1.id })
-    })
+    }),
+    60000
   )
 })

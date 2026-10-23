@@ -63,6 +63,7 @@ describe('attachment', () => {
       await expect(db.attachments.listByUserId(u1.id)).resolves.toMatchObject([{ transactionIds: [tx1.id] }])
       await api.unlinkAttachmentFromTransaction.handler(ctx1, { id: att1.id, transactionId: tx1.id })
       await expect(db.attachments.listByUserId(u1.id)).resolves.toMatchObject([{ transactionIds: [] }])
-    })
+    }),
+    60000
   )
 })

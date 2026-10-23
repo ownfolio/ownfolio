@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 import postgres from 'postgres'
-import { GenericContainer, StartedTestContainer } from 'testcontainers'
+import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
 
 import { Database } from '.'
 
@@ -17,6 +17,9 @@ export function databaseTest(fn: (database: Database) => Promise<void>): () => P
       .withTmpFs({
         '/var/lib/postgresql/data/pgdata': 'rw,noexec,nosuid,size=256m',
       })
+      // the image starts a temporary server for initialization and restarts afterwards, so the port is open before
+      // the database is ready. Only the second ready message comes from the final server.
+      .withWaitStrategy(Wait.forLogMessage(/database system is ready to accept connections/, 2))
     const container = await startTestContainer(containerDefinition, !process.env.CI)
 
     const id = 'ownfolio_' + crypto.randomBytes(8).toString('hex')
