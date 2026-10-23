@@ -2,13 +2,15 @@ import { createRpcRouterFromDefinitionAndHandler, RpcError } from '@ownfolio/rpc
 
 import { rpcV1AttachmentDefinition } from '../../shared/api/attachment'
 import { parseDataUrl, renderDataUrl } from '../../shared/utils/file'
+import { Config } from '../config'
 import { Database } from '../database'
 import { PdfParserResult } from '../pdf/parse'
 import { pdfToConcatenatedPngs, splitConcatenatedPngs } from '../pdf/pdfToPngs'
 import { pdfToText } from '../pdf/pdfToText'
+import { attachmentUploadPath } from './attachmentUpload'
 import { RpcCtx } from './context'
 
-export function createRpcV1Attachment(database: Database) {
+export function createRpcV1Attachment(database: Database, config: Config) {
   return createRpcRouterFromDefinitionAndHandler<RpcCtx, typeof rpcV1AttachmentDefinition>(rpcV1AttachmentDefinition, {
     listAttachments: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()
@@ -75,6 +77,19 @@ export function createRpcV1Attachment(database: Database) {
         Buffer.from(bytesBase64, 'base64')
       )
       return { data: attachment }
+    },
+    createAttachmentUploadUrl: async (ctx, input) => {
+      if (!ctx.user) throw RpcError.unauthorized()
+      const { token, expiresAt } = await database.attachments.createUploadToken(ctx.user.id, input.fileName)
+      const uploadUrl = config.publicUrl + attachmentUploadPath
+      const curlCommand = [
+        'curl --fail-with-body -X POST',
+        `-H 'Authorization: Bearer ${token}'`,
+        `-H 'Content-Type: application/pdf'`,
+        `--data-binary @/path/to/file.pdf`,
+        `'${uploadUrl}'`,
+      ].join(' ')
+      return { data: { uploadUrl, token, expiresAt, curlCommand } }
     },
     downloadAttachment: async (ctx, input) => {
       if (!ctx.user) throw RpcError.unauthorized()

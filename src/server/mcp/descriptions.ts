@@ -20,7 +20,8 @@ Conventions:
 Typical workflows:
 - Current holdings and their value: evaluatePositions, combined with listAssets and listAccounts to resolve names.
 - Total value or profit over time: evaluateSummary.
-- Recording a trade from a broker statement: uploadAttachment, downloadPdfAttachmentAsText or retrieveAttachmentContent to read it, createTransaction, then linkAttachmentToTransaction. Afterwards evaluatePlausibility reports conflicts between transactions and their attachments.
+- Uploading a local file: createAttachmentUploadUrl, then run the returned curlCommand with the file path filled in. Only use uploadAttachment for very small files, since its file content has to be passed inline as base64. If you cannot run commands, ask the user to upload the file in the web app and look it up with listAttachments.
+- Recording a trade from a broker statement: upload it (see above), downloadPdfAttachmentAsText or retrieveAttachmentContent to read it, createTransaction, then linkAttachmentToTransaction. Afterwards evaluatePlausibility reports conflicts between transactions and their attachments.
 - Before creating a transaction, make sure the referenced accounts and assets exist (listAccounts, listAssets) and create them if needed.`
 
 // Every MCP tool needs a description, `index.test.ts` verifies that none is missing.
@@ -92,7 +93,9 @@ export const mcpToolDescriptions: Record<string, string> = {
   unlinkAttachmentFromTransaction: 'Remove the link between an attachment and a transaction. Both are kept.',
   deleteAttachment: 'Delete an attachment and its links to transactions. Cannot be undone.',
   uploadAttachment:
-    'Upload a PDF document (data URL with MIME type application/pdf) as attachment. Returns the created attachment including its ID.',
+    'Upload a PDF document passed inline as base64 data URL (MIME type application/pdf). Only suitable for very small files, prefer createAttachmentUploadUrl. Returns the created attachment including its ID.',
+  createAttachmentUploadUrl:
+    'Create a single use upload URL for a PDF, valid for 15 minutes. Use this instead of uploadAttachment whenever you can run commands: execute the returned curlCommand after replacing /path/to/file.pdf with the local file path. The command prints {"data": <attachment>} with the ID of the created attachment. Files up to 10 MB are accepted.',
   downloadAttachment: 'Download the original file of an attachment as data URL.',
   downloadPdfAttachmentAsPngs:
     'Render each page of a PDF attachment as PNG image. Returns one data URL per page. Prefer downloadPdfAttachmentAsText unless the layout matters.',

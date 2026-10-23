@@ -75,7 +75,11 @@ turns every call of the `createRpcV1()` router into an MCP tool with the same na
 added there is exposed automatically. Do not add API operations outside of that router (e.g. as plain express routes),
 since they would not reach MCP.
 
-The only exceptions are listed in `mcpExcludedRpcCalls`, each with a reason. Only calls that cannot work for an MCP
+The only operation outside of the router is the attachment upload at `POST /api/attachments/upload` (`src/server/api/attachmentUpload.ts`):
+MCP tool arguments are written by the model, so files cannot be passed through them. The `createAttachmentUploadUrl`
+call hands out a single use token, and the client sends the raw file there with that token as bearer header.
+
+RPC calls not exposed as MCP tools are listed in `mcpExcludedRpcCalls`, each with a reason. Only calls that cannot work for an MCP
 client belong there (cookie session handling, the interactive OAuth consent). `src/server/mcp/index.test.ts` fails if
 the tool list and the router diverge or an exclusion refers to a call that no longer exists.
 

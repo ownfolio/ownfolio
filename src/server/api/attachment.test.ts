@@ -13,7 +13,12 @@ describe('attachment', () => {
       await db.init()
       const u1 = await db.users.create({ email: 'user1@domain.com' }, 'password')
       const u2 = await db.users.create({ email: 'user2@domain.com' }, 'password')
-      const api = createRpcV1Attachment(db)
+      const api = createRpcV1Attachment(db, {
+        httpPort: 0,
+        publicUrl: 'http://localhost',
+        userRegistrationEnabled: false,
+        publicDirectory: '',
+      })
       const ctx1 = { user: u1, setSessionId: async () => {}, unsetSessionId: async () => {} }
       const ctx2 = { user: u2, setSessionId: async () => {}, unsetSessionId: async () => {} }
       const createTransaction = async (userId: string) => {

@@ -1,8 +1,8 @@
 import { OAuthClientInformationFull, OAuthClientInformationFullSchema } from '@modelcontextprotocol/sdk/shared/auth.js'
-import crypto from 'crypto'
 import postgres from 'postgres'
 
 import { DatabaseTable } from './DatabaseTable'
+import { hashToken, randomToken } from './token'
 
 const authorizationCodeLifetimeSeconds = 10 * 60
 const accessTokenLifetimeSeconds = 60 * 60
@@ -170,14 +170,6 @@ export class DatabaseOAuth extends DatabaseTable<OAuthClientInformationFull> {
   async revokeToken(clientId: string, value: string): Promise<void> {
     await this.sql`DELETE FROM "oauth_token" WHERE "token_hash" = ${hashToken(value)} AND "client_id" = ${clientId}`
   }
-}
-
-function randomToken(prefix: string): string {
-  return prefix + '_' + crypto.randomBytes(32).toString('hex')
-}
-
-function hashToken(value: string): string {
-  return crypto.createHash('sha256').update(value).digest('hex')
 }
 
 function rowToGrant(row: postgres.Row): OAuthGrant {

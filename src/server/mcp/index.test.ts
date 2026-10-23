@@ -192,6 +192,8 @@ describe('mcp', () => {
         expect(await call('retrieveAttachmentContent', { id: statement.id })).toMatchObject({
           parsed: { type: 'assetSell', assetAmount: expect.any(String), tax: expect.any(String) },
         })
+        const upload = await call('createAttachmentUploadUrl', { fileName: 'statement.pdf' })
+        expect(upload.curlCommand).toContain(upload.token)
         await call('downloadAttachment', { id: attachment.id })
         await call('downloadPdfAttachmentAsText', { id: attachment.id })
         await call('downloadPdfAttachmentAsPngs', { id: attachment.id })

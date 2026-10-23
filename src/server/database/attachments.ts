@@ -15,6 +15,9 @@ import { createPromisePool } from '../promisePool'
 import { DatabaseEntity } from './DatabaseEntity'
 import { DatabaseError } from './DatabaseError'
 import { randomId } from './id'
+import { hashToken, randomToken } from './token'
+
+const uploadTokenLifetimeSeconds = 15 * 60
 
 export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'> {
   protected override table = 'attachment'
@@ -90,6 +93,20 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
     await sql`ALTER TABLE "attachment_derivation_cache" ALTER COLUMN "expiresAt" DROP NOT NULL`
   }
 
+  public async addUploadTokenTable(sql: postgres.TransactionSql<{}>): Promise<void> {
+    await sql`
+      CREATE TABLE "attachment_upload_token" (
+        "tokenHash" VARCHAR(64) NOT NULL,
+        "userId" VARCHAR(32) NOT NULL,
+        "fileName" VARCHAR(128) NOT NULL,
+        "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL,
+        "expiresAt" TIMESTAMP WITH TIME ZONE NOT NULL,
+        PRIMARY KEY ("tokenHash"),
+        CONSTRAINT "fk__attachment_upload_token__userId__user__id" FOREIGN KEY("userId") REFERENCES "user"("id") ON DELETE CASCADE
+      )
+    `
+  }
+
   public async listByUserId(
     userId: string,
     search?: AttachmentSearch,
@@ -138,6 +155,35 @@ export class DatabaseAttachments extends DatabaseEntity<Attachment, 'createdAt'>
     })
     await this.regenerateDefaultDerivations(attachment)
     return attachment
+  }
+
+  public async createUploadToken(
+    userId: string,
+    fileName: string,
+    lifetimeSeconds: number = uploadTokenLifetimeSeconds
+  ): Promise<{ token: string; expiresAt: string }> {
+    await this.sql`DELETE FROM "attachment_upload_token" WHERE "expiresAt" < now()`
+    const token = randomToken('ofu')
+    const now = new Date()
+    const expiresAt = new Date(now.valueOf() + lifetimeSeconds * 1000).toISOString()
+    await this.sql`INSERT INTO "attachment_upload_token" ${this.sql({
+      tokenHash: hashToken(token),
+      userId,
+      fileName,
+      createdAt: now.toISOString(),
+      expiresAt,
+    })}`
+    return { token, expiresAt }
+  }
+
+  // tokens are single use, so they are deleted when consumed
+  public async consumeUploadToken(token: string): Promise<{ userId: string; fileName: string } | undefined> {
+    const rows = await this.sql`
+      DELETE FROM "attachment_upload_token"
+      WHERE "tokenHash" = ${hashToken(token)} AND "expiresAt" > now()
+      RETURNING "userId", "fileName"
+    `
+    return rows[0] ? { userId: rows[0].userId, fileName: rows[0].fileName } : undefined
   }
 
   public async read(id: string): Promise<Buffer> {

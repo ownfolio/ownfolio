@@ -11,6 +11,7 @@ import { createMcp } from '../mcp'
 import { createRpcV1Account } from './account'
 import { createRpcV1Asset } from './asset'
 import { createRpcV1Attachment } from './attachment'
+import { createAttachmentUpload } from './attachmentUpload'
 import { createRpcV1Balance } from './balance'
 import { createRpcCtx, RpcCtx } from './context'
 import { createRpcV1Dashboard } from './dashboard'
@@ -37,7 +38,7 @@ export function createRpcV1(database: Database, config: Config) {
     ...createRpcV1Quote(database),
     ...createRpcV1Transaction(database),
     ...createRpcV1User(database, config),
-    ...createRpcV1Attachment(database),
+    ...createRpcV1Attachment(database, config),
     ...createRpcV1Balance(database),
     ...createRpcV1Report(database),
     ...createRpcV1Dashboard(database),
@@ -49,6 +50,7 @@ export async function createApi(database: Database, config: Config): Promise<exp
   const router = express.Router()
 
   const rpcV1 = createRpcV1(database, config)
+  router.use(createAttachmentUpload(database))
   router.use(
     '/api/v1',
     createRpcExpressServer<RpcCtx>(rpcV1, {

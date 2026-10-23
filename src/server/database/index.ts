@@ -99,6 +99,7 @@ export class Database {
     await this.migrate('portfolios.addStatusColumn', sql => this.portfolios.addStatusColumn(sql))
     await this.migrate('dashboards.init', sql => this.dashboards.init(sql))
     await this.migrate('oauth.init', sql => this.oauth.init(sql))
+    await this.migrate('attachments.addUploadTokenTable', sql => this.attachments.addUploadTokenTable(sql))
     logger.info(`Finished database migrations`)
   }
 
