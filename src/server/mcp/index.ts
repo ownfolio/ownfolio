@@ -31,7 +31,7 @@ export function createMcpServer(rpcV1: RpcV1, ctx: RpcCtx): McpServer {
     if (name in mcpExcludedRpcCalls) {
       continue
     }
-    const run = (input: unknown) => runRpcCall(call, ctx, input)
+    const run = (input: unknown) => runRpcCall(name, call, ctx, input)
     const config = {
       title: rpcCallNameToTitle(name),
       annotations: { readOnlyHint: readOnlyRpcCallPattern.test(name) },
@@ -99,7 +99,14 @@ export function createMcp(database: Database, config: Config, rpcV1: RpcV1): exp
   return router
 }
 
-async function runRpcCall(call: AnyRpcCall<RpcCtx>, ctx: RpcCtx, input: unknown): Promise<CallToolResult> {
+async function runRpcCall(
+  name: string,
+  call: AnyRpcCall<RpcCtx>,
+  ctx: RpcCtx,
+  input: unknown
+): Promise<CallToolResult> {
+  // the input is not logged, since it can contain secrets (e.g. changePassword)
+  logger.info(`MCP tool call ${name}`, { userId: ctx.user?.id })
   try {
     const output = await call.handler(ctx, input)
     const text = isRpcVoid(call.outputSchema) ? 'OK' : JSON.stringify(output)
@@ -108,7 +115,7 @@ async function runRpcCall(call: AnyRpcCall<RpcCtx>, ctx: RpcCtx, input: unknown)
     if (isRpcError(error)) {
       return { isError: true, content: [{ type: 'text', text: `${error.status}: ${error.message}` }] }
     }
-    logger.error('MCP tool call failed', { error })
+    logger.error(`MCP tool call ${name} failed`, { userId: ctx.user?.id, error })
     return { isError: true, content: [{ type: 'text', text: 'Internal server error' }] }
   }
 }
