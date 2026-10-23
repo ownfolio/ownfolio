@@ -106,6 +106,7 @@ async function prepare(
     const session = await database.users.createSession(user.id, false)
     const server = await createServer(database, {
       httpPort: port,
+      publicUrl: baseUrl,
       userRegistrationEnabled: false,
       publicDirectory: path.resolve(__dirname, '..', 'dist', 'public'),
     })
