@@ -2,7 +2,6 @@ import { css } from '@linaria/core'
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
-import { fileAsDataUrl, fileDownload } from '../../../shared/utils/file'
 import { sleep } from '../../../shared/utils/promise'
 import { rpcClient } from '../../api'
 import { Button } from '../../components/Button'
@@ -12,6 +11,7 @@ import { Input } from '../../components/Input'
 import { Label } from '../../components/Label'
 import { Message } from '../../components/Message'
 import { parseError } from '../../error'
+import { fileAsDataUrl, fileDownload } from '../../file'
 import { useMultiState } from '../../hooks/useMultiState'
 
 export const UserDialog: React.FC<DialogContentProps<void>> = ({ closeDialog }) => {

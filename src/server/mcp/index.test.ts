@@ -7,6 +7,7 @@ import express from 'express'
 import http from 'http'
 import { AddressInfo } from 'net'
 import { describe, expect, it } from 'vitest'
+import { z } from 'zod'
 
 import { createApi, createRpcV1 } from '../api'
 import { Config } from '../config'
@@ -26,6 +27,13 @@ describe('mcp', () => {
   it('exposes every RPC call as a tool unless explicitly excluded', async () => {
     const rpcV1 = createRpcV1({} as Database, config)
     const rpcCallNames = Object.keys(rpcV1)
+    for (const [name, call] of Object.entries(rpcV1)) {
+      // undefined schemas are a symptom of circular imports in src/shared
+      expect(call.inputSchema, `input schema of ${name} is undefined`).toBeDefined()
+      expect(call.outputSchema, `output schema of ${name} is undefined`).toBeDefined()
+      expect(() => z.toJSONSchema(call.inputSchema, { unrepresentable: 'any' }), name).not.toThrow()
+      expect(() => z.toJSONSchema(call.outputSchema, { unrepresentable: 'any' }), name).not.toThrow()
+    }
     for (const name of Object.keys(mcpExcludedRpcCalls)) {
       expect(rpcCallNames, `excluded RPC call ${name} does not exist`).toContain(name)
     }

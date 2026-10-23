@@ -2,9 +2,9 @@ import { css } from '@linaria/core'
 import { useQueryClient } from '@tanstack/react-query'
 import React from 'react'
 
-import { fileUpload } from '../../../shared/utils/file'
 import { sleep } from '../../../shared/utils/promise'
 import { useDialogs } from '../../components/DialogsContext'
+import { fileUpload } from '../../file'
 import { TransactionDialog } from '../transactions/TransactionDialog'
 
 export const FullScreenDragAndDropFileUpload: React.FC = () => {

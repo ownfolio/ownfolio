@@ -3,13 +3,13 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import React from 'react'
 
 import { filterNotFalse } from '../../../shared/utils/array'
-import { fileDownload } from '../../../shared/utils/file'
 import { formatSize } from '../../../shared/utils/string'
 import { rpcClient } from '../../api'
 import { CardTable, TableDefinitionColumn, TableDefinitionRow } from '../../components/CardTable'
 import { ConfirmationDialog } from '../../components/ConfirmationDialog'
 import { useDialogs } from '../../components/DialogsContext'
 import { ViewContainer } from '../../components/ViewContainer'
+import { fileDownload } from '../../file'
 import { AttachmentDialog } from './AttachmentDialog'
 
 export const AttachmentsView: React.FC = () => {

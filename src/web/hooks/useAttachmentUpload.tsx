@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { Attachment } from '../../shared/models/Attachment'
-import { fileUpload } from '../../shared/utils/file'
+import { fileUpload } from '../file'
 
 export function useAttachmentUpload(
   onAttachmentUploaded: (attachments: Attachment[]) => void,
