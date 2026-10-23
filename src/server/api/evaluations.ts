@@ -340,6 +340,22 @@ export function createRpcV1Evaluations(database: Database) {
             }
           })
         })
+        const lastTransaction = transactions[transactions.length - 1]
+        const balanceIssues = lastTransaction ? evaluateBalances([lastTransaction.date], transactions)[0].issues : []
+        groupBy(balanceIssues, issue => `${issue.transactionId}-${issue.accountId}-${issue.assetId}`).forEach(
+          issues => {
+            const { transactionId, accountId, assetId } = issues[0]
+            data.push({
+              type: 'transactionConsumesMoreAssetAmountThanAvailable',
+              date: transactions.find(t => t.id === transactionId)!.date,
+              level: 'error',
+              transactionId,
+              assetAccountId: accountId,
+              assetId,
+              excessiveAssetAmount: BigNumber.sum(...issues.map(issue => issue.exceededAssetAmount)).toString(),
+            })
+          }
+        )
         return {
           data: selectionSortBy(data, (f1, f2) => (f1.date === f2.date ? 0 : f1.date < f2.date ? -1 : 1)),
         }

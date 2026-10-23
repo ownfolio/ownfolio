@@ -105,7 +105,7 @@ export const mcpToolDescriptions: Record<string, string> = {
   evaluatePositions:
     'Return the asset holdings at a date, grouped by account and asset. openAssetPositions are currently held units with amount, openPrice (cost basis) and currentPrice (market value based on the latest quote up to the date, cost basis if there is none); closedAssetPositions are sold or withdrawn units with openPrice and closePrice (proceeds before fees and taxes). Prices are totals for all units, not per unit. Each group lists its individual FIFO lots in positions.',
   evaluatePlausibility:
-    'Check all transactions for problems, ordered by date: buys and sells without linked attachment (info) and buys and sells whose fields differ from the data parsed from a linked broker statement (warning, with expected and actual value per field). Asset units removed beyond what is held show up as issues in evaluateBalances instead.',
+    'Check all transactions for problems, ordered by date: buys and sells without linked attachment (info), buys and sells whose fields differ from the data parsed from a linked broker statement (warning, with expected and actual value per field), and transactions removing more units of an asset from an account than it holds at that point (error, with the missing units as excessiveAssetAmount; usually a missing or misdated earlier buy, deposit or transfer).',
 
   generateReport: 'Generate a PDF report as data URL.',
 

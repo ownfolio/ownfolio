@@ -230,4 +230,120 @@ describe('evaluatePlausibility', () => {
     }),
     60000
   )
+
+  it(
+    'transactionConsumesMoreAssetAmountThanAvailable',
+    databaseTest(async db => {
+      await db.init()
+      const u = await db.users.create({ email: 'user@domain.com' }, 'password')
+      const api = createRpcV1Evaluations(db)
+      const ctx = { user: u, sessionId: u.id, setSessionId: async () => {}, unsetSessionId: async () => {} }
+      await expect(api.evaluatePlausibility.handler(ctx, undefined)).resolves.toEqual({ data: [] })
+
+      const port = await db.portfolios.create({ userId: u.id, name: 'Portfolio', status: 'active' })
+      const ast1 = await db.assets.create({
+        userId: u.id,
+        name: 'Asset 1',
+        number: '',
+        symbol: 'S1',
+        denomination: 2,
+        currency: currencies.EUR.symbol,
+        quoteProvider: null,
+        status: 'active',
+      })
+      const act1 = await db.accounts.create({
+        currency: currencies.EUR.symbol,
+        portfolioId: port.id,
+        name: 'Account 1',
+        number: '',
+        status: 'active',
+      })
+      const act2 = await db.accounts.create({
+        currency: currencies.EUR.symbol,
+        portfolioId: port.id,
+        name: 'Account 2',
+        number: '',
+        status: 'active',
+      })
+      await db.transactions.create({
+        userId: u.id,
+        date: '2020-01-01',
+        time: '00:00:00',
+        data: {
+          type: 'assetBuy',
+          assetAccountId: act1.id,
+          assetId: ast1.id,
+          assetAmount: BigNumber(1),
+          cashAccountId: act1.id,
+          cashAmount: BigNumber(100),
+          feeCashAmount: BigNumber(0),
+        },
+        reference: '',
+        comment: '',
+      })
+      const tx2 = await db.transactions.create({
+        userId: u.id,
+        date: '2020-01-02',
+        time: '00:00:00',
+        data: {
+          type: 'assetSell',
+          assetAccountId: act1.id,
+          assetId: ast1.id,
+          assetAmount: BigNumber(3),
+          cashAccountId: act1.id,
+          cashAmount: BigNumber(300),
+          feeCashAmount: BigNumber(0),
+          taxCashAmount: BigNumber(0),
+        },
+        reference: '',
+        comment: '',
+      })
+      const tx3 = await db.transactions.create({
+        userId: u.id,
+        date: '2020-01-03',
+        time: '00:00:00',
+        data: {
+          type: 'assetTransfer',
+          assetId: ast1.id,
+          fromAssetAccountId: act2.id,
+          toAssetAccountId: act1.id,
+          assetAmount: BigNumber(2),
+          feeAssetAmount: BigNumber('0.5'),
+        },
+        reference: '',
+        comment: '',
+      })
+      await db.transactions.create({
+        userId: u.id,
+        date: '2020-01-04',
+        time: '00:00:00',
+        data: { type: 'cashDeposit', cashAccountId: act1.id, cashAmount: BigNumber(100) },
+        reference: '',
+        comment: '',
+      })
+
+      const response = await api.evaluatePlausibility.handler(ctx, undefined)
+      expect(findingsForType(response, 'transactionConsumesMoreAssetAmountThanAvailable')).toEqual([
+        {
+          type: 'transactionConsumesMoreAssetAmountThanAvailable',
+          date: '2020-01-02',
+          level: 'error',
+          transactionId: tx2.id,
+          assetAccountId: act1.id,
+          assetId: ast1.id,
+          excessiveAssetAmount: '2',
+        },
+        {
+          type: 'transactionConsumesMoreAssetAmountThanAvailable',
+          date: '2020-01-03',
+          level: 'error',
+          transactionId: tx3.id,
+          assetAccountId: act2.id,
+          assetId: ast1.id,
+          excessiveAssetAmount: '2.5',
+        },
+      ] satisfies FindingsForType)
+    }),
+    60000
+  )
 })
