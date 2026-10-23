@@ -7,6 +7,7 @@ import { Database } from '../database'
 import { PdfParserResult } from '../pdf/parse'
 import { pdfToConcatenatedPngs, splitConcatenatedPngs } from '../pdf/pdfToPngs'
 import { pdfToText } from '../pdf/pdfToText'
+import { isPdf } from '../pdf/utils'
 import { attachmentUploadPath } from './attachmentUpload'
 import { RpcCtx } from './context'
 
@@ -67,15 +68,11 @@ export function createRpcV1Attachment(database: Database, config: Config) {
       if (!ctx.user) throw RpcError.unauthorized()
       const { fileName } = input
       const [mimeType, bytesBase64] = parseDataUrl(input.dataUrl)
-      if (mimeType !== 'application/pdf') {
+      const bytes = Buffer.from(bytesBase64, 'base64')
+      if (mimeType !== 'application/pdf' || !isPdf(bytes)) {
         throw RpcError.badRequest('Only accepts PDFs')
       }
-      const attachment = await database.attachments.createAndWrite(
-        ctx.user.id,
-        fileName,
-        mimeType,
-        Buffer.from(bytesBase64, 'base64')
-      )
+      const attachment = await database.attachments.createAndWrite(ctx.user.id, fileName, mimeType, bytes)
       return { data: attachment }
     },
     createAttachmentUploadUrl: async (ctx, input) => {

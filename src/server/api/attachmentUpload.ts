@@ -2,6 +2,7 @@ import express from 'express'
 
 import { Database } from '../database'
 import { logger } from '../logger'
+import { isPdf } from '../pdf/utils'
 
 export const attachmentUploadPath = '/api/attachments/upload'
 
@@ -23,7 +24,7 @@ export function createAttachmentUpload(database: Database): express.Router {
       }
       const body = Buffer.isBuffer(req.body) ? req.body : Buffer.alloc(0)
       // the body is checked before the token is consumed, so a rejected request can be retried with the same token
-      if (!req.is('application/pdf') || !body.subarray(0, 5).equals(Buffer.from('%PDF-'))) {
+      if (!req.is('application/pdf') || !isPdf(body)) {
         res.status(400).json({ error: 'Only accepts PDFs, sent with "Content-Type: application/pdf"' })
         return
       }

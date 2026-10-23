@@ -3,6 +3,7 @@ import BigNumber from 'bignumber.js'
 import { describe, expect, it } from 'vitest'
 
 import { currencies } from '../../shared/models/Currency'
+import { renderDataUrl } from '../../shared/utils/file'
 import { databaseTest } from '../database/databaseTest'
 import { createRpcV1Attachment } from './attachment'
 
@@ -64,6 +65,31 @@ describe('attachment', () => {
       await expect(db.attachments.listByUserId(u1.id)).resolves.toMatchObject([{ transactionIds: [tx1.id] }])
       await api.unlinkAttachmentFromTransaction.handler(ctx1, { id: att1.id, transactionId: tx1.id })
       await expect(db.attachments.listByUserId(u1.id)).resolves.toMatchObject([{ transactionIds: [] }])
+    }),
+    60000
+  )
+
+  it(
+    'uploads only files that start like a PDF',
+    databaseTest(async db => {
+      await db.init()
+      const user = await db.users.create({ email: 'user@domain.com' }, 'password')
+      const api = createRpcV1Attachment(db, {
+        httpPort: 0,
+        publicUrl: 'http://localhost',
+        userRegistrationEnabled: false,
+        trustProxyHops: 0,
+        publicDirectory: '',
+      })
+      const ctx = { user, setSessionId: async () => {}, unsetSessionId: async () => {} }
+      const postScript = Buffer.from('%!PS\n(hello) print\n')
+      await expect(
+        api.uploadAttachment.handler(ctx, {
+          fileName: 'statement.pdf',
+          dataUrl: renderDataUrl('application/pdf', postScript.toString('base64')),
+        })
+      ).rejects.toThrow('Only accepts PDFs')
+      await expect(db.attachments.listByUserId(user.id)).resolves.toEqual([])
     }),
     60000
   )

@@ -5,7 +5,8 @@ export async function pdfToPngs(pdf: Buffer): Promise<Buffer[]> {
 }
 
 export async function pdfToConcatenatedPngs(pdf: Buffer): Promise<Buffer> {
-  return await execAsync('convert', ['-density', '144', '-', '-quality', '100', '-alpha', 'remove', 'png:-'], pdf)
+  // the pdf: prefix keeps ImageMagick from detecting another format from the content
+  return await execAsync('convert', ['-density', '144', 'pdf:-', '-quality', '100', '-alpha', 'remove', 'png:-'], pdf)
 }
 
 const SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])

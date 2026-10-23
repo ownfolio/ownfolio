@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ImageMagick only renders user uploaded PDFs (see pdfToPngs.ts), so everything else is denied. Without this, crafted
+  files can make ImageMagick pick another coder (e.g. SVG or MSL) and read local files into the rendered image.
+  Ghostscript is linked as library, so the PDF coder works without delegates, and it returns the pages as PNG.
+-->
+<policymap>
+  <policy domain="resource" name="time" value="60"/>
+  <policy domain="delegate" rights="none" pattern="*"/>
+  <policy domain="coder" rights="none" pattern="*"/>
+  <policy domain="coder" rights="read" pattern="PDF"/>
+  <policy domain="coder" rights="read|write" pattern="PNG"/>
+  <policy domain="path" rights="none" pattern="@*"/>
+</policymap>

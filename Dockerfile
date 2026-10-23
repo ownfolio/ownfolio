@@ -12,6 +12,7 @@ RUN apk add --no-cache nodejs
 COPY --from=ghcr.io/ownfolio/pdfmake-cli:0.1.1 /usr/lib/pdfmake-cli /usr/lib/pdfmake-cli
 RUN ln -s /usr/lib/pdfmake-cli/pdfmake-cli /usr/local/bin/pdfmake-cli
 RUN apk add --no-cache imagemagick imagemagick-pdf
+COPY src/server/pdf/imagemagick-policy.xml /etc/ImageMagick-7/policy.xml
 RUN apk add --no-cache poppler-utils
 ENV NODE_ENV=production
 WORKDIR /app
