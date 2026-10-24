@@ -14,8 +14,14 @@ export const pagingParamsSchema = z.object({
 
 export function responseSchema<T extends z.ZodTypeAny>(dataSchema: T) {
   return z.object({
-    data: dataSchema,
+    // JSON drops undefined values, so a void response arrives without the data key
+    data: dataSchema instanceof z.ZodVoid ? (dataSchema.optional() as unknown as T) : dataSchema,
   })
+}
+
+export function isVoidResponseSchema(schema: z.ZodType): boolean {
+  const data = schema instanceof z.ZodObject ? schema.shape.data : undefined
+  return data instanceof z.ZodOptional && data.unwrap() instanceof z.ZodVoid
 }
 
 export function listResponseSchema<T extends z.ZodTypeAny>(elementSchema: T) {

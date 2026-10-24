@@ -7,6 +7,7 @@ import { AnyRpcCall, isRpcError, isRpcVoid, RpcError } from '@ownfolio/rpc-core'
 import express from 'express'
 import { z } from 'zod'
 
+import { isVoidResponseSchema } from '../../shared/utils/schemas'
 import type { createRpcV1, RpcCtx } from '../api'
 import { Config } from '../config'
 import { Database } from '../database'
@@ -56,7 +57,7 @@ const mcpOutputSchemas = new WeakMap<z.ZodType, z.ZodType | undefined>()
 // the input side of codecs. It is rebuilt from the JSON schema of that side, which also keeps all descriptions.
 function rpcOutputSchemaToMcp(schema: z.ZodType): z.ZodType | undefined {
   if (!mcpOutputSchemas.has(schema)) {
-    const isVoid = isRpcVoid(schema) || (schema instanceof z.ZodObject && schema.shape.data instanceof z.ZodVoid)
+    const isVoid = isRpcVoid(schema) || isVoidResponseSchema(schema)
     mcpOutputSchemas.set(schema, isVoid ? undefined : z.fromJSONSchema(z.toJSONSchema(schema, { io: 'input' })))
   }
   return mcpOutputSchemas.get(schema)
