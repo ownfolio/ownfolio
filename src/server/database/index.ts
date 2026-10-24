@@ -5,6 +5,9 @@ import { logger } from '../logger'
 import { DatabaseAccounts } from './accounts'
 import { DatabaseAssets } from './assets'
 import { DatabaseAttachments } from './attachments'
+import { DatabaseCategories } from './categories'
+import { DatabaseCategorizations } from './categorizations'
+import { DatabaseCategoryAssignments } from './categoryAssignments'
 import { DatabaseDashboards } from './dashboards'
 import { DatabaseOAuth } from './oauth'
 import { DatabasePortfolios } from './portfolios'
@@ -24,6 +27,9 @@ export class Database {
   readonly attachments: DatabaseAttachments
   readonly dashboards: DatabaseDashboards
   readonly oauth: DatabaseOAuth
+  readonly categorizations: DatabaseCategorizations
+  readonly categories: DatabaseCategories
+  readonly categoryAssignments: DatabaseCategoryAssignments
 
   constructor(opts?: postgres.Options<{}>) {
     logger.info('Connecting to database')
@@ -68,6 +74,9 @@ export class Database {
     this.attachments = new DatabaseAttachments(this.sql)
     this.dashboards = new DatabaseDashboards(this.sql)
     this.oauth = new DatabaseOAuth(this.sql)
+    this.categorizations = new DatabaseCategorizations(this.sql)
+    this.categories = new DatabaseCategories(this.sql)
+    this.categoryAssignments = new DatabaseCategoryAssignments(this.sql)
   }
 
   async init(): Promise<void> {
@@ -101,6 +110,9 @@ export class Database {
     await this.migrate('oauth.init', sql => this.oauth.init(sql))
     await this.migrate('attachments.addUploadTokenTable', sql => this.attachments.addUploadTokenTable(sql))
     await this.migrate('users.hashSessionIds', sql => this.users.hashSessionIds(sql))
+    await this.migrate('categorizations.init', sql => this.categorizations.init(sql))
+    await this.migrate('categories.init', sql => this.categories.init(sql))
+    await this.migrate('categoryAssignments.init', sql => this.categoryAssignments.init(sql))
     logger.info(`Finished database migrations`)
   }
 

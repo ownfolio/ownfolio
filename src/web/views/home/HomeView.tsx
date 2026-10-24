@@ -20,6 +20,8 @@ import { AccountsView } from '../accounts/AccountsView'
 import { AssetDialog } from '../assets/AssetDialog'
 import { AssetsView } from '../assets/AssetsView'
 import { AttachmentsView } from '../attachments/AttachmentsView'
+import { CategorizationsView } from '../categorizations/CategorizationsView'
+import { CategorizationView } from '../categorizations/CategorizationView'
 import { ChartView } from '../chart/ChartView'
 import { DashboardView } from '../dashboard/DashboardView'
 import { ErrorView } from '../error/ErrorView'
@@ -75,6 +77,10 @@ export const HomeView: React.FC = () => {
                 {
                   label: 'Assets',
                   onClick: () => navigate('/assets'),
+                },
+                {
+                  label: 'Categorizations',
+                  onClick: () => navigate('/categorizations'),
                 },
                 {
                   label: 'Transactions',
@@ -196,6 +202,8 @@ export const HomeView: React.FC = () => {
                   <Route path="accounts" element={<AccountsView />} />
                   <Route path="assets" element={<AssetsView />} />
                   <Route path="quotes/:assetId" element={<QuotesView />} />
+                  <Route path="categorizations" element={<CategorizationsView />} />
+                  <Route path="categorizations/:categorizationId" element={<CategorizationView />} />
                   <Route path="transactions" element={<TransactionsView />} />
                   <Route path="trades" element={<TradesView />} />
                   <Route path="attachments" element={<AttachmentsView />} />

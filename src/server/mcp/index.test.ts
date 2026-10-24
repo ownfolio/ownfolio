@@ -74,6 +74,8 @@ describe('mcp', () => {
       'linkAttachmentToTransaction',
       'unlinkAttachmentFromTransaction',
       'deleteAttachment',
+      'deleteCategorization',
+      'deleteCategory',
     ])
   })
 
@@ -123,6 +125,36 @@ describe('mcp', () => {
         const asset = await call('createAsset', { name: 'Asset', symbol: 'AST', currency: 'EUR' })
         await call('updateAsset', { ...asset, denomination: 2 })
         await call('updateAssetStatus', { id: asset.id, status: 'inactive' })
+
+        // the demo portfolio comes with three categorizations
+        expect((await call('listCategorizations')).map((c: { name: string }) => c.name)).toEqual([
+          'Liquidity',
+          'Region',
+          'Risk profile',
+        ])
+        expect(await call('listCategoryAssignments')).toHaveLength(26)
+        const categorization = await call('createCategorization', { name: 'Region' })
+        await call('retrieveCategorization', { id: categorization.id })
+        await call('updateCategorization', { ...categorization, name: 'Region renamed' })
+        const category = await call('createCategory', { categorizationId: categorization.id, name: 'EU' })
+        const subCategory = await call('createCategory', {
+          categorizationId: categorization.id,
+          parentCategoryId: category.id,
+          name: 'Germany',
+        })
+        await call('listCategories', { categorizationId: categorization.id })
+        await call('retrieveCategory', { id: subCategory.id })
+        await call('updateCategory', { ...subCategory, name: 'France' })
+        await call('setCategoryAssignments', {
+          categorizationId: categorization.id,
+          assetId: asset.id,
+          assignments: [{ categoryId: subCategory.id, fraction: '0.7' }],
+        })
+        expect(await call('listCategoryAssignments', { categorizationId: categorization.id })).toMatchObject([
+          { categoryId: subCategory.id, accountId: null, assetId: asset.id, fraction: '0.7' },
+        ])
+        await call('deleteCategory', { id: subCategory.id })
+        await call('deleteCategorization', { id: categorization.id })
 
         // the demo portfolio just fetched its quotes, so the providers are paused and nothing is requested
         await call('updateQuotes')

@@ -2,6 +2,7 @@ import { rpcV1AccountDefinition } from './account'
 import { rpcV1AssetDefinition } from './asset'
 import { rpcV1AttachmentDefinition } from './attachment'
 import { rpcV1BalanceDefinition } from './balance'
+import { rpcV1CategorizationDefinition } from './categorization'
 import { rpcV1DashboardDefinition } from './dashboard'
 import { rpcV1EvaluationsDefinition } from './evaluations'
 import { rpcV1OAuthDefinition } from './oauth'
@@ -16,6 +17,7 @@ export const rpcV1Definition = {
   ...rpcV1AssetDefinition,
   ...rpcV1AttachmentDefinition,
   ...rpcV1BalanceDefinition,
+  ...rpcV1CategorizationDefinition,
   ...rpcV1EvaluationsDefinition,
   ...rpcV1PortfolioDefinition,
   ...rpcV1QuoteDefinition,

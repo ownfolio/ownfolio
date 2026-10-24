@@ -2,6 +2,7 @@ import BigNumber from 'bignumber.js'
 
 import { Account } from '../shared/models/Account'
 import { Asset } from '../shared/models/Asset'
+import { Category } from '../shared/models/Category'
 import { currencies, CurrencySymbol } from '../shared/models/Currency'
 import { Portfolio } from '../shared/models/Portfolio'
 import { findClosest } from '../shared/utils/array'
@@ -231,6 +232,7 @@ export async function generateDemoPortfolio(database: Database, userId: string):
       })
     }
   }
+  const assets: Asset[] = []
   for (let i = 0; i < assetAccumulationPlans.length; i++) {
     const assetAccumulationPlan = assetAccumulationPlans[i]
     const assetCurrency = currencies[assetAccumulationPlan.assetTemplate.currency as CurrencySymbol]
@@ -239,6 +241,7 @@ export async function generateDemoPortfolio(database: Database, userId: string):
       userId: portfolio.userId,
       status: 'active',
     })
+    assets.push(asset)
     await updateAssetQuotes(database, asset)
     const assetQuotes = await database.quotes.listByAssetId(asset.id)
     const now = new Date()
@@ -322,5 +325,114 @@ export async function generateDemoPortfolio(database: Database, userId: string):
       }
     }
   }
+  await generateDemoCategorizations(
+    database,
+    portfolio.userId,
+    [accountSavings, accountStocks, accountCryptoEUR, accountCrypto],
+    assets
+  )
   return portfolio
+}
+
+interface DemoCategoryTree {
+  [name: string]: DemoCategoryTree
+}
+
+interface DemoCategorization {
+  name: string
+  categories: DemoCategoryTree
+  // fractions per category name, targets are referenced by account and asset name
+  assignments: { accountName?: string; assetName?: string; fractions: Record<string, string> }[]
+}
+
+const demoCategorizations: DemoCategorization[] = [
+  {
+    name: 'Region',
+    categories: {
+      'North America': { USA: {} },
+      Europe: { Germany: {}, France: {} },
+      Asia: { Japan: {} },
+    },
+    assignments: [
+      { accountName: 'Savings', fractions: { Germany: '1' } },
+      { accountName: 'Stocks', fractions: { Germany: '1' } },
+      { accountName: 'Crypto (EUR)', fractions: { Germany: '1' } },
+      { assetName: 'iShares MSCI World', fractions: { USA: '0.7', Europe: '0.15', Japan: '0.06' } },
+      { assetName: 'Apple Inc.', fractions: { USA: '1' } },
+      { assetName: 'Tesla Inc.', fractions: { USA: '1' } },
+      { assetName: 'Volkswagen AG', fractions: { Germany: '1' } },
+    ],
+  },
+  {
+    name: 'Liquidity',
+    categories: { Liquid: {}, 'Non-liquid': {} },
+    assignments: [
+      { accountName: 'Savings', fractions: { Liquid: '1' } },
+      { accountName: 'Stocks', fractions: { Liquid: '1' } },
+      { accountName: 'Crypto (EUR)', fractions: { Liquid: '1' } },
+      { assetName: 'iShares MSCI World', fractions: { Liquid: '1' } },
+      { assetName: 'Apple Inc.', fractions: { Liquid: '1' } },
+      { assetName: 'Tesla Inc.', fractions: { Liquid: '1' } },
+      { assetName: 'Volkswagen AG', fractions: { Liquid: '1' } },
+      { assetName: 'Bitcoin', fractions: { Liquid: '1' } },
+      // the bitcoins in this account are kept in cold storage
+      { accountName: 'Crypto', assetName: 'Bitcoin', fractions: { 'Non-liquid': '1' } },
+    ],
+  },
+  {
+    name: 'Risk profile',
+    categories: { Low: {}, Medium: {}, High: {} },
+    assignments: [
+      { accountName: 'Savings', fractions: { Low: '1' } },
+      { accountName: 'Stocks', fractions: { Low: '1' } },
+      { accountName: 'Crypto (EUR)', fractions: { Low: '1' } },
+      { assetName: 'iShares MSCI World', fractions: { Medium: '1' } },
+      { assetName: 'Apple Inc.', fractions: { High: '1' } },
+      { assetName: 'Tesla Inc.', fractions: { High: '1' } },
+      { assetName: 'Volkswagen AG', fractions: { High: '1' } },
+      { assetName: 'Bitcoin', fractions: { High: '1' } },
+    ],
+  },
+]
+
+export async function generateDemoCategorizations(
+  database: Database,
+  userId: string,
+  accounts: Account[],
+  assets: Asset[]
+): Promise<void> {
+  const findByName = <T extends { name: string }>(elems: T[], name: string): T => {
+    const elem = elems.find(e => e.name === name)
+    if (!elem) throw new Error(`Unknown demo entity ${name}`)
+    return elem
+  }
+  for (const demoCategorization of demoCategorizations) {
+    const categorization = await database.categorizations.create({ userId, name: demoCategorization.name })
+    const categories: Category[] = []
+    const createCategories = async (tree: DemoCategoryTree, parentCategoryId: string | null) => {
+      for (const [name, subTree] of Object.entries(tree)) {
+        const category = await database.categories.create({
+          categorizationId: categorization.id,
+          parentCategoryId,
+          name,
+        })
+        categories.push(category)
+        await createCategories(subTree, category.id)
+      }
+    }
+    await createCategories(demoCategorization.categories, null)
+    for (const assignment of demoCategorization.assignments) {
+      await database.categoryAssignments.replace(
+        categorization.id,
+        {
+          accountId: assignment.accountName ? findByName(accounts, assignment.accountName).id : null,
+          assetId: assignment.assetName ? findByName(assets, assignment.assetName).id : null,
+        },
+        Object.entries(assignment.fractions).map(([categoryName, fraction]) => ({
+          categoryId: findByName(categories, categoryName).id,
+          fraction: BigNumber(fraction),
+        }))
+      )
+    }
+  }
 }

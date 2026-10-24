@@ -9,6 +9,7 @@ Domain model:
 - Transactions are the single source of truth. Holdings, cash balances, cost basis and profits are never stored but derived by replaying all transactions in chronological order (date, then time). Asset units are matched first in, first out (FIFO).
 - Quotes are daily close prices per asset unit and are used to value holdings.
 - Attachments are uploaded PDFs (e.g. broker statements) that can be linked to transactions as evidence.
+- Categorizations are custom dimensions such as "Region" or "Liquidity" with a tree of categories (e.g. "EU" > "Germany"). Category assignments split the cash on an account, an asset in all accounts, or an asset in one specific account into categories by fraction. For an asset in an account, assignments of that combination take precedence over the assignments of the asset in general. Fractions that are not assigned count as undefined.
 
 Conventions:
 - Every successful call returns JSON of the shape {"data": ...}.
@@ -64,6 +65,27 @@ export const mcpToolDescriptions: Record<string, string> = {
     'Replace all fields of an existing asset. Pass the complete asset as returned by retrieveAsset. The currency cannot be changed once the asset has transactions or quotes.',
   updateAssetStatus: 'Change only the status of an asset (active, inactive or hidden).',
   deleteAsset: 'Delete an asset and its quotes. Fails if the asset is used by any transaction. Cannot be undone.',
+
+  listCategorizations: 'List all categorizations of the user, ordered by name.',
+  retrieveCategorization: 'Retrieve a single categorization by ID.',
+  createCategorization: 'Create a categorization. Returns the created categorization including its ID.',
+  updateCategorization:
+    'Replace all fields of an existing categorization. Pass the complete categorization as returned by retrieveCategorization.',
+  deleteCategorization: 'Delete a categorization with all its categories and category assignments. Cannot be undone.',
+
+  listCategories:
+    'List the categories of the user, optionally only those of one categorization, ordered by name. Use parentCategoryId to reconstruct the tree.',
+  retrieveCategory: 'Retrieve a single category by ID.',
+  createCategory:
+    'Create a category in a categorization, optionally below a parent category of the same categorization. Returns the created category including its ID.',
+  updateCategory:
+    'Replace all fields of an existing category. Pass the complete category as returned by retrieveCategory. The categorization cannot be changed, the parent must be in the same categorization and not below the category itself.',
+  deleteCategory: 'Delete a category with all its subcategories and their category assignments. Cannot be undone.',
+
+  listCategoryAssignments:
+    'List the category assignments of the user, optionally only those of one categorization. accountId without assetId is the cash on the account, assetId without accountId the asset in all accounts, both the asset in this account.',
+  setCategoryAssignments:
+    'Replace all category assignments of one target (cash on an account, an asset in general, or an asset in a specific account) within a categorization. Fractions must sum up to at most 1, the rest counts as undefined. Pass an empty list to remove the assignments. Returns the new assignments.',
 
   listTransactions:
     'Search transactions, newest first. All filters are optional and combined with AND. Each result includes the IDs of its linked attachments.',
